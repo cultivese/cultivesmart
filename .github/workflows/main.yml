@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      -master
+      -main
 name: Deploy cultivesmart on push
 jobs:
   web-deploy:
