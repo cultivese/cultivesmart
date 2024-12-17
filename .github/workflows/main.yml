@@ -2,17 +2,17 @@ on:
   push:
     branches:
       - main
-name: Deploy cultivesmart on push
+name: 🚀 Deploy cultivesmart on push
 jobs:
   web-deploy:
-    name: Deploy
+    name: 🎉 Deploy
     runs-on: ubuntu-latest
     steps:
-    - name: Get latest code
-      uses: actions/checkout@v2
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
       
     - name: Use Node.js 18
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
         node-version: '18'
         
@@ -24,10 +24,11 @@ jobs:
     - name: List output files
       run: find build/ -print
       
-    - name: Sync files
-      uses: SamKirkland/FTP-Deploy-Action@4.1.0
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: 46.202.145.116
         username: u746034674
+        port: 21
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: build/
