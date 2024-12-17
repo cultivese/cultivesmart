@@ -22,7 +22,7 @@ jobs:
         npm run build
         
     - name: List output files
-      run: find build/ -print
+      run: find dist/ -print
       
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -31,5 +31,5 @@ jobs:
         username: u746034674
         port: 21
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: build/
+        local-dir: dist/
         server-dir: domains/cultivesmart.com.br/public_html/
