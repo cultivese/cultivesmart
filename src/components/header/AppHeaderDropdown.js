@@ -21,8 +21,18 @@ import {
   cilUser,
 } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
+import { auth } from './../../../firebase'; // Import do Firebase
 
 import avatar8 from './../../assets/images/avatars/8.jpg'
+
+const handleLogout = async () => {
+  try {
+    await auth.signOut(); // Logout do Firebase
+    navigate('/login'); // Redireciona para a página de login
+  } catch (error) {
+    console.error('Erro ao realizar logout:', error.message);
+  }
+};
 
 const AppHeaderDropdown = () => {
   return (
@@ -84,9 +94,9 @@ const AppHeaderDropdown = () => {
           </CBadge>
         </CDropdownItem>
         <CDropdownDivider />
-        <CDropdownItem href="#">
+        <CDropdownItem onClick={handleLogout}>
           <CIcon icon={cilLockLocked} className="me-2" />
-          Lock Account
+          Sair
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
