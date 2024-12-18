@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import {
-  CButton,
   CCard,
   CCardBody,
   CCardHeader,
   CCol,
-  CForm,
-  CFormInput,
-  CFormFeedback,
-  CFormLabel,
-  CFormSelect,
   CRow,
+  CTable,
+  CTableBody,
+  CTableDataCell,
+  CTableHead,
+  CTableHeaderCell,
+  CTableRow,
   CTabContent,
   CTabPane,
 } from '@coreui/react'
@@ -26,58 +26,22 @@ const CustomStyles = () => {
     setValidated(true)
   }
   return (
-    <CForm
-      className="row g-3 needs-validation"
-      noValidate
-      validated={validated}
-      onSubmit={handleSubmit}
-    >
-      <CCol md={4}>
-        <CFormLabel htmlFor="validationCustom01">Nome</CFormLabel>
-        <CFormInput type="text" id="validationCustom01" defaultValue="Microverde" required />
-        <CFormFeedback valid>Looks good!</CFormFeedback>
-      </CCol>
-      <CCol md={4}>
-        <CFormLabel htmlFor="validationCustom04">Tipo Semente</CFormLabel>
-        <CFormSelect id="validationCustom04">
-          <option disabled>Choose...</option>
-          <option>Microverde</option>
-          <option>Flor Comestível</option>
-        </CFormSelect>
-        <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
-      </CCol>
-      <CCol md={4}>
-        <CFormLabel htmlFor="validationCustom04">Especificação</CFormLabel>
-        <CFormSelect id="validationCustom04">
-          <option disabled>Choose...</option>
-          <option>...</option>
-        </CFormSelect>
-        <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
-      </CCol>
-      <CCol md={4}>
-        <CFormLabel htmlFor="validationCustom04">Fornecedor</CFormLabel>
-        <CFormSelect id="validationCustom04">
-          <option disabled>Choose...</option>
-          <option>...</option>
-        </CFormSelect>
-        <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
-      </CCol>
-      <CCol md={6}>
-        <CFormLabel htmlFor="validationCustom03">Preço</CFormLabel>
-        <CFormInput type="text" id="validationCustom03" required />
-        <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
-      </CCol>
-      <CCol md={3}>
-        <CFormLabel htmlFor="validationCustom05">ICMS</CFormLabel>
-        <CFormInput type="text" id="validationCustom05" required />
-        <CFormFeedback invalid>Please provide a valid zip.</CFormFeedback>
-      </CCol>
-      <CCol xs={12}>
-        <CButton color="primary" type="submit">
-          Cadastrar
-        </CButton>
-      </CCol>
-    </CForm>
+    <CTable color="dark" striped>
+                <CTableHead>
+                  <CTableRow>
+                    <CTableHeaderCell scope="col">#</CTableHeaderCell>
+                    <CTableHeaderCell scope="col">Nome</CTableHeaderCell>
+                    <CTableHeaderCell scope="col">CNPJ</CTableHeaderCell>
+                  </CTableRow>
+                </CTableHead>
+                <CTableBody>
+                  <CTableRow>
+                    <CTableHeaderCell scope="row">1</CTableHeaderCell>
+                    <CTableDataCell>Fornecedore 01</CTableDataCell>
+                    <CTableDataCell>00.000.000/0000-00</CTableDataCell>
+                  </CTableRow>
+                </CTableBody>
+              </CTable>
     )
 }
 
