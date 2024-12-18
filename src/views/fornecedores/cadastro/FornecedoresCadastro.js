@@ -9,7 +9,6 @@ import {
   CFormInput,
   CFormFeedback,
   CFormLabel,
-  CFormSelect,
   CRow,
   CTabContent,
   CTabPane,
@@ -42,6 +41,21 @@ const CustomStyles = () => {
         <CFormInput type="text" id="validationCustom01" defaultValue="00.000.000/0000-00" required />
         <CFormFeedback valid>Looks good!</CFormFeedback>
       </CCol>
+      <CCol md={4}>
+        <CFormLabel htmlFor="validationCustom01">Endereço</CFormLabel>
+        <CFormInput type="text" id="validationCustom01" defaultValue="Logradouro" required />
+        <CFormFeedback valid>Looks good!</CFormFeedback>
+      </CCol>
+      <CCol md={4}>
+        <CFormLabel htmlFor="validationCustom01">Telefone</CFormLabel>
+        <CFormInput type="text" id="validationCustom01" defaultValue="(DDD) 99999 9999" required />
+        <CFormFeedback valid>Looks good!</CFormFeedback>
+      </CCol>
+      <CCol md={4}>
+        <CFormLabel htmlFor="validationCustom01">Email</CFormLabel>
+        <CFormInput type="text" id="validationCustom01" defaultValue="fulano@mail.com.br" required />
+        <CFormFeedback valid>Looks good!</CFormFeedback>
+      </CCol>
       <CCol xs={12}>
         <CButton color="primary" type="submit">
           Cadastrar
@@ -57,7 +71,7 @@ const FornecedoresCadastro = () => {
       <CCol xs={12}>
         <CCard className="mb-4">
           <CCardHeader>
-            <strong>Insumos</strong> <small>Cadastro</small>
+            <strong>Fornecedor</strong> <small>Cadastro</small>
           </CCardHeader>
           <CCardBody>
             <CTabContent className={`rounded-bottom`}>

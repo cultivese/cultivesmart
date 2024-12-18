@@ -75,24 +75,24 @@ const _nav = [
       },
     ],
   },
-  {
-    component: CNavGroup,
-    name: 'Produtos Prontos',
-    to: '/base',
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'Registro de Colheitas',
-        to: '/base/accordion',
-      },
-      {
-        component: CNavItem,
-        name: 'Estoque de Produtos de Vendas',
-        to: '/base/accordion',
-      },
-    ],
-  },
+  // {
+  //   component: CNavGroup,
+  //   name: 'Produtos Prontos',
+  //   to: '/base',
+  //   icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  //   items: [
+  //     {
+  //       component: CNavItem,
+  //       name: 'Registro de Colheitas',
+  //       to: '/base/accordion',
+  //     },
+  //     {
+  //       component: CNavItem,
+  //       name: 'Estoque de Produtos de Vendas',
+  //       to: '/base/accordion',
+  //     },
+  //   ],
+  // },
   {
     component: CNavTitle,
     name: 'Produção',
