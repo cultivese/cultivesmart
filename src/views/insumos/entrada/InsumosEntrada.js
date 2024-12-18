@@ -1,173 +1,91 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
+  CButton,
   CCard,
   CCardBody,
   CCardHeader,
   CCol,
+  CForm,
+  CFormInput,
+  CFormFeedback,
+  CFormLabel,
+  CFormSelect,
   CRow,
-  CAccordion,
-  CAccordionBody,
-  CAccordionHeader,
-  CAccordionItem,
+  CTabContent,
+  CTabPane,
 } from '@coreui/react'
-import { DocsComponents, DocsExample } from 'src/components'
+
+const CustomStyles = () => {
+  const [validated, setValidated] = useState(false)
+  const handleSubmit = (event) => {
+    const form = event.currentTarget
+    if (form.checkValidity() === false) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    setValidated(true)
+  }
+  return (
+    <CForm
+      className="row g-3 needs-validation"
+      noValidate
+      validated={validated}
+      onSubmit={handleSubmit}
+    >
+      <CCol md={4}>
+        <CFormLabel htmlFor="validationCustom01">Microverde</CFormLabel>
+        <CFormInput type="text" id="validationCustom01" defaultValue="Microverde" required />
+        <CFormFeedback valid>Looks good!</CFormFeedback>
+      </CCol>
+      <CCol md={4}>
+        <CFormLabel htmlFor="validationCustom04">Especificação</CFormLabel>
+        <CFormSelect id="validationCustom04">
+          <option disabled>Choose...</option>
+          <option>...</option>
+        </CFormSelect>
+        <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
+      </CCol>
+      <CCol md={4}>
+        <CFormLabel htmlFor="validationCustom04">Fornecedor</CFormLabel>
+        <CFormSelect id="validationCustom04">
+          <option disabled>Choose...</option>
+          <option>...</option>
+        </CFormSelect>
+        <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
+      </CCol>
+      <CCol md={6}>
+        <CFormLabel htmlFor="validationCustom03">Preço</CFormLabel>
+        <CFormInput type="text" id="validationCustom03" required />
+        <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
+      </CCol>
+      <CCol md={3}>
+        <CFormLabel htmlFor="validationCustom05">ICMS</CFormLabel>
+        <CFormInput type="text" id="validationCustom05" required />
+        <CFormFeedback invalid>Please provide a valid zip.</CFormFeedback>
+      </CCol>
+      <CCol xs={12}>
+        <CButton color="primary" type="submit">
+          Cadastrar
+        </CButton>
+      </CCol>
+    </CForm>
+  )
+}
 
 const InsumosEntrada = () => {
   return (
     <CRow>
       <CCol xs={12}>
-        <DocsComponents href="components/accordion/" />
         <CCard className="mb-4">
           <CCardHeader>
-            <strong>React Accordion</strong>
+            <strong>Insumos</strong> <small>Cadastro</small>
           </CCardHeader>
           <CCardBody>
-            <p className="text-body-secondary small">
-              Click the accordions below to expand/collapse the accordion content.
-            </p>
-            <DocsExample href="components/accordion">
-              <CAccordion activeItemKey={2}>
-                <CAccordionItem itemKey={1}>
-                  <CAccordionHeader>Accordion Item #1</CAccordionHeader>
-                  <CAccordionBody>
-                    <strong>This is the first item&#39;s accordion body.</strong> It is hidden by
-                    default, until the collapse plugin adds the appropriate classes that we use to
-                    style each element. These classes control the overall appearance, as well as the
-                    showing and hiding via CSS transitions. You can modify any of this with custom
-                    CSS or overriding our default variables. It&#39;s also worth noting that just
-                    about any HTML can go within the <code>.accordion-body</code>, though the
-                    transition does limit overflow.
-                  </CAccordionBody>
-                </CAccordionItem>
-                <CAccordionItem itemKey={2}>
-                  <CAccordionHeader>Accordion Item #2</CAccordionHeader>
-                  <CAccordionBody>
-                    <strong>This is the second item&#39;s accordion body.</strong> It is hidden by
-                    default, until the collapse plugin adds the appropriate classes that we use to
-                    style each element. These classes control the overall appearance, as well as the
-                    showing and hiding via CSS transitions. You can modify any of this with custom
-                    CSS or overriding our default variables. It&#39;s also worth noting that just
-                    about any HTML can go within the <code>.accordion-body</code>, though the
-                    transition does limit overflow.
-                  </CAccordionBody>
-                </CAccordionItem>
-                <CAccordionItem itemKey={3}>
-                  <CAccordionHeader>Accordion Item #3</CAccordionHeader>
-                  <CAccordionBody>
-                    <strong>This is the second item&#39;s accordion body.</strong> It is hidden by
-                    default, until the collapse plugin adds the appropriate classes that we use to
-                    style each element. These classes control the overall appearance, as well as the
-                    showing and hiding via CSS transitions. You can modify any of this with custom
-                    CSS or overriding our default variables. It&#39;s also worth noting that just
-                    about any HTML can go within the <code>.accordion-body</code>, though the
-                    transition does limit overflow.
-                  </CAccordionBody>
-                </CAccordionItem>
-              </CAccordion>
-            </DocsExample>
-          </CCardBody>
-        </CCard>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>React Accordion</strong> <small>Flush</small>
-          </CCardHeader>
-          <CCardBody>
-            <p className="text-body-secondary small">
-              Add <code>flush</code> to remove the default <code>background-color</code>, some
-              borders, and some rounded corners to render accordions edge-to-edge with their parent
-              container.
-            </p>
-            <DocsExample href="components/accordion#flush">
-              <CAccordion flush>
-                <CAccordionItem itemKey={1}>
-                  <CAccordionHeader>Accordion Item #1</CAccordionHeader>
-                  <CAccordionBody>
-                    <strong>This is the first item&#39;s accordion body.</strong> It is hidden by
-                    default, until the collapse plugin adds the appropriate classes that we use to
-                    style each element. These classes control the overall appearance, as well as the
-                    showing and hiding via CSS transitions. You can modify any of this with custom
-                    CSS or overriding our default variables. It&#39;s also worth noting that just
-                    about any HTML can go within the <code>.accordion-body</code>, though the
-                    transition does limit overflow.
-                  </CAccordionBody>
-                </CAccordionItem>
-                <CAccordionItem itemKey={2}>
-                  <CAccordionHeader>Accordion Item #2</CAccordionHeader>
-                  <CAccordionBody>
-                    <strong>This is the second item&#39;s accordion body.</strong> It is hidden by
-                    default, until the collapse plugin adds the appropriate classes that we use to
-                    style each element. These classes control the overall appearance, as well as the
-                    showing and hiding via CSS transitions. You can modify any of this with custom
-                    CSS or overriding our default variables. It&#39;s also worth noting that just
-                    about any HTML can go within the <code>.accordion-body</code>, though the
-                    transition does limit overflow.
-                  </CAccordionBody>
-                </CAccordionItem>
-                <CAccordionItem itemKey={3}>
-                  <CAccordionHeader>Accordion Item #3</CAccordionHeader>
-                  <CAccordionBody>
-                    <strong>This is the second item&#39;s accordion body.</strong> It is hidden by
-                    default, until the collapse plugin adds the appropriate classes that we use to
-                    style each element. These classes control the overall appearance, as well as the
-                    showing and hiding via CSS transitions. You can modify any of this with custom
-                    CSS or overriding our default variables. It&#39;s also worth noting that just
-                    about any HTML can go within the <code>.accordion-body</code>, though the
-                    transition does limit overflow.
-                  </CAccordionBody>
-                </CAccordionItem>
-              </CAccordion>
-            </DocsExample>
-          </CCardBody>
-        </CCard>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>React Accordion</strong> <small>Always open</small>
-          </CCardHeader>
-          <CCardBody>
-            <p className="text-body-secondary small">
-              Add <code>alwaysOpen</code> property to make accordion items stay open when another
-              item is opened.
-            </p>
-            <DocsExample href="components/accordion#flush">
-              <CAccordion alwaysOpen>
-                <CAccordionItem itemKey={1}>
-                  <CAccordionHeader>Accordion Item #1</CAccordionHeader>
-                  <CAccordionBody>
-                    <strong>This is the first item&#39;s accordion body.</strong> It is hidden by
-                    default, until the collapse plugin adds the appropriate classes that we use to
-                    style each element. These classes control the overall appearance, as well as the
-                    showing and hiding via CSS transitions. You can modify any of this with custom
-                    CSS or overriding our default variables. It&#39;s also worth noting that just
-                    about any HTML can go within the <code>.accordion-body</code>, though the
-                    transition does limit overflow.
-                  </CAccordionBody>
-                </CAccordionItem>
-                <CAccordionItem itemKey={2}>
-                  <CAccordionHeader>Accordion Item #2</CAccordionHeader>
-                  <CAccordionBody>
-                    <strong>This is the second item&#39;s accordion body.</strong> It is hidden by
-                    default, until the collapse plugin adds the appropriate classes that we use to
-                    style each element. These classes control the overall appearance, as well as the
-                    showing and hiding via CSS transitions. You can modify any of this with custom
-                    CSS or overriding our default variables. It&#39;s also worth noting that just
-                    about any HTML can go within the <code>.accordion-body</code>, though the
-                    transition does limit overflow.
-                  </CAccordionBody>
-                </CAccordionItem>
-                <CAccordionItem itemKey={3}>
-                  <CAccordionHeader>Accordion Item #3</CAccordionHeader>
-                  <CAccordionBody>
-                    <strong>This is the second item&#39;s accordion body.</strong> It is hidden by
-                    default, until the collapse plugin adds the appropriate classes that we use to
-                    style each element. These classes control the overall appearance, as well as the
-                    showing and hiding via CSS transitions. You can modify any of this with custom
-                    CSS or overriding our default variables. It&#39;s also worth noting that just
-                    about any HTML can go within the <code>.accordion-body</code>, though the
-                    transition does limit overflow.
-                  </CAccordionBody>
-                </CAccordionItem>
-              </CAccordion>
-            </DocsExample>
+            <CTabContent className={`rounded-bottom`}>
+              <CTabPane className="p-3 preview" visible>
+                {CustomStyles()}
+              </CTabPane>
+            </CTabContent>
           </CCardBody>
         </CCard>
       </CCol>
