@@ -89,13 +89,13 @@ const _nav = [
   {
     component: CNavGroup,
     name: 'Insumos',
-    to: '/base',
+    to: '/insumos',
     icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
     items: [
       {
         component: CNavItem,
         name: 'Entrada de Insumos',
-        to: '/base/accordion',
+        to: '/insumos/entrada',
       },
       {
         component: CNavItem,
