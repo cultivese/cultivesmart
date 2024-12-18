@@ -33,9 +33,18 @@ const CustomStyles = () => {
       onSubmit={handleSubmit}
     >
       <CCol md={4}>
-        <CFormLabel htmlFor="validationCustom01">Microverde</CFormLabel>
+        <CFormLabel htmlFor="validationCustom01">Descrição</CFormLabel>
         <CFormInput type="text" id="validationCustom01" defaultValue="Microverde" required />
         <CFormFeedback valid>Looks good!</CFormFeedback>
+      </CCol>
+      <CCol md={4}>
+        <CFormLabel htmlFor="validationCustom04">Tipo Semente</CFormLabel>
+        <CFormSelect id="validationCustom04">
+          <option disabled>Choose...</option>
+          <option>Microverde</option>
+          <option>Flor Comestível</option>
+        </CFormSelect>
+        <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
       </CCol>
       <CCol md={4}>
         <CFormLabel htmlFor="validationCustom04">Especificação</CFormLabel>
@@ -69,7 +78,7 @@ const CustomStyles = () => {
         </CButton>
       </CCol>
     </CForm>
-  )
+    )
 }
 
 const InsumosEntrada = () => {

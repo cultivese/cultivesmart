@@ -6,6 +6,8 @@ const Typography = React.lazy(() => import('./views/theme/typography/Typography'
 
 // Base
 
+const FornecedoresCadastro = React.lazy(() => import('./views/fornecedores/cadastro/FornecedoresCadastro'))
+const FornecedoresListar = React.lazy(() => import('./views/fornecedores/listar/FornecedoresListar'))
 const InsumosEntrada = React.lazy(() => import('./views/insumos/entrada/InsumosEntrada'))
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
 const Breadcrumbs = React.lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'))
@@ -59,6 +61,9 @@ const routes = [
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },
+  { path: '/fornecedores', name: 'Fornecedores', element: Cards, exact: true },
+  { path: '/fornecedores/cadastro', name: 'Cadastro', element: FornecedoresCadastro },
+  { path: '/fornecedores/listar', name: 'Listar', element: FornecedoresListar },
   { path: '/insumos', name: 'Insumos', element: Cards, exact: true },
   { path: '/insumos/entrada', name: 'Entrada', element: InsumosEntrada },
   { path: '/base/accordion', name: 'Accordion', element: Accordion },

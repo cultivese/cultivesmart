@@ -11,8 +11,9 @@ import {
   CFormLabel,
   CFormSelect,
   CRow,
+  CTabContent,
+  CTabPane,
 } from '@coreui/react'
-import { DocsExample } from 'src/components'
 
 const CustomStyles = () => {
   const [validated, setValidated] = useState(false)
@@ -32,9 +33,18 @@ const CustomStyles = () => {
       onSubmit={handleSubmit}
     >
       <CCol md={4}>
-        <CFormLabel htmlFor="validationCustom01">Microverde</CFormLabel>
-        <CFormInput type="text" id="validationCustom01" defaultValue="Mark" required />
+        <CFormLabel htmlFor="validationCustom01">Nome</CFormLabel>
+        <CFormInput type="text" id="validationCustom01" defaultValue="Microverde" required />
         <CFormFeedback valid>Looks good!</CFormFeedback>
+      </CCol>
+      <CCol md={4}>
+        <CFormLabel htmlFor="validationCustom04">Tipo Semente</CFormLabel>
+        <CFormSelect id="validationCustom04">
+          <option disabled>Choose...</option>
+          <option>Microverde</option>
+          <option>Flor Comestível</option>
+        </CFormSelect>
+        <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
       </CCol>
       <CCol md={4}>
         <CFormLabel htmlFor="validationCustom04">Especificação</CFormLabel>
@@ -68,10 +78,10 @@ const CustomStyles = () => {
         </CButton>
       </CCol>
     </CForm>
-  )
+    )
 }
 
-const Validation = () => {
+const FornecedoresCadastro = () => {
   return (
     <CRow>
       <CCol xs={12}>
@@ -80,7 +90,11 @@ const Validation = () => {
             <strong>Insumos</strong> <small>Cadastro</small>
           </CCardHeader>
           <CCardBody>
-            <DocsExample href="forms/validation">{CustomStyles()}</DocsExample>
+            <CTabContent className={`rounded-bottom`}>
+              <CTabPane className="p-3 preview" visible>
+                {CustomStyles()}
+              </CTabPane>
+            </CTabContent>
           </CCardBody>
         </CCard>
       </CCol>
@@ -88,4 +102,4 @@ const Validation = () => {
   )
 }
 
-export default Validation
+export default FornecedoresCadastro

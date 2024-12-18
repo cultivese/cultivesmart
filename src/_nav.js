@@ -29,6 +29,72 @@ const _nav = [
   },
   {
     component: CNavTitle,
+    name: 'Fornecedores',
+  },
+  {
+    component: CNavItem,
+    name: 'Cadastro',
+    to: '/fornecedores/cadastro',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Listar',
+    to: '/fornecedores/listar',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'Estoque',
+  },
+  {
+    component: CNavGroup,
+    name: 'Insumos',
+    to: '/insumos',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Cadastro de Insumos',
+        to: '/insumos/cadastro',
+      },
+      {
+        component: CNavItem,
+        name: 'Entrada de Insumos',
+        to: '/insumos/entrada',
+      },
+      {
+        component: CNavItem,
+        name: 'Saída de Insumos',
+        to: '/base/accordion',
+      },
+      {
+        component: CNavItem,
+        name: 'Níveis de Estoque',
+        to: '/base/accordion',
+      },
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: 'Produtos Prontos',
+    to: '/base',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Registro de Colheitas',
+        to: '/base/accordion',
+      },
+      {
+        component: CNavItem,
+        name: 'Estoque de Produtos de Vendas',
+        to: '/base/accordion',
+      },
+    ],
+  },
+  {
+    component: CNavTitle,
     name: 'Produção',
   },
   {
@@ -78,51 +144,6 @@ const _nav = [
       {
         component: CNavItem,
         name: 'Colheita',
-        to: '/base/accordion',
-      },
-    ],
-  },
-  {
-    component: CNavTitle,
-    name: 'Estoque',
-  },
-  {
-    component: CNavGroup,
-    name: 'Insumos',
-    to: '/insumos',
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'Entrada de Insumos',
-        to: '/insumos/entrada',
-      },
-      {
-        component: CNavItem,
-        name: 'Saída de Insumos',
-        to: '/base/accordion',
-      },
-      {
-        component: CNavItem,
-        name: 'Níveis de Estoque',
-        to: '/base/accordion',
-      },
-    ],
-  },
-  {
-    component: CNavGroup,
-    name: 'Produtos Prontos',
-    to: '/base',
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'Registro de Colheitas',
-        to: '/base/accordion',
-      },
-      {
-        component: CNavItem,
-        name: 'Estoque de Produtos de Vendas',
         to: '/base/accordion',
       },
     ],
