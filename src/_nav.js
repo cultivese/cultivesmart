@@ -1,18 +1,14 @@
 import React from 'react'
 import CIcon from '@coreui/icons-react'
 import {
-  cilBell,
-  cilCalculator,
-  cilChartPie,
-  cilCursor,
-  cilDescription,
-  cilDrop,
-  cilExternalLink,
-  cilNotes,
-  cilPencil,
+  cilLeaf,
+  cilArrowThickFromTop,
+  cilArrowThickToTop,
+  cilApplications,
   cilPuzzle,
+  cilCalendar,
+  cilCalendarCheck,
   cilSpeedometer,
-  cilStar,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -22,109 +18,43 @@ const _nav = [
     name: 'Dashboard',
     to: '/dashboard',
     icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
-    badge: {
-      color: 'info',
-      text: 'NEW',
-    },
+    // badge: {
+    //   color: 'info',
+    //   text: 'NEW',
+    // },
   },
-  {
-    component: CNavTitle,
-    name: 'Fornecedores',
-  },
-  {
-    component: CNavItem,
-    name: 'Cadastro',
-    to: '/fornecedores/cadastro',
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Listar',
-    to: '/fornecedores/listar',
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavTitle,
-    name: 'Estoque',
-  },
-  {
-    component: CNavGroup,
-    name: 'Insumos',
-    to: '/insumos',
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'Cadastro de Insumos',
-        to: '/insumos/cadastro',
-      },
-      {
-        component: CNavItem,
-        name: 'Entrada de Insumos',
-        to: '/insumos/entrada',
-      },
-      {
-        component: CNavItem,
-        name: 'Saída de Insumos',
-        to: '/base/accordion',
-      },
-      {
-        component: CNavItem,
-        name: 'Níveis de Estoque',
-        to: '/base/accordion',
-      },
-    ],
-  },
-  // {
-  //   component: CNavGroup,
-  //   name: 'Produtos Prontos',
-  //   to: '/base',
-  //   icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-  //   items: [
-  //     {
-  //       component: CNavItem,
-  //       name: 'Registro de Colheitas',
-  //       to: '/base/accordion',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Estoque de Produtos de Vendas',
-  //       to: '/base/accordion',
-  //     },
-  //   ],
-  // },
   {
     component: CNavTitle,
     name: 'Produção',
   },
   {
     component: CNavGroup,
-    name: 'Lotes de Produção',
-    to: '/base',
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    name: 'Acompanhamento',
+    to: '/producao',
+    icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
     items: [
       {
         component: CNavItem,
-        name: 'Registrar Novo Lote',
-        to: '/base/accordion',
+        name: 'Visão Geral',
+        to: '/producao/visao_geral',
       },
       {
         component: CNavItem,
-        name: 'Monitorar Cultivo',
-        to: '/base/accordion',
+        name: 'Novo Lote',
+        to: '/producao/novo_lote',
       },
       {
         component: CNavItem,
-        name: 'Histórico de Lotes',
-        to: '/base/accordion',
+        name: 'Encerrar Lote',
+        to: '/producao/encerra_lote',
       },
     ],
   },
   {
     component: CNavGroup,
-    name: 'Controle de Cultivo',
+    name: 'Planejamento',
     to: '/base',
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilCalendarCheck} customClassName="nav-icon" />,
     items: [
       {
         component: CNavItem,
@@ -147,6 +77,125 @@ const _nav = [
         to: '/base/accordion',
       },
     ],
+  },
+  {
+    component: CNavTitle,
+    name: 'Insumos',
+  },
+  {
+    component: CNavItem,
+    name: 'Cadastro',
+    to: '/cadastro',
+    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavGroup,
+    name: 'Entrada',
+    to: '/entrada',
+    icon: <CIcon icon={cilArrowThickFromTop} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Registrar',
+        to: '/entrada/registrar',
+      },
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: 'Saida',
+    to: '/saida',
+    icon: <CIcon icon={cilArrowThickToTop} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Registrar',
+        to: '/saida/registrar',
+      },
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: 'Estoque',
+    to: '/estoque',
+    icon: <CIcon icon={cilApplications} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Visão Geral',
+        to: '/estoque/visao_geral',
+      },
+      {
+        component: CNavItem,
+        name: 'Alertas',
+        to: '/estoque/alertas',
+      },
+      {
+        component: CNavItem,
+        name: 'Relatório',
+        to: '/estoque/relatorio',
+      },
+    ],
+  },
+  {
+    component: CNavTitle,
+    name: 'Fornecedores',
+  },
+  {
+    component: CNavItem,
+    name: 'Cadastro',
+    to: '/fornecedores/cadastro',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Listar',
+    to: '/fornecedores/listar',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Historico',
+    to: '/fornecedores/historico',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'Relatórios',
+  },
+  {
+    component: CNavItem,
+    name: 'Relatório de Produção',
+    to: '/relatorio/producao',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Relatório de Insumos',
+    to: '/relatorio/insumos',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Relatório de Fornecedores',
+    to: '/relatorio/fornecedores',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'Configuração',
+  },
+  {
+    component: CNavItem,
+    name: 'Lote',
+    to: '/configuracao/lote',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Produção',
+    to: '/configuracao/producao',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
   },
 ]
 

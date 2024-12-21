@@ -1,6 +1,8 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
+import logoImage from '../assets/images/logo.png'; // Atualize o caminho conforme necessário
+
 import {
   CCloseButton,
   CSidebar,
@@ -36,9 +38,11 @@ const AppSidebar = () => {
       }}
     >
       <CSidebarHeader className="border-bottom">
-        <CSidebarBrand to="/">
-          <CIcon customClassName="sidebar-brand-full" icon={logo} height={32} />
+        <CSidebarBrand to="/"  style={{height: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          {/* <CIcon customClassName="sidebar-brand-full" icon={logo} height={32} />
           <CIcon customClassName="sidebar-brand-narrow" icon={sygnet} height={32} />
+           */}
+          <img src={logoImage} alt="Logo" className="logo-image" style={{display: 'block', margin: '0 auto', width: '200px', height: '200px'}} />
         </CSidebarBrand>
         <CCloseButton
           className="d-lg-none"

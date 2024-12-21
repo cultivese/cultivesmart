@@ -45,8 +45,8 @@ const Login = () => {
               <CCard className="p-4">
                 <CCardBody>
                   <CForm onSubmit={handleLogin}>
-                    <h1>Login</h1>
-                    <p className="text-body-secondary">Sign In to your account</p>
+                    <h1>CultiveSmart</h1>
+                    <p className="text-body-secondary">Informe suas credenciais para acessar o sistema</p>
                     {error && <p className="text-danger">{error}</p>}
                     <CInputGroup className="mb-3">
                       <CInputGroupText>
@@ -79,7 +79,7 @@ const Login = () => {
                       </CCol>
                       <CCol xs={6} className="text-right">
                         <CButton color="link" className="px-0">
-                          Forgot password?
+                          Recuperar senha
                         </CButton>
                       </CCol>
                     </CRow>
