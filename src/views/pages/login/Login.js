@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import {
   CButton,
@@ -32,7 +32,7 @@ const Login = () => {
       await signInWithEmailAndPassword(auth, email, password);
       navigate('/dashboard'); // Redireciona após login bem-sucedido
     } catch (err) {
-      setError('Invalid email or password'); // Mensagem genérica para erros
+      setError('Email ou senha inválidos!'); // Mensagem genérica para erros
     }
   };
 

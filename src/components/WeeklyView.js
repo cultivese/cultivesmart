@@ -7,8 +7,6 @@ const WeeklyView = ({ activities, weekDates }) => {
   const [selectedActivity, setSelectedActivity] = useState(null); // Atividade selecionada para exibir no modal
   const [modalVisible, setModalVisible] = useState(false); // Controle do modal
 
-  const daysOfWeek = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
-
   const openModal = (activity) => {
     setSelectedActivity(activity);
     setModalVisible(true);
@@ -21,12 +19,6 @@ const WeeklyView = ({ activities, weekDates }) => {
 
   return (
     <div>
-      {/* Cabeçalho do Período */}
-      <div className="week-period">
-        Período: <span>{weekDates[0]}</span> - <span>{weekDates[6]}</span>
-      </div>
-
-      {/* Exibição dos Dias da Semana e Atividades */}
       <CRow>
         {weekDates.map((date, index) => (
           <CCol key={index} sm={12} md={6} lg={4}>
