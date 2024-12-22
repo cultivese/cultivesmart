@@ -39,18 +39,18 @@ const WidgetsDropdown = (props) => {
 
   return (
     <CRow className={props.className} xs={{ gutter: 4 }}>
-      <CCol sm={6} xl={4} xxl={3}>
+      <CCol sm={2} xl={2} xxl={4}>
         <CWidgetStatsA
           color="primary"
           value={
             <>
-              26K{' '}
+              500g{' '}
               <span className="fs-6 fw-normal">
                 (-12.4% <CIcon icon={cilArrowBottom} />)
               </span>
             </>
           }
-          title="Users"
+          title="Produção Estimada"
           action={
             <CDropdown alignment="end">
               <CDropdownToggle color="transparent" caret={false} className="text-white p-0">
@@ -129,7 +129,7 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
-      <CCol sm={6} xl={4} xxl={3}>
+      <CCol sm={2} xl={2} xxl={4}>
         <CWidgetStatsA
           color="info"
           value={
@@ -140,7 +140,7 @@ const WidgetsDropdown = (props) => {
               </span>
             </>
           }
-          title="Income"
+          title="Colheita"
           action={
             <CDropdown alignment="end">
               <CDropdownToggle color="transparent" caret={false} className="text-white p-0">
@@ -218,7 +218,7 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
-      <CCol sm={6} xl={4} xxl={3}>
+      <CCol sm={2} xl={2} xxl={4}>
         <CWidgetStatsA
           color="warning"
           value={
@@ -290,7 +290,7 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
-      <CCol sm={6} xl={4} xxl={3}>
+      <CCol sm={2} xl={2} xxl={4}>
         <CWidgetStatsA
           color="danger"
           value={

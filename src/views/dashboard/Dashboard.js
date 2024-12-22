@@ -1,6 +1,7 @@
 import React from 'react'
 import WeeklyView from './../../components/WeeklyView'
 import classNames from 'classnames'
+import WidgetsDropdown from '../widgets/WidgetsDropdown'
 
 import {
   CButton,
@@ -47,7 +48,9 @@ const Dashboard = () => {
 
   return (
     <>
-    <CCard className="mb-4">
+      <WidgetsDropdown className="mb-4" />
+
+      <CCard className="mb-4">
         <CCardBody>
           <CRow>
             <CCol sm={5}>
@@ -99,6 +102,7 @@ const Dashboard = () => {
           </CRow>
         </CCardFooter>
       </CCard>
+      
     </>
   )
 }
