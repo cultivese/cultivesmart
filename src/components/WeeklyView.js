@@ -1,7 +1,7 @@
-import "./css/dashboard.css"
-
 import React, { useState } from "react";
-import { CCard, CCardBody, CCardHeader, CCol, CRow, CModal, CModalBody, CModalHeader, CButton } from "@coreui/react";
+import { CCardText, CCard, CBadge, CCardBody, CCardHeader, CCol, CRow, CModal, CModalBody, CModalHeader, CButton } from "@coreui/react";
+import { DocsExample } from 'src/components'
+
 
 const WeeklyView = ({ activities, weekDates }) => {
   const [selectedActivity, setSelectedActivity] = useState(null); // Atividade selecionada para exibir no modal
@@ -17,38 +17,38 @@ const WeeklyView = ({ activities, weekDates }) => {
     setSelectedActivity(null);
   };
 
+
+  
   return (
     <div>
+      <DocsExample href="components/card/#top-border">
+
       <CRow>
         {weekDates.map((date, index) => (
-          <CCol key={index} sm={12} md={6} lg={4}>
-            <CCard>
+          <CCol key={index} sm={12} md={6} lg={3}>
+            <CCard textColor='primary'
+                      className={'mb-3 border-top-primary border-top-3'}>
               <CCardHeader>
-                {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"][index]} ({date})
+                {["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"][index]} ({date})
               </CCardHeader>
               <CCardBody>
+              <CCardText>
+
                 {activities[index] ? (
-                  activities[index].map((activity) => (
-                    <span
-                      key={activity.id}
-                      className={`activity-label ${activity.type}`}
-                      onClick={() => openModal(activity)}
-                    >
-                      {activity.type === "semeadura" && <i className="fas fa-seedling" style={{ marginRight: "0.5rem" }}></i>}
-                      {activity.type === "irrigacao" && <i className="fas fa-water" style={{ marginRight: "0.5rem" }}></i>}
-                      {activity.type === "colheita" && <i className="fas fa-leaf" style={{ marginRight: "0.5rem" }}></i>}
-                      {activity.type === "limpeza" && <i className="fas fa-broom" style={{ marginRight: "0.5rem" }}></i>}
-                      {activity.type}
-                    </span>
-                  ))
-                ) : (
+                  activities[index].map((activity, index) => (
+                <CButton key={index} color={activity.color} className="me-2" onClick={() => openModal(activity)}> 
+                     {activity.type} <CBadge color="secondary">{activity.lotes}</CBadge>
+                </CButton>
+                 ))) : (
                   <div>Nenhuma atividade</div>
                 )}
+              </CCardText>
               </CCardBody>
             </CCard>
           </CCol>
         ))}
       </CRow>
+      </DocsExample>
 
       {/* Modal para Detalhes da Atividade */}
       <CModal visible={modalVisible} onClose={closeModal}>

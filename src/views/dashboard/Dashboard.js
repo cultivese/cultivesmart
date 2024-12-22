@@ -29,14 +29,20 @@ const Dashboard = () => {
 
   const weekDates = ["18/12/2024", "19/12/2024", "20/12/2024", "21/12/2024", "22/12/2024", "23/12/2024", "24/12/2024"];
 
+  const buttonsData = [
+    { color: 'primary', text: 'Irrigação', badge: 4 },
+    { color: 'danger', text: 'Alerta', badge: 3 },
+    { color: 'success', text: 'Notificações', badge: 5 },
+    { color: 'warning', text: 'Pendências', badge: 2 },
+  ]
   const activities = {
     0: [
-      { id: 1, type: "semeadura", details: "Semeadura do lote #1" },
-      { id: 2, type: "irrigacao", details: "Irrigação do lote #1" },
+      { id: 1, color: 'primary', type: "semeadura", details: "Semeadura do lote #1", lotes: 2 },
+      { id: 2, color: 'danger', type: "irrigacao", details: "Irrigação do lote #1" , lotes: 1},
     ],
-    1: [{ id: 3, type: "irrigacao", details: "Irrigação do lote #2" }],
-    3: [{ id: 4, type: "colheita", details: "Colheita do lote #3" }],
-    4: [{ id: 5, type: "limpeza", details: "Limpeza de bandejas" }],
+    1: [{ id: 3, color: 'success', type: "irrigacao", details: "Irrigação do lote #2" , lotes: 1}],
+    3: [{ id: 4, color: 'warning', type: "colheita", details: "Colheita do lote #3" , lotes: 3}],
+    4: [{ id: 5, color: 'success', type: "limpeza", details: "Limpeza de bandejas" , lotes: 4}],
   };
 
   return (
@@ -53,12 +59,12 @@ const Dashboard = () => {
             
             <CCol sm={7} className="d-none d-md-block">
               <CButtonGroup className="float-end me-3">
-                {['Day', 'Month', 'Year'].map((value) => (
+                {['Semanal', 'Mensal'].map((value) => (
                   <CButton
                     color="outline-secondary"
                     key={value}
                     className="mx-0"
-                    active={value === 'Month'}
+                    active={value === 'Semanal'}
                   >
                     {value}
                   </CButton>
