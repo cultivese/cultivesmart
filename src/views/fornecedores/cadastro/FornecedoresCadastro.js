@@ -46,7 +46,7 @@ const FornecedoresCadastro = () => {
       event.stopPropagation()
     } else {
       try {
-        const response = await fetch('https://api.cultivesmart.com.br/fornecedores', {
+        const response = await fetch('https://api.cultivesmart.com.br/', {
           method: 'POST', // Método HTTP
           headers: {
             'Content-Type': 'application/json', // Tipo de dado enviado
