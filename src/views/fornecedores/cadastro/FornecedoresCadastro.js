@@ -65,7 +65,7 @@ const FornecedoresCadastro = () => {
 
           // Redireciona após 2 segundos
           setTimeout(() => {
-            navigate('/fornecedores')
+            navigate('/fornecedores/listar')
           }, 2000)
         } else {
           throw new Error('Erro ao cadastrar fornecedor.')
