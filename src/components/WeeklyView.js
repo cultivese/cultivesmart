@@ -3,7 +3,7 @@ import { CCardText, CCard, CBadge, CCardBody, CCardHeader, CCol, CRow, CModal, C
 import { DocsExample } from 'src/components'
 
 
-const WeeklyView = ({ activities, weekDates }) => {
+const WeeklyView = ({ props, activities, weekDates }) => {
   const [selectedActivity, setSelectedActivity] = useState(null); // Atividade selecionada para exibir no modal
   const [modalVisible, setModalVisible] = useState(false); // Controle do modal
 
@@ -20,11 +20,9 @@ const WeeklyView = ({ activities, weekDates }) => {
 
   
   return (
-    <div>
-      <DocsExample href="components/card/#top-border">
-
-      <CRow>
-        {weekDates.map((date, index) => (
+    <>
+        <CRow  xs={{ gutter: 4 }}>
+          {weekDates.map((date, index) => (
           <CCol key={index} sm={12} md={6} lg={4}>
             <CCard textColor='primary'
                       className={'mb-3 border-top-primary border-top-3'}>
@@ -48,7 +46,6 @@ const WeeklyView = ({ activities, weekDates }) => {
           </CCol>
         ))}
       </CRow>
-      </DocsExample>
 
       {/* Modal para Detalhes da Atividade */}
       <CModal visible={modalVisible} onClose={closeModal}>
@@ -68,7 +65,7 @@ const WeeklyView = ({ activities, weekDates }) => {
           )}
         </CModalBody>
       </CModal>
-    </div>
+    </>
   );
 };
 

@@ -13,59 +13,51 @@ import {
   CTabContent,
   CTabPane,
 } from '@coreui/react'
+import axios from 'axios'
 
-const CustomStyles = () => {
+const FornecedoresCadastro = () => {
+  const [formData, setFormData] = useState({
+    nome: '',
+    cnpj: '',
+    endereco: '',
+    telefone: '',
+    email: '',
+  })
   const [validated, setValidated] = useState(false)
-  const handleSubmit = (event) => {
+
+  const handleChange = (e) => {
+    const { id, value } = e.target
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }))
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
     const form = event.currentTarget
     if (form.checkValidity() === false) {
-      event.preventDefault()
       event.stopPropagation()
+    } else {
+      try {
+        const response = await fetch('https://api.cultivesmart.com.br/', {
+          method: 'POST', // Método HTTP
+          headers: {
+            'Content-Type': 'application/json', // Tipo de dado enviado
+          },
+          body: JSON.stringify(formData), // Converte os dados em JSON
+        });
+
+        alert('Fornecedor cadastrado com sucesso!')
+        console.log(response.data)
+      } catch (error) {
+        console.error('Erro ao cadastrar o fornecedor:', error)
+        alert('Erro ao cadastrar o fornecedor.')
+      }
     }
     setValidated(true)
   }
-  return (
-    <CForm
-      className="row g-3 needs-validation"
-      noValidate
-      validated={validated}
-      onSubmit={handleSubmit}
-    >
-      <CCol md={4}>
-        <CFormLabel htmlFor="validationCustom01">Nome</CFormLabel>
-        <CFormInput type="text" id="validationCustom01" defaultValue="Nome do Fornecedor" required />
-        <CFormFeedback valid>Looks good!</CFormFeedback>
-      </CCol>
-      <CCol md={4}>
-        <CFormLabel htmlFor="validationCustom01">CNPJ</CFormLabel>
-        <CFormInput type="text" id="validationCustom01" defaultValue="00.000.000/0000-00" required />
-        <CFormFeedback valid>Looks good!</CFormFeedback>
-      </CCol>
-      <CCol md={4}>
-        <CFormLabel htmlFor="validationCustom01">Endereço</CFormLabel>
-        <CFormInput type="text" id="validationCustom01" defaultValue="Logradouro" required />
-        <CFormFeedback valid>Looks good!</CFormFeedback>
-      </CCol>
-      <CCol md={4}>
-        <CFormLabel htmlFor="validationCustom01">Telefone</CFormLabel>
-        <CFormInput type="text" id="validationCustom01" defaultValue="(DDD) 99999 9999" required />
-        <CFormFeedback valid>Looks good!</CFormFeedback>
-      </CCol>
-      <CCol md={4}>
-        <CFormLabel htmlFor="validationCustom01">Email</CFormLabel>
-        <CFormInput type="text" id="validationCustom01" defaultValue="fulano@mail.com.br" required />
-        <CFormFeedback valid>Looks good!</CFormFeedback>
-      </CCol>
-      <CCol xs={12}>
-        <CButton color="primary" type="submit">
-          Cadastrar
-        </CButton>
-      </CCol>
-    </CForm>
-    )
-}
 
-const FornecedoresCadastro = () => {
   return (
     <CRow>
       <CCol xs={12}>
@@ -76,7 +68,73 @@ const FornecedoresCadastro = () => {
           <CCardBody>
             <CTabContent className={`rounded-bottom`}>
               <CTabPane className="p-3 preview" visible>
-                {CustomStyles()}
+                <CForm
+                  className="row g-3 needs-validation"
+                  noValidate
+                  validated={validated}
+                  onSubmit={handleSubmit}
+                >
+                  <CCol md={4}>
+                    <CFormLabel htmlFor="nome">Nome</CFormLabel>
+                    <CFormInput
+                      type="text"
+                      id="nome"
+                      value={formData.nome}
+                      onChange={handleChange}
+                      required
+                    />
+                    <CFormFeedback valid>Looks good!</CFormFeedback>
+                  </CCol>
+                  <CCol md={4}>
+                    <CFormLabel htmlFor="cnpj">CNPJ</CFormLabel>
+                    <CFormInput
+                      type="text"
+                      id="cnpj"
+                      value={formData.cnpj}
+                      onChange={handleChange}
+                      required
+                    />
+                    <CFormFeedback valid>Looks good!</CFormFeedback>
+                  </CCol>
+                  <CCol md={4}>
+                    <CFormLabel htmlFor="endereco">Endereço</CFormLabel>
+                    <CFormInput
+                      type="text"
+                      id="endereco"
+                      value={formData.endereco}
+                      onChange={handleChange}
+                      required
+                    />
+                    <CFormFeedback valid>Looks good!</CFormFeedback>
+                  </CCol>
+                  <CCol md={4}>
+                    <CFormLabel htmlFor="telefone">Telefone</CFormLabel>
+                    <CFormInput
+                      type="text"
+                      id="telefone"
+                      value={formData.telefone}
+                      onChange={handleChange}
+                      required
+                    />
+                    <CFormFeedback valid>Looks good!</CFormFeedback>
+                  </CCol>
+                  <CCol md={4}>
+                    <CFormLabel htmlFor="email">Email</CFormLabel>
+                    <CFormInput
+                      type="email"
+                      id="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                    />
+                    <CFormFeedback valid>Looks good!</CFormFeedback>
+                  </CCol>
+                  <CCol xs={12}>
+                    <CButton color="primary" type="submit">
+                      Cadastrar
+                    </CButton>
+                  </CCol>
+                </CForm>
               </CTabPane>
             </CTabContent>
           </CCardBody>

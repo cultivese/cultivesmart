@@ -1,7 +1,7 @@
 import React from 'react'
 import WeeklyView from './../../components/WeeklyView'
 import classNames from 'classnames'
-import WidgetsDropdown from '../widgets/WidgetsDropdown'
+import { DocsExample } from 'src/components'
 
 import {
   CButton,
@@ -10,12 +10,18 @@ import {
   CCardBody,
   CCardFooter,
   CCol,
+  CCardGroup,
   CProgress,
   CRow,
+  CWidgetStatsC,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
-  cilCloudDownload,
+  cilPeople,
+  cilUserFollow,
+  cilBasket,
+  cilChartPie,
+  cilSpeedometer
 } from '@coreui/icons'
 
 const Dashboard = () => {
@@ -30,12 +36,6 @@ const Dashboard = () => {
 
   const weekDates = ["18/12/2024", "19/12/2024", "20/12/2024", "21/12/2024", "22/12/2024", "23/12/2024", "24/12/2024"];
 
-  const buttonsData = [
-    { color: 'primary', text: 'Irrigação', badge: 4 },
-    { color: 'danger', text: 'Alerta', badge: 3 },
-    { color: 'success', text: 'Notificações', badge: 5 },
-    { color: 'warning', text: 'Pendências', badge: 2 },
-  ]
   const activities = {
     0: [
       { id: 1, color: 'primary', type: "semeadura", details: "Semeadura do lote #1", lotes: 2 },
@@ -48,61 +48,41 @@ const Dashboard = () => {
 
   return (
     <>
-      <WidgetsDropdown className="mb-4" />
+    <DocsExample href="components/widgets/#cwidgetstatsc">
+          <CCardGroup className="mb-4">
+            <CWidgetStatsC
+              icon={<CIcon icon={cilPeople} height={36} />}
+              value="10"
+              title="Lotes em andamentos"
+              progress={{ color: 'info', value: 75 }}
+            />
+            <CWidgetStatsC
+              icon={<CIcon icon={cilUserFollow} height={36} />}
+              value="1kg"
+              title="Estoque de Sementes"
+              progress={{ color: 'success', value: 75 }}
+            />
+            <CWidgetStatsC
+              icon={<CIcon icon={cilBasket} height={36} />}
+              value="30"
+              title="Total caixas"
+              progress={{ color: 'warning', value: 75 }}
+            />
+            <CWidgetStatsC
+              icon={<CIcon icon={cilChartPie} height={36} />}
+              value="28%"
+              title="Returning Visitors"
+              progress={{ color: 'primary', value: 75 }}
+            />
+            <CWidgetStatsC
+              icon={<CIcon icon={cilSpeedometer} height={36} />}
+              value="5:34:11"
+              title="Avg. Time"
+              progress={{ color: 'danger', value: 75 }}
+            />
+          </CCardGroup>
+        </DocsExample>
 
-      <CCard className="mb-4">
-        <CCardBody>
-          <CRow>
-            <CCol sm={5}>
-              <h4 id="traffic" className="card-title mb-0">
-              Visão Semanal de Atividades
-              </h4>
-              <div className="small text-body-secondary">Período: 16/12/2024 a 22/12/2024</div>
-            </CCol>
-            
-            <CCol sm={7} className="d-none d-md-block">
-              <CButtonGroup className="float-end me-3">
-                {['Semanal', 'Mensal'].map((value) => (
-                  <CButton
-                    color="outline-secondary"
-                    key={value}
-                    className="mx-0"
-                    active={value === 'Semanal'}
-                  >
-                    {value}
-                  </CButton>
-                ))}
-              </CButtonGroup>
-            </CCol>
-            <WeeklyView activities={activities} weekDates={weekDates}/>
-          </CRow>
-        </CCardBody>
-        <CCardFooter>
-          <CRow
-            xs={{ cols: 1, gutter: 4 }}
-            sm={{ cols: 2 }}
-            lg={{ cols: 4 }}
-            xl={{ cols: 5 }}
-            className="mb-2 text-center"
-          >
-            {progressExample.map((item, index, items) => (
-              <CCol
-                className={classNames({
-                  'd-none d-xl-block': index + 1 === items.length,
-                })}
-                key={index}
-              >
-                <div className="text-body-secondary">{item.title}</div>
-                <div className="fw-semibold text-truncate">
-                  {item.value} ({item.percent}%)
-                </div>
-                <CProgress thin className="mt-2" color={item.color} value={item.percent} />
-              </CCol>
-            ))}
-          </CRow>
-        </CCardFooter>
-      </CCard>
-      
     </>
   )
 }

@@ -6,6 +6,11 @@ const Typography = React.lazy(() => import('./views/theme/typography/Typography'
 
 // Base
 
+// Produção
+const VisaoGeral = React.lazy(() => import('./views/producao/VisaoGeral'))
+const NovoLote = React.lazy(() => import('./views/producao/NovoLote'))
+const EncerrarLote = React.lazy(() => import('./views/producao/EncerrarLote'))
+
 const FornecedoresCadastro = React.lazy(() => import('./views/fornecedores/cadastro/FornecedoresCadastro'))
 const FornecedoresListar = React.lazy(() => import('./views/fornecedores/listar/FornecedoresListar'))
 const InsumosCadastro = React.lazy(() => import('./views/insumos/cadastro/InsumosCadastro'))
@@ -59,6 +64,10 @@ const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
+  { path: '/producao', name: 'Produção', element: Cards, exact: true },
+  { path: '/producao/visao_geral', name: 'VisaoGeral', element: VisaoGeral },
+  { path: '/producao/novo_lote', name: 'NovoLote', element: NovoLote },
+  { path: '/producao/encerrar_lote', name: 'EncerrarLote', element: EncerrarLote },
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },
