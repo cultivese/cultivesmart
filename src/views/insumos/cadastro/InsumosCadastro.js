@@ -155,11 +155,11 @@ const InsumosCadastro = () => {
                 <CFormInput id="basic-url" aria-describedby="basic-addon3" />
               </CInputGroup>
               <CInputGroup className="mb-3">
-                <CInputGroupText id="basic-addon3">Blackout</CInputGroupText>
+                <CInputGroupText id="basic-addon3">Dias em Blackout</CInputGroupText>
                 <CFormInput id="basic-url" aria-describedby="basic-addon3" />
               </CInputGroup>
               <CInputGroup className="mb-3">
-                <CInputGroupText id="basic-addon3">Dias até Colheita</CInputGroupText>
+                <CInputGroupText id="basic-addon3">Dias até a Colheita</CInputGroupText>
                 <CFormInput id="basic-url" aria-describedby="basic-addon3" />
               </CInputGroup>
               <CInputGroup className="mb-3">
