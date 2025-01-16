@@ -12,14 +12,14 @@ import {
   CRow,
 } from '@coreui/react'
 
-const InsumosEntrada = () => {
+const InsumosSaida = () => {
   const [validated, setValidated] = useState(false)
   const [formData, setFormData] = useState({
     produto: '',
     quantidade: '',
     unidade: '',
-    fornecedor: '',
-    dataCompra: '',
+    finalidade: '',
+    dataSaida: '',
     observacoes: '',
   })
 
@@ -35,7 +35,7 @@ const InsumosEntrada = () => {
       event.stopPropagation()
     } else {
       event.preventDefault()
-      console.log('Dados da entrada:', formData)
+      console.log('Dados da saída:', formData)
       // Aqui você pode adicionar a lógica para enviar os dados ao backend
     }
     setValidated(true)
@@ -52,7 +52,7 @@ const InsumosEntrada = () => {
         <CCol lg={12}>
           <CCard className="mb-4">
             <CCardHeader>
-              <strong>Entrada de Insumos</strong> <small>Registro de Compra</small>
+              <strong>Saída de Insumos</strong> <small>Registro de Uso</small>
             </CCardHeader>
             <CCardBody>
               <CRow className="g-3">
@@ -98,26 +98,27 @@ const InsumosEntrada = () => {
                   </CFormSelect>
                 </CCol>
                 <CCol md={6}>
-                  <CFormLabel htmlFor="fornecedor">Fornecedor</CFormLabel>
+                  <CFormLabel htmlFor="finalidade">Finalidade</CFormLabel>
                   <CFormSelect
-                    id="fornecedor"
-                    name="fornecedor"
-                    value={formData.fornecedor}
+                    id="finalidade"
+                    name="finalidade"
+                    value={formData.finalidade}
                     onChange={handleInputChange}
                     required
                   >
-                    <option value="">Escolha um fornecedor</option>
-                    <option value="ISLA">ISLA</option>
-                    <option value="TOPSEEDS">TOPSEEDS</option>
+                    <option value="">Escolha a finalidade</option>
+                    <option value="Plantio">Plantio</option>
+                    <option value="Manutenção">Manutenção</option>
+                    <option value="Outro">Outro</option>
                   </CFormSelect>
                 </CCol>
                 <CCol md={6}>
-                  <CFormLabel htmlFor="dataCompra">Data da Compra</CFormLabel>
+                  <CFormLabel htmlFor="dataSaida">Data da Saída</CFormLabel>
                   <CFormInput
                     type="date"
-                    id="dataCompra"
-                    name="dataCompra"
-                    value={formData.dataCompra}
+                    id="dataSaida"
+                    name="dataSaida"
+                    value={formData.dataSaida}
                     onChange={handleInputChange}
                     required
                   />
@@ -138,7 +139,7 @@ const InsumosEntrada = () => {
         </CCol>
         <CCol xs={12} className="text-center">
           <CButton color="primary" type="submit">
-            Registrar Entrada
+            Registrar Saída
           </CButton>
         </CCol>
       </CRow>
@@ -146,4 +147,4 @@ const InsumosEntrada = () => {
   )
 }
 
-export default InsumosEntrada
+export default InsumosSaida

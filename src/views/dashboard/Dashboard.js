@@ -10,6 +10,7 @@ import {
   CCardBody,
   CCardFooter,
   CCol,
+  CCardHeader,
   CCardGroup,
   CProgress,
   CRow,
@@ -20,11 +21,39 @@ import {
   cilPeople,
   cilUserFollow,
   cilBasket,
+  cilUser,
+  cilUserFemale,
+  cibGoogle,
+  cibFacebook,
+  cibTwitter,
+  cibLinkedin,
   cilChartPie,
   cilSpeedometer
 } from '@coreui/icons'
 
 const Dashboard = () => {
+
+  const progressGroupExample1 = [
+    { title: 'Monday', value1: 34, value2: 78, value3: 78 },
+    { title: 'Tuesday', value1: 56, value2: 94, value3: 78 },
+    { title: 'Wednesday', value1: 12, value2: 67, value3: 78 },
+    { title: 'Thursday', value1: 43, value2: 91, value3: 78 },
+    { title: 'Friday', value1: 22, value2: 73, value3: 78},
+    { title: 'Saturday', value1: 53, value2: 82, value3: 78 },
+    { title: 'Sunday', value1: 9, value2: 69, value3: 78 },
+  ]
+
+  const progressGroupExample2 = [
+    { title: 'Male', icon: cilUser, value: 53 },
+    { title: 'Female', icon: cilUserFemale, value: 43 },
+  ]
+
+  const progressGroupExample3 = [
+    { title: 'Organic Search', icon: cibGoogle, percent: 56, value: '191,235' },
+    { title: 'Facebook', icon: cibFacebook, percent: 15, value: '51,223' },
+    { title: 'Twitter', icon: cibTwitter, percent: 11, value: '37,564' },
+    { title: 'LinkedIn', icon: cibLinkedin, percent: 8, value: '27,319' },
+  ]
 
   const progressExample = [
     { title: 'Lote 01', value: 'Beterraba', percent: 40, color: 'success' },
@@ -65,24 +94,85 @@ const Dashboard = () => {
             <CWidgetStatsC
               icon={<CIcon icon={cilBasket} height={36} />}
               value="30"
-              title="Total caixas"
+              title="Total caixas prontas"
               progress={{ color: 'warning', value: 75 }}
             />
             <CWidgetStatsC
               icon={<CIcon icon={cilChartPie} height={36} />}
-              value="28%"
-              title="Returning Visitors"
+              value="120"
+              title="Estimativa caixas"
               progress={{ color: 'primary', value: 75 }}
             />
             <CWidgetStatsC
               icon={<CIcon icon={cilSpeedometer} height={36} />}
-              value="5:34:11"
-              title="Avg. Time"
+              value="5"
+              title="Novos Pedidos"
               progress={{ color: 'danger', value: 75 }}
             />
           </CCardGroup>
         </DocsExample>
 
+        <CRow>
+        <CCol xs>
+          <CCard className="mb-4">
+            <CCardHeader>Estimativas</CCardHeader>
+            <CCardBody>
+              <CRow>
+                <CCol xs={12} md={6} xl={6}>
+                  <CRow>
+                    <CCol xs={6}>
+                      <div className="border-start border-start-4 border-start-info py-1 px-3">
+                        <div className="text-body-secondary text-truncate small">Beterraba</div>
+                        <div className="fs-5 fw-semibold">900g</div>
+                      </div>
+                    </CCol>
+                    <CCol xs={6}>
+                      <div className="border-start border-start-4 border-start-danger py-1 px-3 mb-3">
+                        <div className="text-body-secondary text-truncate small">
+                          Repolho
+                        </div>
+                        <div className="fs-5 fw-semibold">250g</div>
+                      </div>
+                    </CCol>
+                  </CRow>
+                  <hr className="mt-0" />
+                  {progressGroupExample1.map((item, index) => (
+                    <div className="progress-group mb-4" key={index}>
+                      <div className="progress-group-prepend">
+                        <span className="text-body-secondary small">{item.title}</span>
+                      </div>
+                      <div className="progress-group-bars">
+                        <CProgress thin color="info" value={item.value1} />
+                        <CProgress thin color="danger" value={item.value2} />
+                        <CProgress thin color="primary" value={item.value3} />
+                      </div>
+                    </div>
+                  ))}
+                </CCol>
+                <CCol xs={12} md={6} xl={6}>
+                  <CRow>
+                    <CCol xs={6}>
+                      <div className="border-start border-start-4 border-start-warning py-1 px-3 mb-3">
+                        <div className="text-body-secondary text-truncate small">Clientes</div>
+                        <div className="fs-5 fw-semibold">78,623</div>
+                      </div>
+                    </CCol>
+                    <CCol xs={6}>
+                      <div className="border-start border-start-4 border-start-success py-1 px-3 mb-3">
+                        <div className="text-body-secondary text-truncate small">Fornecedores</div>
+                        <div className="fs-5 fw-semibold">49,123</div>
+                      </div>
+                    </CCol>
+                  </CRow>
+
+                  <hr className="mt-0" />
+
+                </CCol>
+              </CRow>
+              </CCardBody>
+              </CCard>
+              </CCol>
+              </CRow>
     </>
   )
 }
