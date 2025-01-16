@@ -47,6 +47,7 @@ export default defineConfig(() => {
     },
     server: {
       port: 3000,
+      historyApiFallback: true,
       proxy: {
         // https://vitejs.dev/config/server-options.html
       },
