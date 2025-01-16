@@ -66,6 +66,28 @@ const _nav = [
   //     }      
   //   ],
   // },
+  // {
+  //   component: CNavTitle,
+  //   name: 'Fornecedores',
+  // },
+  // {
+  //   component: CNavItem,
+  //   name: 'Cadastro',
+  //   to: '/fornecedores/cadastro',
+  //   icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+  // },
+  // {
+  //   component: CNavItem,
+  //   name: 'Listar',
+  //   to: '/fornecedores/listar',
+  //   icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+  // },
+  // {
+  //   component: CNavItem,
+  //   name: 'Historico',
+  //   to: '/fornecedores/historico',
+  //   icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+  // },
   {
     component: CNavTitle,
     name: 'Insumos',
@@ -121,28 +143,6 @@ const _nav = [
   //   name: 'Cadastro',
   //   to: '/fornecedores/cadastro',
   //   icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-  // },
-  // {
-  //   component: CNavTitle,
-  //   name: 'Fornecedores',
-  // },
-  // {
-  //   component: CNavItem,
-  //   name: 'Cadastro',
-  //   to: '/fornecedores/cadastro',
-  //   icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-  // },
-  // {
-  //   component: CNavItem,
-  //   name: 'Listar',
-  //   to: '/fornecedores/listar',
-  //   icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
-  // },
-  // {
-  //   component: CNavItem,
-  //   name: 'Historico',
-  //   to: '/fornecedores/historico',
-  //   icon: <CIcon icon={cilList} customClassName="nav-icon" />,
   // },
   // ,
   // {

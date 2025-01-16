@@ -30,7 +30,7 @@ const EstoqueVisaoGeral = () => {
       estoqueMinimo: 500,
       status: 'Disponível',
       ultimaMovimentacao: '2025-01-14',
-      imagem: './../../../src/assets/images/microverdes/product_default.png',
+      imagem: './../../assets/images/microverdes/product_default.png',
     },
     {
       id: 2,
@@ -40,7 +40,7 @@ const EstoqueVisaoGeral = () => {
       estoqueMinimo: 100,
       status: 'Disponível',
       ultimaMovimentacao: '2025-01-15',
-      imagem: './../../../src/assets/images/microverdes/product_default.png',
+      imagem: './../../assets/images/microverdes/product_default.png',
     },
     {
       id: 3,
@@ -50,7 +50,7 @@ const EstoqueVisaoGeral = () => {
       estoqueMinimo: 10,
       status: 'Baixo Estoque',
       ultimaMovimentacao: '2025-01-10',
-      imagem: './../../../src/assets/images/microverdes/product_default.png',
+      imagem: './../../assets/images/microverdes/product_default.png',
     },
   ])
 
