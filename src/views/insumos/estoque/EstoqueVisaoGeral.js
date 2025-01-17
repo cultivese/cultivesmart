@@ -13,6 +13,8 @@ import {
   CCardImage,
 } from '@coreui/react'
 
+import product_default from './../../../assets/images/microverdes/product_default.png'
+
 const EstoqueVisaoGeral = () => {
   const [filters, setFilters] = useState({
     produto: '',
@@ -30,7 +32,7 @@ const EstoqueVisaoGeral = () => {
       estoqueMinimo: 500,
       status: 'Disponível',
       ultimaMovimentacao: '2025-01-14',
-      imagem: './../../assets/images/microverdes/product_default.png',
+      imagem: product_default,
     },
     {
       id: 2,
@@ -40,7 +42,7 @@ const EstoqueVisaoGeral = () => {
       estoqueMinimo: 100,
       status: 'Disponível',
       ultimaMovimentacao: '2025-01-15',
-      imagem: './../../assets/images/microverdes/product_default.png',
+      imagem: product_default,
     },
     {
       id: 3,
@@ -50,7 +52,7 @@ const EstoqueVisaoGeral = () => {
       estoqueMinimo: 10,
       status: 'Baixo Estoque',
       ultimaMovimentacao: '2025-01-10',
-      imagem: './../../assets/images/microverdes/product_default.png',
+      imagem: product_default,
     },
   ])
 

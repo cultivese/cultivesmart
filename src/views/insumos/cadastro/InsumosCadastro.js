@@ -16,9 +16,11 @@ import {
   CFormCheck,
 } from '@coreui/react'
 
+import product_default from './../../../assets/images/microverdes/product_default.png'
+
 const InsumosCadastro = () => {
   const [validated, setValidated] = useState(false)
-  const [selectedImage, setSelectedImage] = useState("./../../src/assets/images/microverdes/product_default.png") // Caminho para a imagem padrão
+  const [selectedImage, setSelectedImage] = useState(product_default)
 
   const handleSubmit = (event) => {
     const form = event.currentTarget

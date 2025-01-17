@@ -19,6 +19,8 @@ import {
   CFormLabel
 } from '@coreui/react'
 
+import product_default from './../../../assets/images/microverdes/product_default.png'
+
 const InsumosSaida = () => {
   const [validated, setValidated] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
@@ -41,21 +43,21 @@ const InsumosSaida = () => {
       produto: 'Semente de Microverde',
       quantidade_disponivel: '300g',
       status: 'Disponível',
-      imagem: './../../../src/assets/images/microverdes/product_default.png',
+      imagem: product_default,
     },
     {
       id: 2,
       produto: 'Flor Comestível',
       status: 'Disponível',
       quantidade_disponivel: '230g',
-      imagem: './../../../src/assets/images/microverdes/product_default.png',
+      imagem: product_default,
     },
     {
       id: 3,
       produto: 'Substrato Orgânico',
       status: 'Baixo Estoque',
       quantidade_disponivel: '30g',
-      imagem: './../../../src/assets/images/microverdes/product_default.png',
+      imagem: product_default,
     },
   ]
 
