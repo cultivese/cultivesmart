@@ -85,7 +85,17 @@ const InsumosCadastro = () => {
                 <CCol md={9}>
                   <CContainer>
                   <CRow>
-                    <CCol md={4}>
+                    <CCol md={5}>
+                      <CFormLabel htmlFor="tipoSemente">Tipo Insumo</CFormLabel>
+                      <CFormSelect id="tipoSemente">
+                        <option disabled>Escolha...</option>
+                        <option>Microverde</option>
+                        <option>Flor Comestível</option>
+                        <option>Substrato</option>
+                        <option>Embalagem</option>
+                      </CFormSelect>
+                    </CCol>
+                    <CCol md={7}>
                       <CFormLabel htmlFor="fornecedor">Fornecedor</CFormLabel>
                       <CFormSelect id="fornecedor">
                         <option disabled>Escolha um fornecedor</option>
@@ -93,18 +103,6 @@ const InsumosCadastro = () => {
                         <option>TOPSEEDS</option>
                       </CFormSelect>
                     </CCol>
-                    <CCol md={4}>
-                      <CFormLabel htmlFor="tipoSemente">Tipo Semente</CFormLabel>
-                      <CFormSelect id="tipoSemente">
-                        <option disabled>Escolha...</option>
-                        <option>Microverde</option>
-                        <option>Flor Comestível</option>
-                      </CFormSelect>
-                    </CCol>  
-                    <CCol md={4}>
-                      <CFormLabel htmlFor="notaFiscal">Nota Fiscal</CFormLabel>
-                      <CFormInput type="text" id="notaFiscal" required />
-                    </CCol>                  
                   </CRow>
                   <CRow>
                     <CCol md={6}>
@@ -112,7 +110,7 @@ const InsumosCadastro = () => {
                       <CFormInput type="text" id="descricao" required />
                     </CCol>
                     <CCol md={6}>
-                      <CFormLabel htmlFor="variedade">Variedade</CFormLabel>
+                      <CFormLabel htmlFor="variedade">Complemento</CFormLabel>
                       <CFormInput type="text" id="variedade" required />
                     </CCol>
                     <CCol md={4}>
@@ -128,11 +126,6 @@ const InsumosCadastro = () => {
                     <CCol md={4}>
                       <CFormLabel htmlFor="estoqueMinimo">Estoque Mínimo</CFormLabel>
                       <CFormInput type="text" id="estoqueMinimo" required />
-                    </CCol>
-                    
-                    <CCol md={4}>
-                      <CFormLabel htmlFor="lote">Lote</CFormLabel>
-                      <CFormInput type="text" id="lote" required />
                     </CCol>
                   </CRow>
                   </CContainer>
