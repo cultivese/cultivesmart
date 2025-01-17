@@ -5,6 +5,7 @@ import {
   CCardBody,
   CCardHeader,
   CCol,
+  CContainer,
   CForm,
   CFormInput,
   CFormLabel,
@@ -38,8 +39,8 @@ const InsumosCadastro = () => {
   }
 
   const handleImageClick = (event) => {
-    event.preventDefault() // Evita o comportamento padrão do link
-    document.getElementById('imageUpload').click() // Simula o clique no input de arquivo
+    event.preventDefault() 
+    document.getElementById('imageUpload').click()
   }
 
   return (
@@ -57,7 +58,6 @@ const InsumosCadastro = () => {
             </CCardHeader>
             <CCardBody>
               <CRow className="g-3">
-                {/* Avatar quadrado com clique para upload */}
                 <CCol md={3} className="text-center">
                   <div>
                     <label htmlFor="imageUpload" style={{ cursor: 'pointer' }}>
@@ -68,7 +68,6 @@ const InsumosCadastro = () => {
                           width: '100%',
                           height: '100%',
                           objectFit: 'cover',
-                          marginBottom: '10px',
                         }}
                       />
                     </label>
@@ -79,66 +78,62 @@ const InsumosCadastro = () => {
                       onChange={handleImageChange}
                       style={{ display: 'none' }}
                     />
-                    <small>
-                      <a href="#" onClick={handleImageClick}>
-                        Alterar Imagem
-                      </a>
-                    </small>
                   </div>
                 </CCol>
                 <CCol md={9}>
+                  <CContainer>
                   <CRow>
-                    <CCol md={6}>
-                      <CFormLabel htmlFor="validationCustom04">Fornecedor</CFormLabel>
-                      <CFormSelect id="validationCustom04">
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="fornecedor">Fornecedor</CFormLabel>
+                      <CFormSelect id="fornecedor">
                         <option disabled>Escolha um fornecedor</option>
                         <option>ISLA</option>
                         <option>TOPSEEDS</option>
                       </CFormSelect>
                     </CCol>
-                      <CCol md={6}>
-                        <CFormLabel htmlFor="validationCustom04">Tipo Semente</CFormLabel>
-                        <CFormSelect id="validationCustom04">
-                          <option disabled>Escolha...</option>
-                          <option>Microverde</option>
-                          <option>Flor Comestível</option>
-                        </CFormSelect>
-                      </CCol>                    
-                    </CRow>
-                    <CRow>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="tipoSemente">Tipo Semente</CFormLabel>
+                      <CFormSelect id="tipoSemente">
+                        <option disabled>Escolha...</option>
+                        <option>Microverde</option>
+                        <option>Flor Comestível</option>
+                      </CFormSelect>
+                    </CCol>  
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="notaFiscal">Nota Fiscal</CFormLabel>
+                      <CFormInput type="text" id="notaFiscal" required />
+                    </CCol>                  
+                  </CRow>
+                  <CRow>
                     <CCol md={6}>
-                      <CFormLabel htmlFor="validationCustom01">Descrição</CFormLabel>
-                      <CFormInput
-                        type="text"
-                        id="validationCustom01"
-                        defaultValue="Microverde"
-                        required
-                      />
+                      <CFormLabel htmlFor="descricao">Descrição</CFormLabel>
+                      <CFormInput type="text" id="descricao" required />
                     </CCol>
-                      <CCol md={6}>
-                        <CFormLabel htmlFor="validationCustom01">Variedade</CFormLabel>
-                        <CFormInput
-                          type="text"
-                          id="validationCustom01"
-                          defaultValue="Microverde"
-                          required
-                        />
-                      </CCol>
-                      
-                    <CCol md={4}>
-                      <CFormLabel htmlFor="validationCustom05">Unidade de Medida</CFormLabel>
-                      <CFormSelect id="validationCustom04">
-                          <option disabled>Escolha...</option>
-                          <option>Gramas</option>
-                          <option>Unidades</option>
-                          <option>Litro</option>
-                        </CFormSelect>
+                    <CCol md={6}>
+                      <CFormLabel htmlFor="variedade">Variedade</CFormLabel>
+                      <CFormInput type="text" id="variedade" required />
                     </CCol>
                     <CCol md={4}>
-                      <CFormLabel htmlFor="validationCustom05">Estoque Mínimo</CFormLabel>
-                      <CFormInput type="text" id="validationCustom05" required />
+                      <CFormLabel htmlFor="unidadeMedida">Unidade de Medida</CFormLabel>
+                      <CFormSelect id="unidadeMedida">
+                        <option disabled>Escolha...</option>
+                        <option>Sacos</option>
+                        <option>Gramas</option>
+                        <option>Unidades</option>
+                        <option>Litro</option>
+                      </CFormSelect>
                     </CCol>
-                    </CRow>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="estoqueMinimo">Estoque Mínimo</CFormLabel>
+                      <CFormInput type="text" id="estoqueMinimo" required />
+                    </CCol>
+                    
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="lote">Lote</CFormLabel>
+                      <CFormInput type="text" id="lote" required />
+                    </CCol>
+                  </CRow>
+                  </CContainer>
                 </CCol>
               </CRow>
             </CCardBody>
@@ -151,31 +146,31 @@ const InsumosCadastro = () => {
             </CCardHeader>
             <CCardBody>
               <CInputGroup className="mb-3">
-                <CInputGroupText id="basic-addon3">Dias em Pilha</CInputGroupText>
-                <CFormInput id="basic-url" aria-describedby="basic-addon3" />
+                <CInputGroupText>Dias em Pilha</CInputGroupText>
+                <CFormInput />
               </CInputGroup>
               <CInputGroup className="mb-3">
-                <CInputGroupText id="basic-addon3">Dias em Blackout</CInputGroupText>
-                <CFormInput id="basic-url" aria-describedby="basic-addon3" />
+                <CInputGroupText>Dias em Blackout</CInputGroupText>
+                <CFormInput />
               </CInputGroup>
               <CInputGroup className="mb-3">
-                <CInputGroupText id="basic-addon3">Dias até a Colheita</CInputGroupText>
-                <CFormInput id="basic-url" aria-describedby="basic-addon3" />
+                <CInputGroupText>Dias até a Colheita</CInputGroupText>
+                <CFormInput />
               </CInputGroup>
               <CInputGroup className="mb-3">
-                <CInputGroupText as="label" htmlFor="inputGroupSelect01">
-                  Hidratação
-                </CInputGroupText>
-                <CFormSelect id="inputGroupSelect01">
+                <CInputGroupText>Hidratação</CInputGroupText>
+                <CFormSelect>
                   <option value="1">Irrigação</option>
                   <option value="2">Aspersão</option>
                 </CFormSelect>
               </CInputGroup>
-              <CFormCheck id="flexCheckDefault" label="Colocar peso" />
-              <CFormCheck id="flexCheckDefault" label="Substrato (cobertura)" />
+              <CFormCheck label="Colocar peso" />
+              <CFormCheck label="Substrato (cobertura)" />
             </CCardBody>
           </CCard>
         </CCol>
+      </CRow>
+      <CRow>
         <CCol xs={12} className="text-center">
           <CButton color="primary" type="submit">
             Cadastrar

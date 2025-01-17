@@ -38,23 +38,29 @@ const InsumosEntrada = () => {
   const insumos = [
     {
       id: 1,
-      produto: 'Semente de Microverde',
-      quantidade_disponivel: '300g',
+      produto: 'Beterraba Maravilha',
+      quantidade_sacos: '3 sacos',
+      sacos_abertos: '1 saco',
+      quantidade_disponivel: '1500g',
       status: 'Disponível',
       imagem: './../../../src/assets/images/microverdes/product_default.png',
     },
     {
       id: 2,
       produto: 'Flor Comestível',
+      quantidade_sacos: '1 saco',
+      sacos_abertos: '0 sacos',
+      quantidade_disponivel: '500g',
       status: 'Disponível',
-      quantidade_disponivel: '230g',
       imagem: './../../../src/assets/images/microverdes/product_default.png',
     },
     {
       id: 3,
       produto: 'Substrato Orgânico',
+      quantidade_sacos: '6 saco',
+      sacos_abertos: '1 sacos',
+      quantidade_disponivel: '3000g',
       status: 'Baixo Estoque',
-      quantidade_disponivel: '30g',
       imagem: './../../../src/assets/images/microverdes/product_default.png',
     },
   ]
@@ -138,6 +144,8 @@ const InsumosEntrada = () => {
                         <CCardBody>
                           <h5 className="mb-3">{item.produto}</h5>
                           <p className="mb-2"><strong>ID:</strong> {item.id}</p>
+                          <p className="mb-2"><strong>Quantidade de Sacos:</strong> {item.quantidade_sacos}</p>
+                          <p className="mb-2"><strong>Quantidade de Sacos abertos:</strong> {item.sacos_abertos}</p>
                           <p className="mb-2"><strong>Quantidade Disponível:</strong> {item.quantidade_disponivel}</p>
                           <p className="mb-2"><strong>Status:</strong> <CBadge color="success">{item.status}</CBadge></p>
                           <CButton color="primary" onClick={() => handleOpenModal(item)}>Registrar Entrada</CButton>
