@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import InputMask from 'react-input-mask'
 import {
   CButton,
   CCard,
@@ -28,8 +29,8 @@ const FornecedoresCadastro = () => {
     email: '',
   })
   const [validated, setValidated] = useState(false)
-  const [toast, setToast] = useState(null) // Gerencia as notificações
-  const navigate = useNavigate() // Para redirecionamento
+  const [toast, setToast] = useState(null)
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     const { id, value } = e.target
@@ -46,24 +47,21 @@ const FornecedoresCadastro = () => {
       event.stopPropagation()
     } else {
       try {
-        const response = await fetch('https://api.cultivesmart.com.br/', {
-          method: 'POST', // Método HTTP
+        const response = await fetch('https://backend.cultivesmart.com.br/api/fornecedores', {
+          method: 'POST',
           headers: {
-            'Content-Type': 'application/json', // Tipo de dado enviado
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify(formData), // Converte os dados em JSON
+          body: JSON.stringify(formData),
         })
 
         if (response.ok) {
-          // Exibe notificação de sucesso
           setToast(
             <CToast autohide={true} visible={true} color="success">
               <CToastHeader closeButton>Sucesso</CToastHeader>
               <CToastBody>Fornecedor cadastrado com sucesso!</CToastBody>
             </CToast>
           )
-
-          // Redireciona após 2 segundos
           setTimeout(() => {
             navigate('/fornecedores/listar')
           }, 2000)
@@ -71,7 +69,6 @@ const FornecedoresCadastro = () => {
           throw new Error('Erro ao cadastrar fornecedor.')
         }
       } catch (error) {
-        // Exibe notificação de erro
         setToast(
           <CToast autohide={true} visible={true} color="danger">
             <CToastHeader closeButton>Erro</CToastHeader>
@@ -85,7 +82,7 @@ const FornecedoresCadastro = () => {
 
   return (
     <>
-      <CToaster push={toast} placement="top-end" /> {/* Exibe o toast */}
+      <CToaster push={toast} placement="top-end" />
       <CRow>
         <CCol xs={12}>
           <CCard className="mb-4">
@@ -95,65 +92,34 @@ const FornecedoresCadastro = () => {
             <CCardBody>
               <CTabContent className={`rounded-bottom`}>
                 <CTabPane className="p-3 preview" visible>
-                  <CForm
-                    className="row g-3 needs-validation"
-                    noValidate
-                    validated={validated}
-                    onSubmit={handleSubmit}
-                  >
+                  <CForm className="row g-3 needs-validation" noValidate validated={validated} onSubmit={handleSubmit}>
                     <CCol md={4}>
                       <CFormLabel htmlFor="nome">Nome</CFormLabel>
-                      <CFormInput
-                        type="text"
-                        id="nome"
-                        value={formData.nome}
-                        onChange={handleChange}
-                        required
-                      />
+                      <CFormInput type="text" id="nome" value={formData.nome} onChange={handleChange} required />
                       <CFormFeedback valid>Looks good!</CFormFeedback>
                     </CCol>
                     <CCol md={4}>
                       <CFormLabel htmlFor="cnpj">CNPJ</CFormLabel>
-                      <CFormInput
-                        type="text"
-                        id="cnpj"
-                        value={formData.cnpj}
-                        onChange={handleChange}
-                        required
-                      />
+                      <InputMask mask="99.999.999/9999-99" value={formData.cnpj} onChange={handleChange}>
+                        {(inputProps) => <CFormInput {...inputProps} type="text" id="cnpj" required />}
+                      </InputMask>
                       <CFormFeedback valid>Looks good!</CFormFeedback>
                     </CCol>
                     <CCol md={4}>
                       <CFormLabel htmlFor="endereco">Endereço</CFormLabel>
-                      <CFormInput
-                        type="text"
-                        id="endereco"
-                        value={formData.endereco}
-                        onChange={handleChange}
-                        required
-                      />
+                      <CFormInput type="text" id="endereco" value={formData.endereco} onChange={handleChange} required />
                       <CFormFeedback valid>Looks good!</CFormFeedback>
                     </CCol>
                     <CCol md={4}>
                       <CFormLabel htmlFor="telefone">Telefone</CFormLabel>
-                      <CFormInput
-                        type="text"
-                        id="telefone"
-                        value={formData.telefone}
-                        onChange={handleChange}
-                        required
-                      />
+                      <InputMask mask="(99) 99999-9999" value={formData.telefone} onChange={handleChange}>
+                        {(inputProps) => <CFormInput {...inputProps} type="text" id="telefone" required />}
+                      </InputMask>
                       <CFormFeedback valid>Looks good!</CFormFeedback>
                     </CCol>
                     <CCol md={4}>
                       <CFormLabel htmlFor="email">Email</CFormLabel>
-                      <CFormInput
-                        type="email"
-                        id="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                      />
+                      <CFormInput type="email" id="email" value={formData.email} onChange={handleChange} required />
                       <CFormFeedback valid>Looks good!</CFormFeedback>
                     </CCol>
                     <CCol xs={12}>

@@ -31,10 +31,10 @@ const routes = [
   // { path: '/producao/novo_lote', name: 'NovoLote', element: NovoLote },
   // { path: '/producao/encerrar_lote', name: 'EncerrarLote', element: EncerrarLote },
   
-  // // Fornecedores
-  // { path: '/fornecedores', name: 'Fornecedores', element: Cards, exact: true },
-  // { path: '/fornecedores/cadastro', name: 'Cadastro', element: FornecedoresCadastro },
-  // { path: '/fornecedores/listar', name: 'Listar', element: FornecedoresListar },
+  // Fornecedores
+  { path: '/fornecedores', name: 'Fornecedores', element: Cards, exact: true },
+  { path: '/fornecedores/cadastro', name: 'Cadastro', element: FornecedoresCadastro },
+  { path: '/fornecedores/listar', name: 'Listar', element: FornecedoresListar },
   
   // Insumos
   { path: '/insumos', name: 'Insumos', element: Cards, exact: true },

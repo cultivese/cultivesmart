@@ -23,7 +23,7 @@ const FornecedoresListar = () => {
   useEffect(() => {
     const fetchFornecedores = async () => {
       try {
-        const response = await fetch('https://api.cultivesmart.com.br/') // URL da API
+        const response = await fetch('https://backend.cultivesmart.com.br/api/fornecedores') // URL da API
         if (!response.ok) {
           throw new Error('Erro ao buscar fornecedores.')
         }
