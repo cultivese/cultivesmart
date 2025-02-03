@@ -105,7 +105,7 @@ const _nav = [
     icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
   },
   {
-    component: CNavGroup,
+    component: CNavItem,
     name: 'Estoque',
     to: '/insumos/estoque',
     icon: <CIcon icon={cilApplications} customClassName="nav-icon" />,
