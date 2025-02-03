@@ -99,40 +99,16 @@ const _nav = [
     icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
   },
   {
-    component: CNavGroup,
-    name: 'Entrada',
-    icon: <CIcon icon={cilArrowThickFromTop} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'Registrar',
-        to: '/insumos/entrada/registrar',
-      },
-    ],
-  },
-  {
-    component: CNavGroup,
-    name: 'Saida',
-    icon: <CIcon icon={cilArrowThickToTop} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'Registrar',
-        to: '/insumos/saida/registrar',
-      },
-    ],
+    component: CNavItem,
+    name: 'Listar',
+    to: '/insumos/listar',
+    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
   },
   {
     component: CNavGroup,
     name: 'Estoque',
+    to: '/insumos/estoque',
     icon: <CIcon icon={cilApplications} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'VisaoGeral',
-        to: '/insumos/estoque/visao_geral',
-      },
-    ],
   },
   // {
   //   component: CNavTitle,

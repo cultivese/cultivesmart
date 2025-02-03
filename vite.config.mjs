@@ -51,6 +51,7 @@ export default defineConfig(() => {
       proxy: {
         // https://vitejs.dev/config/server-options.html
       },
+      hmr:true
     },
   }
 })

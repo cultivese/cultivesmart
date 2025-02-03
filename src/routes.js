@@ -39,9 +39,8 @@ const routes = [
   // Insumos
   { path: '/insumos', name: 'Insumos', element: Cards, exact: true },
   { path: '/insumos/cadastro', name: 'Cadastro', element: InsumosCadastro },
-  { path: '/insumos/entrada/registrar', name: 'Entrada', element: InsumosEntrada },
-  { path: '/insumos/saida/registrar', name: 'Saída', element: InsumosSaida },
-  { path: '/insumos/estoque/visao_geral', name: 'Estoque', element: EstoqueVisaoGeral },
+  { path: '/insumos/listar', name: 'Listar', element: InsumosEntrada },
+  { path: '/insumos/estoque', name: 'Estoque', element: EstoqueVisaoGeral },
 
   // Fornecedores
   { path: '/planejamento', name: 'Planejamento', element: Cards, exact: true },
