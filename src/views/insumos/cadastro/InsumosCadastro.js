@@ -241,7 +241,7 @@ const handleBack = (e) => {
                       {fornecedores.map((fornecedor) => {
                         return (
                         <CCol lg={4} key='1'>
-                          <CCard key={fornecedor.id} color={ selectedFornecedor === '1' ? 'success' : 'light'} textColor={ selectedFornecedor === '1' ? 'white' : ''} className="mb-3" onClick={() => handleFornecedorSelect ('1')}>
+                          <CCard key={fornecedor.id} color={ selectedFornecedor === fornecedor.id ? 'success' : 'light'} textColor={ selectedFornecedor === fornecedor.id ? 'white' : ''} className="mb-3" onClick={() => handleFornecedorSelect (fornecedor.id)}>
                             <CCardHeader>{fornecedor.nome}</CCardHeader>
                             <CCardImage src={isla_fornecedor} />
                           </CCard>

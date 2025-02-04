@@ -10,6 +10,8 @@ import {
     CFormInput,
     CFormSelect,
     CButton,
+    CCardTitle,
+    CCardText,
     CCardImage,
     CModal,
     CModalHeader,
@@ -24,6 +26,7 @@ const EstoqueVisaoGeral = () => {
         categoria: '',
     });
     const [estoqueData, setEstoqueData] = useState([]);
+    const [fornecedores, setFornecedores] = useState([]);
     const [categorias, setCategorias] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
@@ -33,7 +36,7 @@ const EstoqueVisaoGeral = () => {
     useEffect(() => {
         const fetchCategorias = async () => {
             try {
-                const response = await fetch('http://backend.cultivesmart.com.br/api/categorias');
+                const response = await fetch('https://backend.cultivesmart.com.br/api/categorias');
                 const data = await response.json();
                 setCategorias(data);
             } catch (error) {
@@ -41,9 +44,19 @@ const EstoqueVisaoGeral = () => {
             }
         };
 
+        const fetchFornecedores = async () => {
+          try {
+              const response = await fetch('https://backend.cultivesmart.com.br/api/fornecedores');
+              const data = await response.json();
+              setFornecedores(data);
+          } catch (error) {
+              console.error('Erro ao buscar fornecedores:', error);
+          }
+      };
+
         const fetchEstoque = async () => {
             try {
-                const response = await fetch('http://backend.cultivesmart.com.br/api/estoque');
+                const response = await fetch('https://backend.cultivesmart.com.br/api/estoque');
                 const data = await response.json();
                 setEstoqueData(data);
                 setFilteredData(data);
@@ -53,6 +66,7 @@ const EstoqueVisaoGeral = () => {
         };
 
         fetchCategorias();
+        fetchFornecedores();
         fetchEstoque();
     }, []);
 
@@ -107,111 +121,143 @@ const EstoqueVisaoGeral = () => {
                         <strong>Estoque Atual</strong> <small>Gestão de Estoque</small>
                     </CCardHeader>
                     <CCardBody>
-                        <CForm className="mb-4">
-                            <CRow className="g-3">
-                                <CCol md={4}>
-                                    <CFormSelect
-                                        name="categoria"
-                                        value={filters.categoria}
-                                        onChange={handleFilterChange}
-                                    >
-                                        <option value="">Filtrar por Categoria</option>
-                                        {categorias.map((cat) => (
-                                            <option key={cat.id} value={cat.id}>
-                                                {cat.descricao}
-                                            </option>
-                                        ))}
-                                    </CFormSelect>
-                                </CCol>
-                            </CRow>
-                        </CForm>
-
-                        <CRow className="g-3">
-                            {filteredData.map((item) => (
-                                <CCol md={4} key={item.id}>
-                                    <CCard>
-                                        <CCardImage
-                                            orientation="top"
-                                            src={item.imagem || product_default}
-                                            alt={item.produto}
-                                            style={{ width: '50%', margin: '0 auto' }}
-                                        />
-                                        <CCardBody>
-                                            <h5 className="mb-3">{item.produto}</h5>
-                                            <p className="mb-2">
-                                                <strong>ID:</strong> {item.id}
-                                            </p>
-                                            <p className="mb-2">
-                                                <strong>Quantidade:</strong> {item.quantidade} {item.unidade}
-                                            </p>
-                                            <p className="mb-2">
-                                                <strong>Estoque Mínimo:</strong> {item.estoque_minimo}
-                                            </p>
-                                            <p className="mb-2">
-                                                <strong>Status:</strong>{' '}
-                                                <CBadge color={getStatusBadge(item.status)}>
-                                                    {item.status}
-                                                </CBadge>
-                                            </p>
-                                            <CButton
-                                                color="success"
-                                                onClick={() => {
-                                                    setModalType('registrar');
-                                                    setModalData(item);
-                                                    setModalVisible(true);
-                                                }}
-                                            >
-                                                Registrar
-                                            </CButton>
-                                            <CButton
-                                                color="danger"
-                                                onClick={() => {
-                                                    setModalType('saida');
-                                                    setModalData(item);
-                                                    setModalVisible(true);
-                                                }}
-                                            >
-                                                Dar Saída
-                                            </CButton>
-                                        </CCardBody>
-                                    </CCard>
-                                </CCol>
-                            ))}
-                        </CRow>
-                    </CCardBody>
-                </CCard>
-            </CCol>
-
-            <CModal visible={modalVisible} onClose={handleModalClose}>
-                <CModalHeader>
-                    <strong>{modalType === 'registrar' ? 'Registrar' : 'Saída'} do Estoque</strong>
-                </CModalHeader>
-                <CModalBody>
-                    <CCol>
-                        <p>
-                            <strong>Produto:</strong> {modalData?.produto}
-                        </p>
-                        <p>
-                            <strong>Quantidade Atual:</strong> {modalData?.quantidade} {modalData?.unidade}
-                        </p>
-                        <CFormInput type="number" placeholder="Quantidade" min="1" />
-                    </CCol>
-                </CModalBody>
-                <CModalFooter>
-                    <CButton color="secondary" onClick={handleModalClose}>
-                        Cancelar
-                    </CButton>
-                    <CButton
-                        color={modalType === 'registrar' ? 'success' : 'danger'}
-                        onClick={
-                            modalType === 'registrar' ? handleRegistrarEstoque : handleSaidaEstoque
-                        }
+					
+					<CForm className="mb-4">
+              <CRow className="g-3">
+			          <CCol md={2}>
+                    <CFormSelect
+                        name="categoria"
+                        value={filters.categoria}
+                        onChange={handleFilterChange}
                     >
-                        {modalType === 'registrar' ? 'Registrar' : 'Registrar Saída'}
-                    </CButton>
-                </CModalFooter>
-            </CModal>
-        </CRow>
+                        <option value="">Filtrar por Categoria</option>
+                        {categorias.map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                                {cat.descricao}
+                            </option>
+                        ))}
+                    </CFormSelect>
+                </CCol>
+                <CCol md={3}>
+                    <CFormSelect
+                        name="fornecedor"
+                        value={filters.fornecedor}
+                        onChange={handleFilterChange}
+                    >
+                        <option value="">Filtrar por Fornecedor</option>
+                        {fornecedores.map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                                {cat.nome}
+                            </option>
+                        ))}
+                    </CFormSelect>
+                </CCol>
+                <CCol md={4}>
+                  <CFormInput
+                    type="text"
+                    placeholder="Buscar por Produto"
+                    name="produto"
+                    value={filters.produto}
+                    onChange={handleFilterChange}
+                  />
+                </CCol>
+                <CCol md={2}>
+                  <CFormSelect
+                    name="status"
+                    value={filters.status}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="">Filtrar por Status</option>
+                    <option value="Disponível">Disponível</option>
+                    <option value="Baixo Estoque">Baixo Estoque</option>
+                    <option value="Indisponível">Indisponível</option>
+                  </CFormSelect>
+                </CCol>
+                <CCol md={1}>
+                  <CButton type="button" color="primary">
+                    Filtrar
+                  </CButton>
+                </CCol>
+              </CRow>
+            </CForm>
+            
+            <CRow className="g-3">
+                {filteredData.map((item) => (
+                    <CCol md={4} key={item.id}>
+
+<CCard style={{ width: '18rem' }}>
+      <CCardImage orientation="top" alt={item.produto} src={item.imagem || product_default} />
+      <CCardBody>
+        <CCardTitle>{item.nome}</CCardTitle>
+        <CCardText>
+          <p className="mb-2">
+            <strong>Nome:</strong> {item.nome}
+          </p>
+          <p className="mb-2">
+            <strong>Quantidade:</strong> {item.quantidade} {item.unidade_medida} 
+          </p>
+          <p className="mb-2">
+            <strong>Estoque Mínimo:</strong> {item.estoque_minimo}
+          </p>
+          <p className="mb-2">
+              <strong>Status:</strong>{' '}
+              <CBadge color={getStatusBadge(item.status)}>
+                  {item.status}
+              </CBadge>
+          </p>
+        </CCardText>
+
+        <CButton color="primary" onClick={() => {
+                setModalType('registrar');
+                setModalData(item);
+                setModalVisible(true);
+            }}>Registrar</CButton>
+
+        <CButton color="danger" onClick={() => {
+                setModalType('saida');
+                setModalData(item);
+                setModalVisible(true);
+            }}>Dar Saída</CButton>
+      </CCardBody>
+    </CCard>
+
+                    </CCol>
+                ))}
+            </CRow>
+                  </CCardBody>
+              </CCard>
+          </CCol>
+
+          <CModal visible={modalVisible} onClose={handleModalClose}>
+              <CModalHeader>
+                  <strong>{modalType === 'registrar' ? 'Registrar' : 'Saída'} do Estoque</strong>
+              </CModalHeader>
+              <CModalBody>
+                  <CCol>
+                      <p>
+                          <strong>Produto:</strong> {modalData?.produto}
+                      </p>
+                      <p>
+                          <strong>Quantidade Atual:</strong> {modalData?.quantidade} {modalData?.unidade}
+                      </p>
+                      <CFormInput type="number" placeholder="Quantidade" min="1" />
+                  </CCol>
+              </CModalBody>
+              <CModalFooter>
+                  <CButton color="secondary" onClick={handleModalClose}>
+                      Cancelar
+                  </CButton>
+                  <CButton
+                      color={modalType === 'registrar' ? 'success' : 'danger'}
+                      onClick={
+                          modalType === 'registrar' ? handleRegistrarEstoque : handleSaidaEstoque
+                      }
+                  >
+                      {modalType === 'registrar' ? 'Registrar' : 'Registrar Saída'}
+                  </CButton>
+              </CModalFooter>
+          </CModal>
+      </CRow>
     );
 };
 
