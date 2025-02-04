@@ -126,10 +126,91 @@ const EstoqueVisaoGeral = () => {
                             </CRow>
                         </CForm>
 
+                        <CRow className="g-3">
+                            {filteredData.map((item) => (
+                                <CCol md={4} key={item.id}>
+                                    <CCard>
+                                        <CCardImage
+                                            orientation="top"
+                                            src={item.imagem || product_default}
+                                            alt={item.produto}
+                                            style={{ width: '50%', margin: '0 auto' }}
+                                        />
+                                        <CCardBody>
+                                            <h5 className="mb-3">{item.produto}</h5>
+                                            <p className="mb-2">
+                                                <strong>ID:</strong> {item.id}
+                                            </p>
+                                            <p className="mb-2">
+                                                <strong>Quantidade:</strong> {item.quantidade} {item.unidade}
+                                            </p>
+                                            <p className="mb-2">
+                                                <strong>Estoque Mínimo:</strong> {item.estoque_minimo}
+                                            </p>
+                                            <p className="mb-2">
+                                                <strong>Status:</strong>{' '}
+                                                <CBadge color={getStatusBadge(item.status)}>
+                                                    {item.status}
+                                                </CBadge>
+                                            </p>
+                                            <CButton
+                                                color="success"
+                                                onClick={() => {
+                                                    setModalType('registrar');
+                                                    setModalData(item);
+                                                    setModalVisible(true);
+                                                }}
+                                            >
+                                                Registrar
+                                            </CButton>
+                                            <CButton
+                                                color="danger"
+                                                onClick={() => {
+                                                    setModalType('saida');
+                                                    setModalData(item);
+                                                    setModalVisible(true);
+                                                }}
+                                            >
+                                                Dar Saída
+                                            </CButton>
+                                        </CCardBody>
+                                    </CCard>
+                                </CCol>
+                            ))}
+                        </CRow>
                     </CCardBody>
                 </CCard>
             </CCol>
 
+            <CModal visible={modalVisible} onClose={handleModalClose}>
+                <CModalHeader>
+                    <strong>{modalType === 'registrar' ? 'Registrar' : 'Saída'} do Estoque</strong>
+                </CModalHeader>
+                <CModalBody>
+                    <CCol>
+                        <p>
+                            <strong>Produto:</strong> {modalData?.produto}
+                        </p>
+                        <p>
+                            <strong>Quantidade Atual:</strong> {modalData?.quantidade} {modalData?.unidade}
+                        </p>
+                        <CFormInput type="number" placeholder="Quantidade" min="1" />
+                    </CCol>
+                </CModalBody>
+                <CModalFooter>
+                    <CButton color="secondary" onClick={handleModalClose}>
+                        Cancelar
+                    </CButton>
+                    <CButton
+                        color={modalType === 'registrar' ? 'success' : 'danger'}
+                        onClick={
+                            modalType === 'registrar' ? handleRegistrarEstoque : handleSaidaEstoque
+                        }
+                    >
+                        {modalType === 'registrar' ? 'Registrar' : 'Registrar Saída'}
+                    </CButton>
+                </CModalFooter>
+            </CModal>
         </CRow>
     );
 };
