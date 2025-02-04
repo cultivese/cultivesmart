@@ -6,7 +6,9 @@ import {
   CCardHeader,
   CCol,
   CContainer,
+  CCardImage,
   CForm,
+  CCardImageOverlay,
   CFormInput,
   CFormLabel,
   CFormSelect,
@@ -18,6 +20,10 @@ import {
   CFormCheck,
 } from '@coreui/react';
 import { Stepper, Step } from 'react-form-stepper';
+import product_default from './../../../assets/images/microverdes/product_default.png'
+import isla_fornecedor from './../../../assets/images/microverdes/fornecedores/isla.png'
+import top_seed__fornecedor from './../../../assets/images/microverdes/fornecedores/top_seed.jpg'
+
 import { DocsExample } from 'src/components'
 const InsumosCadastro = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -28,7 +34,7 @@ const InsumosCadastro = () => {
   const stepLabels = [
     { title: "Categoria", subtitle: "Escolha a categoria" },
     { title: "Fornecedor", subtitle: "Defina o fornecedor" },
-    { title: "Informações do Insumo", subtitle: "Preencha as informações principais" },
+    { title: "Informações", subtitle: "Preencha as informações principais" },
     { title: "Resumo", subtitle: "Resumo dos dados preenchidos" },
   ];
 
@@ -83,7 +89,7 @@ const InsumosCadastro = () => {
     // Validation logic for each step
     if (activeStep === 0 && !selectedCategory) {
         hasErrors = true;
-    } else if (activeStep === 1 && !formData.fornecedor_id) {
+    } else if (activeStep === 1 && !fornecedores) {
         hasErrors = true;
         newStepErrors[activeStep] = true;
     } else if (activeStep === 2 && (!formData.descricao || !formData.unidade_medida || !formData.estoque_minimo)) {
@@ -142,10 +148,10 @@ const handleBack = (e) => {
   return (
     <CContainer>
       <Stepper activeStep={activeStep}>
-        <Step label="Categoria" onClick={() => setActiveStep(1)} />
-        <Step label="Fornecedor" onClick={() => setActiveStep(2)} />
-        <Step label="Informações do Insumo" onClick={() => setActiveStep(3)} />
-        <Step label="Resumo" onClick={() => setActiveStep(4)} />
+        <Step label="Categoria" onClick={() => setActiveStep(0)} />
+        <Step label="Fornecedor" onClick={() => setActiveStep(1)} />
+        <Step label="Informações" onClick={() => setActiveStep(2)} />
+        <Step label="Resumo" onClick={() => setActiveStep(3)} />
       </Stepper>
       <CForm onSubmit={handleSubmit}>
 
@@ -161,7 +167,7 @@ const handleBack = (e) => {
                 <DocsExample href="components/card/#background-and-color">
                   <CRow>
                     <CCol lg={4} key='1'>
-                      <CCard color={ selectedCategory === '1' ? 'success' : 'light'} textColor={ selectedCategory === '1' ? 'white' : ''} className="mb-3" onClick={() => setSelectedCategory('1')}>
+                      <CCard color={ selectedCategory === '1' ? 'success' : 'light'} textColor={ selectedCategory === '1' ? 'white' : ''} className="h-100" onClick={() => setSelectedCategory('1')}>
                         <CCardHeader>Sementes</CCardHeader>
                         <CCardBody>
                           <CCardTitle>Microverde</CCardTitle>
@@ -172,18 +178,18 @@ const handleBack = (e) => {
                       </CCard>
                     </CCol>
                     <CCol lg={4} key='2'>
-                      <CCard color={ selectedCategory === '2' ? 'success' : 'light'} textColor={ selectedCategory === '2' ? 'white' : ''} className="mb-3" onClick={() => setSelectedCategory('2')}>
+                      <CCard color={ selectedCategory === '2' ? 'success' : 'light'} textColor={ selectedCategory === '2' ? 'white' : ''} className="h-100" onClick={() => setSelectedCategory('2')}>
                         <CCardHeader>Sementes</CCardHeader>
                         <CCardBody>
                           <CCardTitle>Flores Comestíveis</CCardTitle>
                           <CCardText>
-                            Amor-Perfeito Gigante Suico Purpura, Amor-Perfeito Gigante Suico Branco, Amor-Perfeito Gigante Suico Roxo, Amor-Perfeito Gigante Suico Amarelo
+                            Amor-Perfeito Gigante Suico Purpura, Amor-Perfeito Gigante Suico Branco, Amor-Perfeito Gigante Suico Roxo
                           </CCardText>
                         </CCardBody>
                       </CCard>
                     </CCol>
                     <CCol lg={4} key='3'>
-                    <CCard color={ selectedCategory === '3' ? 'success' : 'light'} textColor={ selectedCategory === '3' ? 'white' : ''} className="mb-3" onClick={() => setSelectedCategory('3')}>
+                      <CCard color={ selectedCategory === '3' ? 'success' : 'light'} textColor={ selectedCategory === '3' ? 'white' : ''} className="h-100" onClick={() => setSelectedCategory('3')}>
                         <CCardHeader>Substrato</CCardHeader>
                         <CCardBody>
                           <CCardTitle>Substrato</CCardTitle>
@@ -197,30 +203,36 @@ const handleBack = (e) => {
                 </DocsExample>
             )}
             {activeStep === 1 && (
-              <CCol md={6}>
-                <CFormSelect id="fornecedor_id" value={formData.fornecedor_id} onChange={handleChange} required
-                className={stepErrors[activeStep] ? 'is-invalid' : ''}>
-                  <option value="">Escolha um fornecedor</option>
-                  {fornecedores.map(fornecedor => (
-                    <option key={fornecedor.id} value={fornecedor.id}>{fornecedor.nome}</option>
-                  ))}
-                </CFormSelect>
-                {stepErrors[activeStep] && <div className="invalid-feedback">Este campo é obrigatório.</div>} {/* Error message */}
-              </CCol>
+              <DocsExample href="components/card/#background-and-color">
+                <CRow>
+                  <CCol lg={4} key='1'>
+                    <CCard color={ fornecedores === '1' ? 'success' : 'light'} textColor={ fornecedores === '1' ? 'white' : ''} className="mb-3" onClick={() => setFornecedores('1')}>
+                    <CCardHeader>ISLA Sementes</CCardHeader>
+                      <CCardImage src={isla_fornecedor} />
+                  </CCard>
+                </CCol>
+                <CCol lg={4} key='2'>
+                    <CCard color={ fornecedores === '2' ? 'success' : 'light'} textColor={ fornecedores === '2' ? 'white' : ''} className="mb-3" onClick={() => setFornecedores('2')}>
+                    <CCardHeader>Top Seed</CCardHeader>
+                      <CCardImage src={top_seed__fornecedor} />
+                  </CCard>
+                </CCol>
+              </CRow>
+            </DocsExample>
             )}
             {activeStep === 2 && (
               selectedCategory === '1' && (
                 <CContainer>
                   <CRow>
-                    <CCol xs={8}>
+                    <CCol lg={8}>
                       <CRow>
-                        <CCol xs={4}>
+                        <CCol lg={8}>
                           <CFormLabel htmlFor="nome">Nome</CFormLabel>
                           <CFormInput type="text" id="nome" value={formData.nome} onChange={handleChange} required 
                             className={stepErrors[activeStep] && (!formData.nome) ? 'is-invalid' : ''} />
                           {stepErrors[activeStep] && (!formData.nome) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
                         </CCol>
-                        <CCol xs={4}>
+                        <CCol>
                           <CFormLabel htmlFor="variedade">Variedade</CFormLabel>
                           <CFormInput type="text" id="variedade" value={formData.variedade} onChange={handleChange} required 
                             className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''} />
@@ -228,13 +240,13 @@ const handleBack = (e) => {
                         </CCol>
                       </CRow>
                       <CRow>
-                        <CCol xs={5}>
+                        <CCol lg={5}>
                           <CFormLabel htmlFor="descricao">Descrição</CFormLabel>
                           <CFormInput type="text" id="descricao" value={formData.descricao} onChange={handleChange} required 
                             className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''} />
                           {stepErrors[activeStep] && (!formData.descricao) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
                         </CCol>
-                        <CCol xs={3}>
+                        <CCol lg={3}>
                           <CFormLabel htmlFor="unidade_medida">Unidade de Medida</CFormLabel>
                           <CFormSelect id="unidade_medida" value={formData.unidade_medida} onChange={handleChange} required
                             className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'is-invalid' : ''} >
@@ -248,7 +260,7 @@ const handleBack = (e) => {
                         </CCol>
                       </CRow>
                       <CRow>
-                        <CCol md={4}>
+                        <CCol lg={4}>
                           <CFormLabel htmlFor="estoque_minimo">Estoque Mínimo</CFormLabel>
                           <CFormInput type="number" id="estoque_minimo" value={formData.estoque_minimo} onChange={handleChange} required
                           className={stepErrors[activeStep] && (!formData.estoque_minimo) ? 'is-invalid' : ''}
@@ -257,7 +269,7 @@ const handleBack = (e) => {
                         </CCol>
                       </CRow>
                     </CCol>
-                    <CCol xs={4}>
+                    <CCol lg={4}>
                       <CInputGroup className="mb-3">
                         <CInputGroupText>Dias em Pilha</CInputGroupText>
                         <CFormInput type="number" id="dias_pilha" value={formData.dias_pilha} onChange={handleChange} required />
