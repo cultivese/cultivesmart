@@ -60,17 +60,17 @@ const InsumosListar = () => {
                         <CTableHeaderCell scope="col">Nome</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Categoria</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Fornecedor</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Variedade</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Descrição</CTableHeaderCell>
+                        {/* <CTableHeaderCell scope="col">Variedade</CTableHeaderCell> 
+                         <CTableHeaderCell scope="col">Descrição</CTableHeaderCell> */}
                         <CTableHeaderCell scope="col">Quantidade</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Unidade de Medida</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Estoque Mínimo</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Dias de Pilha</CTableHeaderCell>
+                        {/* <CTableHeaderCell scope="col">Dias de Pilha</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Dias Blackout</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Dias para Colheita</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Hidratação</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Hidratação</CTableHeaderCell> 
                         <CTableHeaderCell scope="col">Peso</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Substrato</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Substrato</CTableHeaderCell>*/}
                         <CTableHeaderCell scope="col">Data de Inclusão</CTableHeaderCell>
                       </CTableRow>
                     </CTableHead>
@@ -81,17 +81,17 @@ const InsumosListar = () => {
                           <CTableDataCell>{insumo.nome}</CTableDataCell>
                           <CTableDataCell>{insumo.category}</CTableDataCell>
                           <CTableDataCell>{insumo.fornecedor.nome}</CTableDataCell>
-                          <CTableDataCell>{insumo.variedade}</CTableDataCell>
-                          <CTableDataCell>{insumo.descricao}</CTableDataCell>
+                          {/* <CTableDataCell>{insumo.variedade}</CTableDataCell>
+                          <CTableDataCell>{insumo.descricao}</CTableDataCell> */}
                           <CTableDataCell>{insumo.quantidade}</CTableDataCell>
                           <CTableDataCell>{insumo.unidade_medida}</CTableDataCell>
                           <CTableDataCell>{insumo.estoque_minimo}</CTableDataCell>
-                          <CTableDataCell>{insumo.dias_pilha}</CTableDataCell>
+                          {/* <CTableDataCell>{insumo.dias_pilha}</CTableDataCell>
                           <CTableDataCell>{insumo.dias_blackout}</CTableDataCell>
                           <CTableDataCell>{insumo.dias_colheita}</CTableDataCell>
                           <CTableDataCell>{insumo.hidratacao}</CTableDataCell>
                           <CTableDataCell>{insumo.colocar_peso ? 'Sim' : 'Não'}</CTableDataCell>
-                          <CTableDataCell>{insumo.substrato ? 'Sim' : 'Não'}</CTableDataCell>
+                          <CTableDataCell>{insumo.substrato ? 'Sim' : 'Não'}</CTableDataCell> */}
                           <CTableDataCell>{new Date(insumo.created_at).toLocaleDateString()}</CTableDataCell>
                         </CTableRow>
                       ))}
