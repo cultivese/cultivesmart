@@ -1,188 +1,137 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
-  CCard,
-  CCardBody,
-  CCardHeader,
-  CCol,
-  CRow,
-  CBadge,
-  CForm,
-  CFormInput,
-  CFormSelect,
-  CButton,
-  CCardImage,
-} from '@coreui/react'
+    CCard,
+    CCardBody,
+    CCardHeader,
+    CCol,
+    CRow,
+    CBadge,
+    CForm,
+    CFormInput,
+    CFormSelect,
+    CButton,
+    CCardImage,
+    CModal,
+    CModalHeader,
+    CModalBody,
+    CModalFooter,
+} from '@coreui/react';
 
-import product_default from './../../../assets/images/microverdes/product_default.png'
+import product_default from './../../../assets/images/microverdes/product_default.png';
 
 const EstoqueVisaoGeral = () => {
-  const [filters, setFilters] = useState({
-    produto: '',
-    status: '',
-    dataInicio: '',
-    dataFim: '',
-  })
+    const [filters, setFilters] = useState({
+        categoria: '',
+    });
+    const [estoqueData, setEstoqueData] = useState([]);
+    const [categorias, setCategorias] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalType, setModalType] = useState(''); // 'registrar' ou 'saida'
+    const [modalData, setModalData] = useState(null);
 
-  const [estoqueData] = useState([
-    {
-      id: 1,
-      produto: 'Semente de Microverde',
-      quantidade: 1200,
-      unidade: 'Gramas',
-      estoqueMinimo: 500,
-      status: 'Disponível',
-      ultimaMovimentacao: '2025-01-14',
-      imagem: product_default,
-    },
-    {
-      id: 2,
-      produto: 'Flor Comestível',
-      quantidade: 300,
-      unidade: 'Unidades',
-      estoqueMinimo: 100,
-      status: 'Disponível',
-      ultimaMovimentacao: '2025-01-15',
-      imagem: product_default,
-    },
-    {
-      id: 3,
-      produto: 'Substrato Orgânico',
-      quantidade: 20,
-      unidade: 'Litros',
-      estoqueMinimo: 10,
-      status: 'Baixo Estoque',
-      ultimaMovimentacao: '2025-01-10',
-      imagem: product_default,
-    },
-  ])
+    useEffect(() => {
+        const fetchCategorias = async () => {
+            try {
+                const response = await fetch('http://backend.cultivesmart.com.br/api/categorias');
+                const data = await response.json();
+                setCategorias(data);
+            } catch (error) {
+                console.error('Erro ao buscar categorias:', error);
+            }
+        };
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target
-    setFilters((prev) => ({ ...prev, [name]: value }))
-  }
+        const fetchEstoque = async () => {
+            try {
+                const response = await fetch('http://backend.cultivesmart.com.br/api/estoque');
+                const data = await response.json();
+                setEstoqueData(data);
+                setFilteredData(data);
+            } catch (error) {
+                console.error('Erro ao buscar dados do estoque:', error);
+            }
+        };
 
-  const filteredData = estoqueData.filter((item) => {
-    const { produto, status, dataInicio, dataFim } = filters
+        fetchCategorias();
+        fetchEstoque();
+    }, []);
 
-    const produtoMatch = produto
-      ? item.produto.toLowerCase().includes(produto.toLowerCase())
-      : true
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters((prev) => ({ ...prev, [name]: value }));
+    };
 
-    const statusMatch = status ? item.status === status : true
+    const handleModalClose = () => {
+        setModalVisible(false);
+        setModalData(null);
+    };
 
-    const dataInicioMatch = dataInicio
-      ? new Date(item.ultimaMovimentacao) >= new Date(dataInicio)
-      : true
-    const dataFimMatch = dataFim
-      ? new Date(item.ultimaMovimentacao) <= new Date(dataFim)
-      : true
+    const handleRegistrarEstoque = () => {
+        // Lógica para registrar entrada no estoque (usando modalData)
+        setModalVisible(false);
+        alert(`Entrada registrada para o item: ${modalData.produto}`);
+    };
 
-    return produtoMatch && statusMatch && dataInicioMatch && dataFimMatch
-  })
+    const handleSaidaEstoque = () => {
+        // Lógica para registrar saída do estoque (usando modalData)
+        setModalVisible(false);
+        alert(`Saída registrada para o item: ${modalData.produto}`);
+    };
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'Disponível':
-        return 'success'
-      case 'Baixo Estoque':
-        return 'warning'
-      case 'Indisponível':
-        return 'danger'
-      default:
-        return 'secondary'
-    }
-  }
+    useEffect(() => {
+        const filtered = estoqueData.filter((item) => {
+            const categoriaMatch = filters.categoria ? item.category_id === parseInt(filters.categoria) : true;
+            return categoriaMatch;
+        });
+        setFilteredData(filtered);
+    }, [filters, estoqueData]);
 
-  return (
-    <CRow>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>Visão Geral do Estoque</strong> <small>Resumo Atual</small>
-          </CCardHeader>
-          <CCardBody>
-            <CForm className="mb-4">
-              <CRow className="g-3">
-                <CCol md={4}>
-                  <CFormInput
-                    type="text"
-                    placeholder="Buscar por Produto"
-                    name="produto"
-                    value={filters.produto}
-                    onChange={handleFilterChange}
-                  />
-                </CCol>
-                <CCol md={3}>
-                  <CFormSelect
-                    name="status"
-                    value={filters.status}
-                    onChange={handleFilterChange}
-                  >
-                    <option value="">Fornecedor</option>
-                    <option value="Disponível">Disponível</option>
-                    <option value="Baixo Estoque">Baixo Estoque</option>
-                    <option value="Indisponível">Indisponível</option>
-                  </CFormSelect>
-                </CCol>
-                <CCol md={2}>
-                  <CFormSelect
-                    name="status"
-                    value={filters.status}
-                    onChange={handleFilterChange}
-                  >
-                    <option value="">Filtrar por Status</option>
-                    <option value="Disponível">Disponível</option>
-                    <option value="Baixo Estoque">Baixo Estoque</option>
-                    <option value="Indisponível">Indisponível</option>
-                  </CFormSelect>
-                </CCol>
-                <CCol md={1}>
-                  <CButton type="button" color="primary">
-                    Filtrar
-                  </CButton>
-                </CCol>
-              </CRow>
-            </CForm>
-            <CRow className="g-3">
-              {filteredData.map((item) => (
-                <CCol md={4} key={item.id}>
-                  <CCard>
-                    <CCardImage
-                      orientation="top"
-                      src={item.imagem}
-                      alt={item.produto}
-                      style={{ width: '50%', margin: '0 auto' }}
-                    />
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'Disponível':
+                return 'success';
+            case 'Baixo Estoque':
+                return 'warning';
+            case 'Indisponível':
+                return 'danger';
+            default:
+                return 'secondary';
+        }
+    };
+
+    return (
+        <CRow>
+            <CCol xs={12}>
+                <CCard className="mb-4">
+                    <CCardHeader>
+                        <strong>Estoque Atual</strong> <small>Gestão de Estoque</small>
+                    </CCardHeader>
                     <CCardBody>
-                      <h5 className="mb-3">{item.produto}</h5>
-                      <p className="mb-2">
-                        <strong>ID:</strong> {item.id}
-                      </p>
-                      <p className="mb-2">
-                        <strong>Quantidade:</strong> {item.quantidade} {item.unidade}
-                      </p>
-                      <p className="mb-2">
-                        <strong>Estoque Mínimo:</strong> {item.estoqueMinimo}
-                      </p>
-                      <p className="mb-2">
-                        <strong>Status:</strong>{' '}
-                        <CBadge color={getStatusBadge(item.status)}>
-                          {item.status}
-                        </CBadge>
-                      </p>
+                        <CForm className="mb-4">
+                            <CRow className="g-3">
+                                <CCol md={4}>
+                                    <CFormSelect
+                                        name="categoria"
+                                        value={filters.categoria}
+                                        onChange={handleFilterChange}
+                                    >
+                                        <option value="">Filtrar por Categoria</option>
+                                        {categorias.map((cat) => (
+                                            <option key={cat.id} value={cat.id}>
+                                                {cat.descricao}
+                                            </option>
+                                        ))}
+                                    </CFormSelect>
+                                </CCol>
+                            </CRow>
+                        </CForm>
+
                     </CCardBody>
-                  </CCard>
-                </CCol>
-              ))}
-            </CRow>
-          </CCardBody>
-        </CCard>
-      </CCol>
-    </CRow>
-  )
-}
+                </CCard>
+            </CCol>
 
-export default EstoqueVisaoGeral
+        </CRow>
+    );
+};
 
-
-
+export default EstoqueVisaoGeral;

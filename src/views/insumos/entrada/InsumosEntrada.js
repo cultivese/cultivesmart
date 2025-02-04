@@ -1,225 +1,110 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   CCard,
   CCardBody,
   CCardHeader,
   CCol,
   CRow,
-  CCardTitle,
-  CCardText,
+  CTable,
+  CTableBody,
+  CTableDataCell,
+  CTableHead,
+  CTableHeaderCell,
+  CTableRow,
+  CTabContent,
+  CTabPane,
+  CSpinner,
 } from '@coreui/react'
-import { DocsExample } from 'src/components'
-import product_default from './../../../assets/images/microverdes/product_default.png'
 
-const InsumosEntrada = () => {
-  const [validated, setValidated] = useState(false)
-  const [modalVisible, setModalVisible] = useState(false)
-  const [selectedInsumo, setSelectedInsumo] = useState(null)
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [formData, setFormData] = useState({
-    produto: '',
-    quantidade: '',
-    unidade: '',
-    fornecedor: '',
-    dataCompra: '',
-    observacoes: '',
-  })
-  const [filters, setFilters] = useState({
-    produto: '',
-    status: '',
-  })
-  const insumos = [
-    {
-      id: 1,
-      produto: 'Beterraba Maravilha',
-      quantidade_sacos: '3 sacos',
-      sacos_abertos: '1 saco',
-      quantidade_disponivel: '1500g',
-      status: 'Disponível',
-      imagem: product_default,
-    },
-    {
-      id: 2,
-      produto: 'Flor Comestível',
-      quantidade_sacos: '1 saco',
-      sacos_abertos: '0 sacos',
-      quantidade_disponivel: '500g',
-      status: 'Disponível',
-      imagem: product_default,
-    },
-    {
-      id: 3,
-      produto: 'Substrato Orgânico',
-      quantidade_sacos: '6 saco',
-      sacos_abertos: '1 sacos',
-      quantidade_disponivel: '3000g',
-      status: 'Baixo Estoque',
-      imagem: product_default,
-    },
-  ]
+const InsumosListar = () => {
+  const [insumos, setInsumos] = useState([]) // Estado para armazenar os insumos
+  const [loading, setLoading] = useState(true) // Estado para gerenciar o carregamento
 
-  const handleOpenModal = (insumo) => {
-    setSelectedInsumo(insumo)
-    setModalVisible(true)
-  }
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target
-    setFormData({ ...formData, [name]: value })
-  }
-
-  // const handleSubmit = () => {
-  //   console.log('Registro de Insumo:', { ...formData, produto: selectedInsumo?.produto })
-  //   setModalVisible(false)
-  // }
-
-  const handleFilterChange = (event) => {
-    const { name, value } = event.target
-    setFilters({ ...filters, [name]: value })
-  }
-
-  const handleSubmit = (event) => {
-    const form = event.currentTarget
-    if (form.checkValidity() === false) {
-      event.preventDefault()
-      event.stopPropagation()
-    } else {
-      event.preventDefault()
-      console.log('Dados da entrada:', formData)
+  useEffect(() => {
+    const fetchInsumos = async () => {
+      try {
+        const response = await fetch('https://backend.cultivesmart.com.br/api/insumos') // URL da API
+        if (!response.ok) {
+          throw new Error('Erro ao buscar insumos.')
+        }
+        const data = await response.json() // Converte a resposta em JSON
+        setInsumos(data) // Define os insumos no estado
+      } catch (error) {
+        console.error(error.message)
+        alert('Não foi possível carregar os insumos.')
+      } finally {
+        setLoading(false) // Finaliza o carregamento
+      }
     }
-    setValidated(true)
-    setModalVisible(false)
-  }
+
+    fetchInsumos()
+  }, [])
 
   return (
-    // <>
-    //   <CForm className="needs-validation" noValidate validated={validated}>
-    //     <CRow>
-    //       <CCol xs={12}>
-    //         <CCard className="mb-4">
-    //           <CCardHeader>
-    //             <strong>Entrada de Insumos</strong> <small>Registro de Compra</small>
-    //           </CCardHeader>
-    //           <CCardBody>
-    //             <CRow className="g-3 mb-3">
-    //               <CCol md={6}>
-    //                 <CFormInput
-    //                   type="text"
-    //                   placeholder="Buscar por Produto"
-    //                   name="produto"
-    //                   value={filters.produto}
-    //                   onChange={handleFilterChange}
-    //                 />
-    //               </CCol>
-    //               <CCol md={3}>
-    //                 <CFormSelect
-    //                   name="status"
-    //                   value={filters.status}
-    //                   onChange={handleFilterChange}
-    //                 >
-    //                   <option value="">Filtrar por Status</option>
-    //                   <option value="Disponível">Disponível</option>
-    //                   <option value="Baixo Estoque">Baixo Estoque</option>
-    //                   <option value="Indisponível">Indisponível</option>
-    //                 </CFormSelect>
-    //               </CCol>
-    //               <CCol md={3} className="text-end">
-    //                 <CButton color="success" onClick={() => setModalVisible(true)}>
-    //                   + Novo Insumo
-    //                 </CButton>
-    //               </CCol>
-    //             </CRow>
-    //             <CRow className="g-3">
-    //               {insumos.map((item) => (
-    //                 <CCol md={4} key={item.id}>
-    //                   <CCard className="mb-4">
-    //                     <CCardImage orientation="top" src={item.imagem} alt={item.produto} style={{ width: '50%', margin: '0 auto' }} />
-    //                     <CCardBody>
-    //                       <h5 className="mb-3">{item.produto}</h5>
-    //                       <p className="mb-2"><strong>ID:</strong> {item.id}</p>
-    //                       <p className="mb-2"><strong>Quantidade de Sacos:</strong> {item.quantidade_sacos}</p>
-    //                       <p className="mb-2"><strong>Quantidade de Sacos abertos:</strong> {item.sacos_abertos}</p>
-    //                       <p className="mb-2"><strong>Quantidade Disponível:</strong> {item.quantidade_disponivel}</p>
-    //                       <p className="mb-2"><strong>Status:</strong> <CBadge color="success">{item.status}</CBadge></p>
-    //                       <CButton color="primary" onClick={() => handleOpenModal(item)}>Registrar Entrada</CButton>
-    //                     </CCardBody>
-    //                   </CCard>
-    //                 </CCol>
-                   //))}
-    //             </CRow>
-    //           </CCardBody>
-    //         </CCard>
-    //       </CCol>
-    //     </CRow>
-    //   </CForm>
-
-    //   <CModal visible={modalVisible} onClose={() => setModalVisible(false)}>
-    //     <CModalHeader>
-    //       <CModalTitle>Registrar Entrada - {selectedInsumo?.produto}</CModalTitle>
-    //     </CModalHeader>
-    //     <CModalBody>
-    //       <CForm>
-    //         <CFormLabel htmlFor="quantidade">Quantidade</CFormLabel>
-    //         <CFormInput type="number" id="quantidade" name="quantidade" value={formData.quantidade} onChange={handleInputChange} required />
-            
-    //         <CFormLabel htmlFor="dataCompra">Data da Compra</CFormLabel>
-    //         <CFormInput type="date" id="dataCompra" name="dataCompra" value={formData.dataCompra} onChange={handleInputChange} required />
-
-    //         <CFormLabel htmlFor="observacoes">Observações</CFormLabel>
-    //         <CFormInput type="text" id="observacoes" name="observacoes" value={formData.observacoes} onChange={handleInputChange} />
-    //       </CForm>
-    //     </CModalBody>
-    //     <CModalFooter>
-    //       <CButton color="secondary" onClick={() => setModalVisible(false)}>Cancelar</CButton>
-    //       <CButton color="primary" onClick={handleSubmit}>Registrar</CButton>
-    //     </CModalFooter>
-    //   </CModal>
-    //   </>
-    
-    
-    <>
-    
-    <CCol xs={12}>
-              <CCard className="mb-4">
-                <CCardHeader>
-                  <strong>Insumos</strong> <small>Cadastro</small>
-                </CCardHeader>
-                <CCardBody>
-                
-                    <DocsExample href="components/card/#background-and-color">
-                      <CRow>
-                        <CCol lg={4} key='1'>
-                          <CCard color={ selectedCategory === '1' ? 'success' : 'light'} textColor={ selectedCategory === '1' ? 'white' : ''} className="mb-3" onClick={() => setSelectedCategory('1')}>
-                            <CCardHeader>Sementes</CCardHeader>
-                            <CCardBody>
-                              <CCardTitle>Microverde</CCardTitle>
-                            </CCardBody>
-                          </CCard>
-                        </CCol>
-                        <CCol lg={4} key='2'>
-                          <CCard color={ selectedCategory === '2' ? 'success' : 'light'} textColor={ selectedCategory === '2' ? 'white' : ''} className="mb-3" onClick={() => setSelectedCategory('2')}>
-                            <CCardHeader>Sementes</CCardHeader>
-                            <CCardBody>
-                              <CCardTitle>Flores Comestíveis</CCardTitle>
-                            </CCardBody>
-                          </CCard>
-                        </CCol>
-                        <CCol lg={4} key='3'>
-                        <CCard color={ selectedCategory === '3' ? 'success' : 'light'} textColor={ selectedCategory === '3' ? 'white' : ''} className="mb-3" onClick={() => setSelectedCategory('3')}>
-                            <CCardHeader>Substrato</CCardHeader>
-                            <CCardBody>
-                              <CCardTitle>Substratos</CCardTitle>
-                            </CCardBody>
-                          </CCard>
-                        </CCol>
-                      </CRow>
-                    </DocsExample>
-                
-                </CCardBody>
-              </CCard>
-            </CCol>
-    </>
+    <CRow>
+      <CCol xs={12}>
+        <CCard className="mb-4">
+          <CCardHeader>
+            <strong>Insumos</strong> <small>Listar</small>
+          </CCardHeader>
+          <CCardBody>
+            <CTabContent className={`rounded-bottom`}>
+              <CTabPane className="p-3 preview" visible>
+                {loading ? (
+                  <CSpinner color="primary" /> // Exibe um spinner enquanto carrega os dados
+                ) : (
+                  <CTable color="dark">
+                    <CTableHead>
+                      <CTableRow>
+                        <CTableHeaderCell scope="col">Id</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Nome</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Categoria</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Fornecedor</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Variedade</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Descrição</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Quantidade</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Unidade de Medida</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Estoque Mínimo</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Dias de Pilha</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Dias Blackout</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Dias para Colheita</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Hidratação</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Peso</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Substrato</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Data de Inclusão</CTableHeaderCell>
+                      </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+                      {insumos.map((insumo) => (
+                        <CTableRow key={insumo.id}>
+                          <CTableHeaderCell scope="row">{insumo.id}</CTableHeaderCell>
+                          <CTableDataCell>{insumo.nome}</CTableDataCell>
+                          <CTableDataCell>{insumo.category}</CTableDataCell>
+                          <CTableDataCell>{insumo.fornecedor.nome}</CTableDataCell>
+                          <CTableDataCell>{insumo.variedade}</CTableDataCell>
+                          <CTableDataCell>{insumo.descricao}</CTableDataCell>
+                          <CTableDataCell>{insumo.quantidade}</CTableDataCell>
+                          <CTableDataCell>{insumo.unidade_medida}</CTableDataCell>
+                          <CTableDataCell>{insumo.estoque_minimo}</CTableDataCell>
+                          <CTableDataCell>{insumo.dias_pilha}</CTableDataCell>
+                          <CTableDataCell>{insumo.dias_blackout}</CTableDataCell>
+                          <CTableDataCell>{insumo.dias_colheita}</CTableDataCell>
+                          <CTableDataCell>{insumo.hidratacao}</CTableDataCell>
+                          <CTableDataCell>{insumo.colocar_peso ? 'Sim' : 'Não'}</CTableDataCell>
+                          <CTableDataCell>{insumo.substrato ? 'Sim' : 'Não'}</CTableDataCell>
+                          <CTableDataCell>{new Date(insumo.created_at).toLocaleDateString()}</CTableDataCell>
+                        </CTableRow>
+                      ))}
+                    </CTableBody>
+                  </CTable>
+                )}
+              </CTabPane>
+            </CTabContent>
+          </CCardBody>
+        </CCard>
+      </CCol>
+    </CRow>
   )
 }
 
-export default InsumosEntrada
+export default InsumosListar

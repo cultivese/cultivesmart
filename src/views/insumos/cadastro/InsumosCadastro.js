@@ -29,6 +29,7 @@ const InsumosCadastro = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [fornecedores, setFornecedores] = useState([]);
+  const [selectedFornecedor, setSelectedFornecedor] = useState(null);
   const [stepErrors, setStepErrors] = useState([false, false, false, false, false]); // Array to track errors for each step
 
   const stepLabels = [
@@ -40,10 +41,11 @@ const InsumosCadastro = () => {
 
   const [formData, setFormData] = useState({
     nome:'',
-    tipo_insumo: '',
+    category: '',
     fornecedor_id: '',
     variedade: '',
     descricao: '',
+    quantidade: '',
     unidade_medida: '',
     estoque_minimo: 0,
     dias_pilha: 0,
@@ -54,11 +56,18 @@ const InsumosCadastro = () => {
     substrato: false
   });
 
+  const categoryNames = {
+    '1': 'Sementes - Microverde',
+    '2': 'Flores Comestíveis',
+    '3': 'Substrato',
+  };
 
   useEffect(() => {
     fetch('https://backend.cultivesmart.com.br/api/fornecedores')
       .then(response => response.json())
-      .then(data => setFornecedores(data))
+      .then(data => {
+        setFornecedores(data);
+      })
       .catch(error => console.error('Erro ao buscar fornecedores:', error));
   }, []);
 
@@ -89,22 +98,45 @@ const InsumosCadastro = () => {
     // Validation logic for each step
     if (activeStep === 0 && !selectedCategory) {
         hasErrors = true;
-    } else if (activeStep === 1 && !fornecedores) {
+    } else if (activeStep === 1 && !formData.fornecedor_id) {
         hasErrors = true;
         newStepErrors[activeStep] = true;
-    } else if (activeStep === 2 && (!formData.descricao || !formData.unidade_medida || !formData.estoque_minimo)) {
+    } else if (activeStep === 2 &&
+      selectedCategory === "1" && (
+          !formData.nome.trim() || !formData.variedade.trim() || !formData.descricao.trim() ||
+          !formData.unidade_medida || formData.estoque_minimo <= 0 ||
+          formData.dias_pilha <= 0 || formData.dias_blackout <= 0 || formData.dias_colheita <= 0 || !formData.hidratacao
+      )
+   ) {
         hasErrors = true;
         newStepErrors[activeStep] = true;
-    } else if (activeStep === 3 && (!formData.dias_pilha || !formData.dias_blackout || !formData.dias_colheita || !formData.hidratacao)) {
+    } else if (activeStep === 2 &&
+      selectedCategory === 2 && (!formData.descricao ||  !formData.unidade_medida || !formData.estoque_minimo)
+    ) {
         hasErrors = true;
         newStepErrors[activeStep] = true;
     }
-
     setStepErrors(newStepErrors);
 
     if (!hasErrors) {
         setActiveStep(prevStep => prevStep + 1);
     }
+};
+
+const handleCategorySelect = (category) => {
+  setSelectedCategory(category);  // Atualiza o estado da categoria selecionada
+  setFormData(prevState => ({
+    ...prevState,
+    category: category  // Atualiza o valor da categoria no formData
+  }));
+};
+
+const handleFornecedorSelect = (id) => {
+  setFormData(prevState => ({
+      ...prevState,
+      fornecedor_id: id
+  }));
+  setSelectedFornecedor(id);
 };
 
 const handleBack = (e) => {
@@ -132,7 +164,7 @@ const handleBack = (e) => {
         alert('Insumo cadastrado com sucesso!');
         setFormData({
           selectedCategory: 0,
-          tipo_insumo: '', fornecedor_id: '', descricao: '', unidade_medida: '',
+          category: '', fornecedor_id: '', descricao: '', unidade_medida: '',
           estoque_minimo: 0, dias_pilha: 0, dias_blackout: 0, dias_colheita: 0, hidratacao: '',
           colocar_peso: true, substrato: false
         });
@@ -153,7 +185,7 @@ const handleBack = (e) => {
         <Step label="Informações" onClick={() => setActiveStep(2)} />
         <Step label="Resumo" onClick={() => setActiveStep(3)} />
       </Stepper>
-      <CForm onSubmit={handleSubmit}>
+      <CForm onSubmit={handleSubmit} className="row g-3">
 
         <CCol xs={12}>
           <CCard className="mb-4">
@@ -162,189 +194,268 @@ const handleBack = (e) => {
               <small>{stepLabels[activeStep].subtitle}</small>
             </CCardHeader>
             <CCardBody>
-            
-            {activeStep === 0 && (
-                <DocsExample href="components/card/#background-and-color">
-                  <CRow xs={{ gutterY: 5 }} >
-                    <CCol lg={4} key='1'>
-                      <CCard color={ selectedCategory === '1' ? 'success' : 'light'} textColor={ selectedCategory === '1' ? 'white' : ''} className="h-100" onClick={() => setSelectedCategory('1')}>
-                        <CCardHeader>Sementes</CCardHeader>
-                        <CCardBody>
-                          <CCardTitle>Microverde</CCardTitle>
-                          <CCardText>
-                            Rabanete, Amaranto, Acelga, Girassol, Salsa, Mostarda, Manjericão, Cebola, Cenoura
-                          </CCardText>
-                        </CCardBody>
-                      </CCard>
-                    </CCol>
-                    <CCol lg={4} key='2'>
-                      <CCard color={ selectedCategory === '2' ? 'success' : 'light'} textColor={ selectedCategory === '2' ? 'white' : ''} className="h-100" onClick={() => setSelectedCategory('2')}>
-                        <CCardHeader>Sementes</CCardHeader>
-                        <CCardBody>
-                          <CCardTitle>Flores Comestíveis</CCardTitle>
-                          <CCardText>
-                            Amor-Perfeito Gigante Suico Purpura, Amor-Perfeito Gigante Suico Branco, Amor-Perfeito Gigante Suico Roxo
-                          </CCardText>
-                        </CCardBody>
-                      </CCard>
-                    </CCol>
-                    <CCol lg={4} key='3'>
-                      <CCard color={ selectedCategory === '3' ? 'success' : 'light'} textColor={ selectedCategory === '3' ? 'white' : ''} className="h-100" onClick={() => setSelectedCategory('3')}>
-                        <CCardHeader>Substrato</CCardHeader>
-                        <CCardBody>
-                          <CCardTitle>Substrato</CCardTitle>
-                          <CCardText>
-                            Carolina Soil, Pó de Coco
-                          </CCardText>
-                        </CCardBody>
-                      </CCard>
-                    </CCol>
-                  </CRow>
-                </DocsExample>
-            )}
-            {activeStep === 1 && (
-              <DocsExample href="components/card/#background-and-color">
-                <CRow>
-                  <CCol lg={4} key='1'>
-                    <CCard color={ fornecedores === '1' ? 'success' : 'light'} textColor={ fornecedores === '1' ? 'white' : ''} className="mb-3" onClick={() => setFornecedores('1')}>
-                    <CCardHeader>ISLA Sementes</CCardHeader>
-                      <CCardImage src={isla_fornecedor} />
-                  </CCard>
-                </CCol>
-                <CCol lg={4} key='2'>
-                    <CCard color={ fornecedores === '2' ? 'success' : 'light'} textColor={ fornecedores === '2' ? 'white' : ''} className="mb-3" onClick={() => setFornecedores('2')}>
-                    <CCardHeader>Top Seed</CCardHeader>
-                      <CCardImage src={top_seed__fornecedor} />
-                  </CCard>
-                </CCol>
-              </CRow>
-            </DocsExample>
-            )}
-            {activeStep === 2 && (
-              selectedCategory === '1' && (
-                <CContainer>
-                  <CRow>
-                    <CCol lg={8}>
-                      <CRow>
-                        <CCol lg={8}>
-                          <CFormLabel htmlFor="nome">Nome</CFormLabel>
-                          <CFormInput type="text" id="nome" value={formData.nome} onChange={handleChange} required 
-                            className={stepErrors[activeStep] && (!formData.nome) ? 'is-invalid' : ''} />
-                          {stepErrors[activeStep] && (!formData.nome) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
-                        </CCol>
-                        <CCol>
-                          <CFormLabel htmlFor="variedade">Variedade</CFormLabel>
-                          <CFormInput type="text" id="variedade" value={formData.variedade} onChange={handleChange} required 
-                            className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''} />
-                          {stepErrors[activeStep] && (!formData.variedade) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
-                        </CCol>
-                      </CRow>
-                      <CRow>
-                        <CCol lg={5}>
-                          <CFormLabel htmlFor="descricao">Descrição</CFormLabel>
-                          <CFormInput type="text" id="descricao" value={formData.descricao} onChange={handleChange} required 
-                            className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''} />
-                          {stepErrors[activeStep] && (!formData.descricao) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
-                        </CCol>
-                        <CCol lg={3}>
-                          <CFormLabel htmlFor="unidade_medida">Unidade de Medida</CFormLabel>
-                          <CFormSelect id="unidade_medida" value={formData.unidade_medida} onChange={handleChange} required
-                            className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'is-invalid' : ''} >
-                            <option value="" disabled>Escolha...</option>
-                            <option>Sacos</option>
-                            <option>Gramas</option>
-                            <option>Unidades</option>
-                            <option>Litro</option>
-                          </CFormSelect>
-                          {stepErrors[activeStep] && (!formData.unidade_medida) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
-                        </CCol>
-                      </CRow>
-                      <CRow>
-                        <CCol lg={4}>
-                          <CFormLabel htmlFor="estoque_minimo">Estoque Mínimo</CFormLabel>
-                          <CFormInput type="number" id="estoque_minimo" value={formData.estoque_minimo} onChange={handleChange} required
-                          className={stepErrors[activeStep] && (!formData.estoque_minimo) ? 'is-invalid' : ''}
-                          />
-                          {stepErrors[activeStep] && (!formData.estoque_minimo) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
-                        </CCol>
-                      </CRow>
-                    </CCol>
-                    <CCol lg={4}>
-                      <CInputGroup className="mb-3">
-                        <CInputGroupText>Dias em Pilha</CInputGroupText>
-                        <CFormInput type="number" id="dias_pilha" value={formData.dias_pilha} onChange={handleChange} required />
-                      </CInputGroup>
-                      <CInputGroup className="mb-3">
-                        <CInputGroupText>Dias em Blackout</CInputGroupText>
-                        <CFormInput type="number" id="dias_blackout" value={formData.dias_blackout} onChange={handleChange} required />
-                      </CInputGroup>
-                      <CInputGroup className="mb-3">
-                        <CInputGroupText>Dias até a Colheita</CInputGroupText>
-                        <CFormInput type="number" id="dias_colheita" value={formData.dias_colheita} onChange={handleChange} required />
-                      </CInputGroup>
-                      <CInputGroup className="mb-3">
-                        <CInputGroupText>Hidratação</CInputGroupText>
-                        <CFormSelect id="hidratacao" value={formData.hidratacao} onChange={handleChange} required>
-                          <option value="Irrigação">Irrigação</option>
-                          <option value="Aspersão">Aspersão</option>
-                        </CFormSelect>
-                      </CInputGroup>
-                      <CFormCheck label="Colocar peso" value={formData.colocar_peso}/>
-                      <CFormCheck label="Substrato (cobertura)" value={formData.substrato}/>
-                    </CCol>
-                  </CRow>
-               </CContainer>
-              )
-              ||
-              selectedCategory === '2' && (
-                <CContainer>
-                  <CRow>
-                    <CCol xs={6}>
-                      <CFormLabel htmlFor="descricao">Descrição</CFormLabel>
-                      <CFormInput type="text" id="descricao" value={formData.descricao} onChange={handleChange} required 
-                        className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''} />
-                      {stepErrors[activeStep] && (!formData.descricao) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
-                    </CCol>
-                    <CCol xs={4}>
-                      <CFormLabel htmlFor="unidade_medida">Unidade de Medida</CFormLabel>
-                      <CFormSelect id="unidade_medida" value={formData.unidade_medida} onChange={handleChange} required
-                        className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'is-invalid' : ''} >
-                        <option value="" disabled>Escolha...</option>
-                        <option>Sacos</option>
-                        <option>Gramas</option>
-                        <option>Unidades</option>
-                        <option>Litro</option>
-                      </CFormSelect>
-                      {stepErrors[activeStep] && (!formData.unidade_medida) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
-                    </CCol>
-                    <CCol md={2}>
-                      <CFormLabel htmlFor="estoque_minimo">Estoque Mínimo</CFormLabel>
-                      <CFormInput type="number" id="estoque_minimo" value={formData.estoque_minimo} onChange={handleChange} required
-                      className={stepErrors[activeStep] && (!formData.estoque_minimo) ? 'is-invalid' : ''}
-                      />
-                      {stepErrors[activeStep] && (!formData.estoque_minimo) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
-                    </CCol>
-                  </CRow>
-               </CContainer>
-              )
-            )}
-            {activeStep === 3 && (
-            <div>
-            <h2 className="text-xl font-bold">Resumo</h2>
-            <p><strong>Categoria:</strong> {formData.tipo_insumo}</p>
-            <p><strong>Fornecedor:</strong> {formData.fornecedor_id}</p>
-            <p><strong>Dados Básicos:</strong> {formData.descricao}</p>
-            <p><strong>Unidade de Medida:</strong> {formData.unidade_medida}</p>
-            <p><strong>Estoque Mínimo:</strong> {formData.estoque_minimo}</p>
-            <p><strong>Dias Pilha:</strong> {formData.dias_pilha}</p>
-            <p><strong>Dias Blackoutr:</strong> {formData.dias_blackout}</p>
-            <p><strong>Dias Colheita:</strong> {formData.dias_colheita}</p>
-            <p><strong>Hidratação:</strong> {formData.hidratacao}</p>
-            <p><strong>Colocar Peso:</strong> {formData.colocar_peso}</p>
-            <p><strong>Substrato:</strong> {formData.substrato}</p>
+              
+              {activeStep === 0 && (
+                  <DocsExample href="components/card/#background-and-color">
+                    <CRow xs={{ gutterY: 5 }} >
+                      <CCol lg={4} key='1'>
+                        <CCard color={ selectedCategory === '1' ? 'success' : 'light'} textColor={ selectedCategory === '1' ? 'white' : ''} className="h-100" onClick={() => handleCategorySelect('1')}>
+                          <CCardHeader>Sementes</CCardHeader>
+                          <CCardBody>
+                            <CCardTitle>Microverde</CCardTitle>
+                            <CCardText>
+                              Rabanete, Amaranto, Acelga, Girassol, Salsa, Mostarda, Manjericão, Cebola, Cenoura
+                            </CCardText>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                      <CCol lg={4} key='2'>
+                        <CCard color={ selectedCategory === '2' ? 'success' : 'light'} textColor={ selectedCategory === '2' ? 'white' : ''} className="h-100" onClick={() => handleCategorySelect('2')}>
+                          <CCardHeader>Sementes</CCardHeader>
+                          <CCardBody>
+                            <CCardTitle>Flores Comestíveis</CCardTitle>
+                            <CCardText>
+                              Amor-Perfeito Gigante Suico Purpura, Amor-Perfeito Gigante Suico Branco, Amor-Perfeito Gigante Suico Roxo
+                            </CCardText>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                      <CCol lg={4} key='3'>
+                        <CCard color={ selectedCategory === '3' ? 'success' : 'light'} textColor={ selectedCategory === '3' ? 'white' : ''} className="h-100" onClick={() => handleCategorySelect('3')}>
+                          <CCardHeader>Substrato</CCardHeader>
+                          <CCardBody>
+                            <CCardTitle>Substrato</CCardTitle>
+                            <CCardText>
+                              Carolina Soil, Pó de Coco
+                            </CCardText>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                    </CRow>
+                  </DocsExample>
+              )}
 
-            </div>
-            )}
+              {activeStep === 1 && (
+                <DocsExample href="components/card/#background-and-color">
+                  <CRow>
+                      {fornecedores.map((fornecedor) => {
+                        return (
+                        <CCol lg={4} key='1'>
+                          <CCard key={fornecedor.id} color={ selectedFornecedor === '1' ? 'success' : 'light'} textColor={ selectedFornecedor === '1' ? 'white' : ''} className="mb-3" onClick={() => handleFornecedorSelect ('1')}>
+                            <CCardHeader>{fornecedor.nome}</CCardHeader>
+                            <CCardImage src={isla_fornecedor} />
+                          </CCard>
+                        </CCol>);
+                      })}
+                    {/* <CCol lg={4} key='2'>
+                      <CCard color={ selectedFornecedor === '2' ? 'success' : 'light'} textColor={ selectedFornecedor === '2' ? 'white' : ''} className="mb-3" onClick={() => handleFornecedorSelect ('2')}>
+                      <CCardHeader>Top Seed</CCardHeader>
+                        <CCardImage src={top_seed__fornecedor} />
+                    </CCard>
+                  </CCol> */}
+                </CRow>
+              </DocsExample>
+              )}
+            
+              {activeStep === 2 && (
+                selectedCategory === '1' && (
+                  <CContainer>
+                    <CRow>
+                      <CCol md={5}>
+                        <CFormInput
+                              type="text"
+                              id="nome"
+                              floatingClassName="mb-3"
+                              floatingLabel="Nome"
+                              value={formData.nome}
+                              onChange={handleChange} required
+                              className={stepErrors[activeStep] && (!formData.nome) ? 'is-invalid' : ''}
+                            />
+                      </CCol>
+                      <CCol md={4}>
+                        <CFormInput
+                                type="text"
+                                id="variedade"
+                                floatingClassName="mb-3"
+                                floatingLabel="Variedade"
+                                value={formData.variedade}
+                                onChange={handleChange}
+                                required
+                                className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
+                              />
+                      </CCol>
+                      <CCol md={4}>
+                      <CFormInput
+                                type="text"
+                                id="descricao"
+                                floatingClassName="mb-3"
+                                floatingLabel="Descricao"
+                                value={formData.descricao}
+                                onChange={handleChange}
+                                className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
+                                required
+                              />
+                      </CCol>
+                      <CCol md={2}>
+                      <CFormInput
+                            type="number"
+                            id="quantidade"
+                            floatingClassName="mb-3"
+                            floatingLabel="Quantidade"
+                            value={formData.quantidade}
+                            onChange={handleChange} required
+                            className={stepErrors[activeStep] && (!formData.quantidade) ? 'is-invalid' : ''}
+                          />
+                      </CCol>
+                      <CCol md={2}>
+                      <CFormSelect
+                            id="unidade_medida"
+                            floatingLabel="Unidade de Medida"
+                            aria-label="Floating label select example"
+                            value={formData.unidade_medida}
+                            onChange={handleChange}
+                            className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'is-invalid' : ''}
+                            required
+                          >
+                          <option value="" disabled>Escolha...</option>
+                          <option value="1">Sacos</option>
+                          <option value="2">Gramas</option>
+                          <option value="3">Unidades</option>
+                          <option value="4">Litro</option>
+                        </CFormSelect>
+                        {stepErrors[activeStep] && (!formData.unidade_medida) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
+                      </CCol>
+                      <CCol md={2}>
+                        <CFormInput
+                            type="number"
+                            id="estoque_minimo"
+                            floatingClassName="mb-3"
+                            floatingLabel="Estoque Mínimo"
+                            value={formData.estoque_minimo}
+                            onChange={handleChange} required
+                            className={stepErrors[activeStep] && (!formData.estoque_minimo) ? 'is-invalid' : ''}
+                          />
+                        {stepErrors[activeStep] && (!formData.estoque_minimo) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
+                      </CCol>
+                    </CRow>
+                      <CCol lg={4}>
+                        <CInputGroup className="mb-3">
+                          <CInputGroupText>Dias em Pilha</CInputGroupText>
+                          <CFormInput type="number" id="dias_pilha" value={formData.dias_pilha} onChange={handleChange} required />
+                        </CInputGroup>
+                        <CInputGroup className="mb-3">
+                          <CInputGroupText>Dias em Blackout</CInputGroupText>
+                          <CFormInput type="number" id="dias_blackout" value={formData.dias_blackout} onChange={handleChange} required />
+                        </CInputGroup>
+                        <CInputGroup className="mb-3">
+                          <CInputGroupText>Dias até a Colheita</CInputGroupText>
+                          <CFormInput type="number" id="dias_colheita" value={formData.dias_colheita} onChange={handleChange} required />
+                        </CInputGroup>
+                        <CInputGroup className="mb-3">
+                          <CInputGroupText>Hidratação</CInputGroupText>
+                          <CFormSelect id="hidratacao" value={formData.hidratacao} onChange={handleChange} required>
+                            <option value="Irrigação">Irrigação</option>
+                            <option value="Aspersão">Aspersão</option>
+                          </CFormSelect>
+                        </CInputGroup>
+                        <CFormCheck label="Colocar peso" value={formData.colocar_peso}/>
+                        <CFormCheck label="Substrato (cobertura)" value={formData.substrato}/>
+                      </CCol>
+                </CContainer>
+                )
+
+                ||
+                selectedCategory === '2' && (
+                  <CContainer>
+                      <CCol md={6}>
+                        <CFormInput
+                                type="text"
+                                id="descricao"
+                                floatingClassName="mb-3"
+                                floatingLabel="Descricao"
+                                value={formData.descricao}
+                                onChange={handleChange}
+                                className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
+                                required
+                              />
+                      </CCol>
+                      <CCol md={2}>
+                      <CFormInput
+                            type="number"
+                            id="quantidade"
+                            floatingClassName="mb-3"
+                            floatingLabel="Quantidade"
+                            value={formData.quantidade}
+                            onChange={handleChange} required
+                            className={stepErrors[activeStep] && (!formData.quantidade) ? 'is-invalid' : ''}
+                          />
+                      </CCol>
+                      <CCol md={4}>
+                      <CFormSelect
+                            id="unidade_medida"
+                            floatingLabel="Unidade de Medida"
+                            aria-label="Floating label select example"
+                            value={formData.unidade_medida}
+                            onChange={handleChange}
+                            size="lg"
+                            className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'is-invalid' : ''}
+                            required
+                          >
+                          <option value="" disabled>Escolha...</option>
+                          <option value="sc">Sacos</option>
+                          <option value="g">Gramas</option>
+                          <option value="und">Unidades</option>
+                          <option value="l">Litro</option>
+                        </CFormSelect>
+                      </CCol>
+                      <CCol md={2}>
+                      <CFormInput
+                            type="number"
+                            id="estoque_minimo"
+                            floatingClassName="mb-3"
+                            floatingLabel="Estoque Mínimo"
+                            value={formData.estoque_minimo}
+                            onChange={handleChange} required
+                            className={stepErrors[activeStep] && (!formData.estoque_minimo) ? 'is-invalid' : ''}
+                          />
+                      </CCol>
+                </CContainer>
+                )
+              )}
+
+              {activeStep === 3 && (
+                selectedCategory === '1' && (
+                <div>
+                  <h2 className="text-xl font-bold">Resumo</h2>
+                  <p><strong>Categoria:</strong> {categoryNames[formData.category]}</p>
+                  <p><strong>Fornecedor:</strong> {fornecedores[0].nome}</p>
+                  <p><strong>Descrição:</strong> {formData.descricao}</p>
+                  <p><strong>Unidade de Medida:</strong> {formData.unidade_medida}</p>
+                  <p><strong>Estoque Mínimo:</strong> {formData.estoque_minimo}</p>
+                  <p><strong>Dias Pilha:</strong> {formData.dias_pilha}</p>
+                  <p><strong>Dias Blackoutr:</strong> {formData.dias_blackout}</p>
+                  <p><strong>Dias Colheita:</strong> {formData.dias_colheita}</p>
+                  <p><strong>Hidratação:</strong> {formData.hidratacao}</p>
+                  <p><strong>Colocar Peso:</strong> {formData.colocar_peso ? "Sim" : "Não"}</p>
+                  <p><strong>Substrato:</strong> {formData.substrato ? "Sim" : "Não"}</p>
+                </div>
+              )
+            )
+              }
+              {activeStep === 3 && (
+                selectedCategory === '2' && (
+                <div>
+                  <h2 className="text-xl font-bold">Resumo</h2>
+                  <p><strong>Categoria:</strong> {categoryNames[formData.category]}</p>
+                  <p><strong>Fornecedor:</strong> {fornecedores[0].nome}</p>
+                  <p><strong>Dados Básicos:</strong> {formData.descricao}</p>
+                  <p><strong>Unidade de Medida:</strong> {formData.unidade_medida}</p>
+                  <p><strong>Estoque Mínimo:</strong> {formData.estoque_minimo}</p>
+                </div>
+              )
+            )
+              }
+              
             <CRow className="mt-4">
               {activeStep > 0 && (
                 <CCol>
