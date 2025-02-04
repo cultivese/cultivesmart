@@ -165,7 +165,7 @@ const handleBack = (e) => {
             
             {activeStep === 0 && (
                 <DocsExample href="components/card/#background-and-color">
-                  <CRow>
+                  <CRow xs={{ gutterY: 5 }} >
                     <CCol lg={4} key='1'>
                       <CCard color={ selectedCategory === '1' ? 'success' : 'light'} textColor={ selectedCategory === '1' ? 'white' : ''} className="h-100" onClick={() => setSelectedCategory('1')}>
                         <CCardHeader>Sementes</CCardHeader>
