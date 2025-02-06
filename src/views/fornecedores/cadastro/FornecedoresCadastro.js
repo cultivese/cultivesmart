@@ -75,7 +75,12 @@ const FornecedoresCadastro = () => {
         const formDataToSend = new FormData(); // Use FormData para enviar arquivos
 
         for (const key in formData) {
-          formDataToSend.append(key, formData[key]);
+          // Certifique-se de anexar corretamente a logo
+          if (key === "logo" && formData[key]) {
+            formDataToSend.append(key, formData[key]); 
+          } else {
+            formDataToSend.append(key, formData[key]);
+          }
         }
 
         const response = await fetch('https://backend.cultivesmart.com.br/api/fornecedores', {
@@ -83,7 +88,7 @@ const FornecedoresCadastro = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: formDataToSend,
+          body: JSON.stringify(formData),
         })
 
         if (response.ok) {

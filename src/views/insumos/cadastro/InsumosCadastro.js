@@ -8,9 +8,14 @@ import {
   CContainer,
   CCardImage,
   CForm,
+  CFormTextarea,
   CCardImageOverlay,
   CFormInput,
   CFormLabel,
+  CModal,
+  CModalHeader,
+  CModalBody,
+  CModalFooter,
   CFormSelect,
   CRow,
   CCardTitle,
@@ -31,6 +36,12 @@ const InsumosCadastro = () => {
   const [fornecedores, setFornecedores] = useState([]);
   const [selectedFornecedor, setSelectedFornecedor] = useState(null);
   const [stepErrors, setStepErrors] = useState([false, false, false, false, false]); // Array to track errors for each step
+  const [showAdditionalFieldsModal, setShowAdditionalFieldsModal] = useState(false); // Estado para controlar o modal
+  const [additionalFields, setAdditionalFields] = useState({ // Estado para os campos adicionais
+    quantidade_inicial: '',
+    unidade_medida_conteudo: '',
+    quantidade_consumida: '',
+  });
 
   const stepLabels = [
     { title: "Categoria", subtitle: "Escolha a categoria" },
@@ -123,6 +134,33 @@ const InsumosCadastro = () => {
     }
 };
 
+const handleAdditionalFieldsChange = (event) => {
+  const { id, value } = event.target;
+  setAdditionalFields(prevState => ({
+    ...prevState,
+    [id]: value,
+  }));
+};
+
+const handleOpenAdditionalFieldsModal = () => {
+  setShowAdditionalFieldsModal(true);
+};
+
+const handleCloseAdditionalFieldsModal = () => {
+  setShowAdditionalFieldsModal(false);
+};
+
+const handleSaveAdditionalFields = () => {
+  // Atualiza o formData com os valores do modal
+  setFormData(prevState => ({
+    ...prevState,
+    quantidade_inicial: additionalFields.quantidade_inicial,
+    unidade_medida_conteudo: additionalFields.unidade_medida_conteudo,
+    quantidade_consumida: additionalFields.quantidade_consumida,
+  }));
+  setShowAdditionalFieldsModal(false); // Fecha o modal
+};
+
 const handleCategorySelect = (category) => {
   setSelectedCategory(category);  // Atualiza o estado da categoria selecionada
   setFormData(prevState => ({
@@ -186,83 +224,95 @@ const handleBack = (e) => {
         <Step label="Resumo" onClick={() => setActiveStep(3)} />
       </Stepper>
       <CForm onSubmit={handleSubmit} className="row g-3">
-
-        <CCol xs={12}>
-          <CCard className="mb-4">
-            <CCardHeader>
-              <strong>{stepLabels[activeStep].title} - </strong>
-              <small>{stepLabels[activeStep].subtitle}</small>
-            </CCardHeader>
-            <CCardBody>
-              
-              {activeStep === 0 && (
-                
+          
+          {activeStep === 0 && (
+            <CCol xs={12}>
+              <CCard className="mb-4">
+                <CCardHeader>
+                  <strong>{stepLabels[activeStep].title} - </strong>
+                  <small>{stepLabels[activeStep].subtitle}</small>
+                </CCardHeader>
+                <CCardBody>
                   <DocsExample href="components/card/#background-and-color">
                     <CRow xs={{ gutterY: 5 }} >
-                      <CCol lg={4} key='1'>
-                        <CCard color={ selectedCategory === '1' ? 'success' : 'light'} textColor={ selectedCategory === '1' ? 'white' : ''} className="h-100" onClick={() => handleCategorySelect('1')}>
-                          <CCardHeader>Sementes</CCardHeader>
-                          <CCardBody>
-                            <CCardTitle>Microverde</CCardTitle>
-                            <CCardText>
-                              Rabanete, Amaranto, Acelga, Girassol, Salsa, Mostarda, Manjericão, Cebola, Cenoura
-                            </CCardText>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                      <CCol lg={4} key='2'>
-                        <CCard color={ selectedCategory === '2' ? 'success' : 'light'} textColor={ selectedCategory === '2' ? 'white' : ''} className="h-100" onClick={() => handleCategorySelect('2')}>
-                          <CCardHeader>Sementes</CCardHeader>
-                          <CCardBody>
-                            <CCardTitle>Flores Comestíveis</CCardTitle>
-                            <CCardText>
-                              Amor-Perfeito Gigante Suico Purpura, Amor-Perfeito Gigante Suico Branco, Amor-Perfeito Gigante Suico Roxo
-                            </CCardText>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                      <CCol lg={4} key='3'>
-                        <CCard color={ selectedCategory === '3' ? 'success' : 'light'} textColor={ selectedCategory === '3' ? 'white' : ''} className="h-100" onClick={() => handleCategorySelect('3')}>
-                          <CCardHeader>Substrato</CCardHeader>
-                          <CCardBody>
-                            <CCardTitle>Substrato</CCardTitle>
-                            <CCardText>
-                              Carolina Soil, Pó de Coco
-                            </CCardText>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
+                        <CCol lg={4} key='1'>
+                          <CCard color={ selectedCategory === '1' ? 'success' : 'light'} textColor={ selectedCategory === '1' ? 'white' : ''} className="h-100" onClick={() => handleCategorySelect('1')}>
+                            <CCardHeader>Sementes</CCardHeader>
+                            <CCardBody>
+                              <CCardTitle>Microverde</CCardTitle>
+                              <CCardText>
+                                Rabanete, Amaranto, Acelga, Girassol, Salsa, Mostarda, Manjericão, Cebola, Cenoura
+                              </CCardText>
+                            </CCardBody>
+                          </CCard>
+                        </CCol>
+                        <CCol lg={4} key='2'>
+                          <CCard color={ selectedCategory === '2' ? 'success' : 'light'} textColor={ selectedCategory === '2' ? 'white' : ''} className="h-100" onClick={() => handleCategorySelect('2')}>
+                            <CCardHeader>Sementes</CCardHeader>
+                            <CCardBody>
+                              <CCardTitle>Flores Comestíveis</CCardTitle>
+                              <CCardText>
+                                Amor-Perfeito Gigante Suico Purpura, Amor-Perfeito Gigante Suico Branco, Amor-Perfeito Gigante Suico Roxo
+                              </CCardText>
+                            </CCardBody>
+                          </CCard>
+                        </CCol>
+                        <CCol lg={4} key='3'>
+                          <CCard color={ selectedCategory === '3' ? 'success' : 'light'} textColor={ selectedCategory === '3' ? 'white' : ''} className="h-100" onClick={() => handleCategorySelect('3')}>
+                            <CCardHeader>Substrato</CCardHeader>
+                            <CCardBody>
+                              <CCardTitle>Substrato</CCardTitle>
+                              <CCardText>
+                                Carolina Soil, Pó de Coco
+                              </CCardText>
+                            </CCardBody>
+                          </CCard>
+                        </CCol>
                     </CRow>
                   </DocsExample>
-              )}
+                </CCardBody>
+              </CCard>
+            </CCol>
+          )}
 
-              {activeStep === 1 && (
-                <DocsExample href="components/card/#background-and-color">
-                  <CRow>
-                      {fornecedores.records.map((fornecedor) => {
-                        return (
-                        <CCol lg={4} key='1'>
-                          <CCard key={fornecedor.id} color={ selectedFornecedor === fornecedor.id ? 'success' : 'light'} textColor={ selectedFornecedor === fornecedor.id ? 'white' : ''} className="mb-3" onClick={() => handleFornecedorSelect (fornecedor.id)}>
-                            <CCardHeader>{fornecedor.nome}</CCardHeader>
-                            <CCardImage src={isla_fornecedor} />
-                          </CCard>
-                        </CCol>);
-                      })}
-                    {/* <CCol lg={4} key='2'>
-                      <CCard color={ selectedFornecedor === '2' ? 'success' : 'light'} textColor={ selectedFornecedor === '2' ? 'white' : ''} className="mb-3" onClick={() => handleFornecedorSelect ('2')}>
-                      <CCardHeader>Top Seed</CCardHeader>
-                        <CCardImage src={top_seed__fornecedor} />
-                    </CCard>
-                  </CCol> */}
-                </CRow>
-              </DocsExample>
-              )}
-            
-              {activeStep === 2 && (
-                selectedCategory === '1' && (
-                  <CContainer>
+          {activeStep === 1 && (
+            <CCol xs={12}>
+              <CCard className="mb-4">
+                <CCardHeader>
+                  <strong>{stepLabels[activeStep].title} - </strong>
+                  <small>{stepLabels[activeStep].subtitle}</small>
+                </CCardHeader>
+                <CCardBody>
+                  <DocsExample href="components/card/#background-and-color">
                     <CRow>
-                      <CCol md={5}>
+                        {fornecedores.records.map((fornecedor) => {
+                          return (
+                          <CCol lg={4} key='1'>
+                            <CCard key={fornecedor.id} color={ selectedFornecedor === fornecedor.id ? 'success' : 'light'} textColor={ selectedFornecedor === fornecedor.id ? 'white' : ''} className="mb-3" onClick={() => handleFornecedorSelect (fornecedor.id)}>
+                              <CCardHeader>{fornecedor.nome}</CCardHeader>
+                              <CCardImage src={isla_fornecedor} />
+                            </CCard>
+                          </CCol>);
+                        })}
+                    </CRow>
+                  </DocsExample>
+                </CCardBody>
+              </CCard>
+            </CCol>
+          )}
+            
+          {activeStep === 2 && (
+            selectedCategory === '1' && (
+              <CRow>
+                <CCol xs={8}>
+                  <CCard className="mb-4">
+                    <CCardHeader>
+                      <strong>{stepLabels[2].title} - </strong>
+                      <small>{stepLabels[2].subtitle}</small>
+                    </CCardHeader>
+                    <CCardBody>
+                      <CRow>
+                      <CCol md={7}>
                         <CFormInput
                               type="text"
                               id="nome"
@@ -273,7 +323,7 @@ const handleBack = (e) => {
                               className={stepErrors[activeStep] && (!formData.nome) ? 'is-invalid' : ''}
                             />
                       </CCol>
-                      <CCol md={4}>
+                      <CCol md={5}>
                         <CFormInput
                                 type="text"
                                 id="variedade"
@@ -285,8 +335,17 @@ const handleBack = (e) => {
                                 className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
                               />
                       </CCol>
-                      <CCol md={4}>
-                      <CFormInput
+                      <CCol md={12}  xs={{ gutterY: 5}}>
+                        <CFormTextarea
+                          id="descricao"
+                          value={formData.descricao}
+                          floatingLabel="Descricao"                          
+                          onChange={handleChange}
+                          style={{ minHeight: '200px' }} // Altura mínima
+                          className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
+                          required
+                        ></CFormTextarea>
+                      {/* <CFormInput
                                 type="text"
                                 id="descricao"
                                 floatingClassName="mb-3"
@@ -295,9 +354,9 @@ const handleBack = (e) => {
                                 onChange={handleChange}
                                 className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
                                 required
-                              />
+                              /> */}
                       </CCol>
-                      <CCol md={2}>
+                      <CCol md={3}>
                       <CFormInput
                             type="number"
                             id="quantidade"
@@ -308,13 +367,18 @@ const handleBack = (e) => {
                             className={stepErrors[activeStep] && (!formData.quantidade) ? 'is-invalid' : ''}
                           />
                       </CCol>
-                      <CCol md={2}>
+                      <CCol md={4}>
                       <CFormSelect
                             id="unidade_medida"
                             floatingLabel="Unidade de Medida"
                             aria-label="Floating label select example"
                             value={formData.unidade_medida}
-                            onChange={handleChange}
+                            onChange={(e) => {
+                              handleChange(e);
+                              if (e.target.value === '1') { // Se for saco (unidade 1), abre o modal
+                                handleOpenAdditionalFieldsModal();
+                              }
+                            }}
                             className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'is-invalid' : ''}
                             required
                           >
@@ -326,7 +390,7 @@ const handleBack = (e) => {
                         </CFormSelect>
                         {stepErrors[activeStep] && (!formData.unidade_medida) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
                       </CCol>
-                      <CCol md={2}>
+                      <CCol md={3}>
                         <CFormInput
                             type="number"
                             id="estoque_minimo"
@@ -338,94 +402,150 @@ const handleBack = (e) => {
                           />
                         {stepErrors[activeStep] && (!formData.estoque_minimo) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
                       </CCol>
-                    </CRow>
-                      <CCol lg={4}>
-                        <CInputGroup className="mb-3">
-                          <CInputGroupText>Dias em Pilha</CInputGroupText>
-                          <CFormInput type="number" id="dias_pilha" value={formData.dias_pilha} onChange={handleChange} required />
-                        </CInputGroup>
-                        <CInputGroup className="mb-3">
-                          <CInputGroupText>Dias em Blackout</CInputGroupText>
-                          <CFormInput type="number" id="dias_blackout" value={formData.dias_blackout} onChange={handleChange} required />
-                        </CInputGroup>
-                        <CInputGroup className="mb-3">
-                          <CInputGroupText>Dias até a Colheita</CInputGroupText>
-                          <CFormInput type="number" id="dias_colheita" value={formData.dias_colheita} onChange={handleChange} required />
-                        </CInputGroup>
-                        <CInputGroup className="mb-3">
-                          <CInputGroupText>Hidratação</CInputGroupText>
-                          <CFormSelect id="hidratacao" value={formData.hidratacao} onChange={handleChange} required>
-                            <option value="Irrigação">Irrigação</option>
-                            <option value="Aspersão">Aspersão</option>
+                      </CRow>
+                    </CCardBody>
+                  </CCard>
+                </CCol>
+                <CCol xs={4}>
+                  <CCard className="mb-4">
+                    <CCardHeader>
+                      <strong>Especificação</strong>
+                    </CCardHeader>
+                    <CCardBody>
+                      <CInputGroup className="mb-3">
+                        <CInputGroupText>Dias em Pilha</CInputGroupText>
+                        <CFormInput type="number" id="dias_pilha" value={formData.dias_pilha} onChange={handleChange} required />
+                      </CInputGroup>
+                      <CInputGroup className="mb-3">
+                        <CInputGroupText>Dias em Blackout</CInputGroupText>
+                        <CFormInput type="number" id="dias_blackout" value={formData.dias_blackout} onChange={handleChange} required />
+                      </CInputGroup>
+                      <CInputGroup className="mb-3">
+                        <CInputGroupText>Dias até a Colheita</CInputGroupText>
+                        <CFormInput type="number" id="dias_colheita" value={formData.dias_colheita} onChange={handleChange} required />
+                      </CInputGroup>
+                      <CInputGroup className="mb-3">
+                        <CInputGroupText>Hidratação</CInputGroupText>
+                        <CFormSelect id="hidratacao" value={formData.hidratacao} onChange={handleChange} required>
+                          <option value="Irrigação">Irrigação</option>
+                          <option value="Aspersão">Aspersão</option>
                           </CFormSelect>
-                        </CInputGroup>
-                        <CFormCheck label="Colocar peso" value={formData.colocar_peso}/>
-                        <CFormCheck label="Substrato (cobertura)" value={formData.substrato}/>
-                      </CCol>
-                </CContainer>
-                )
+                      </CInputGroup>
+                      <CFormCheck label="Colocar peso" value={formData.colocar_peso}/>
+                      <CFormCheck label="Substrato (cobertura)" value={formData.substrato}/>
+                    </CCardBody>
+                  </CCard>
+                </CCol>
+              </CRow>
+              //   <CCol lg={4}>
+              //     <CCard className="mb-4">
+              //       <CCardHeader>
+              //         <strong>{stepLabels[activeStep].title} - </strong>
+              //         <small>{stepLabels[activeStep].subtitle}</small>
+              //       </CCardHeader>
+              //       <CCardBody>
+              //     <CInputGroup className="mb-3">
+              //       <CInputGroupText>Dias em Pilha</CInputGroupText>
+              //       <CFormInput type="number" id="dias_pilha" value={formData.dias_pilha} onChange={handleChange} required />
+              //     </CInputGroup>
+              //     <CInputGroup className="mb-3">
+              //       <CInputGroupText>Dias em Blackout</CInputGroupText>
+              //       <CFormInput type="number" id="dias_blackout" value={formData.dias_blackout} onChange={handleChange} required />
+              //     </CInputGroup>
+              //     <CInputGroup className="mb-3">
+              //       <CInputGroupText>Dias até a Colheita</CInputGroupText>
+              //       <CFormInput type="number" id="dias_colheita" value={formData.dias_colheita} onChange={handleChange} required />
+              //     </CInputGroup>
+              //     <CInputGroup className="mb-3">
+              //       <CInputGroupText>Hidratação</CInputGroupText>
+              //       <CFormSelect id="hidratacao" value={formData.hidratacao} onChange={handleChange} required>
+              //         <option value="Irrigação">Irrigação</option>
+              //         <option value="Aspersão">Aspersão</option>
+              //       </CFormSelect>
+              //     </CInputGroup>
+              //     <CFormCheck label="Colocar peso" value={formData.colocar_peso}/>
+              //     <CFormCheck label="Substrato (cobertura)" value={formData.substrato}/>
+              //     </CCardBody>
+              // </CCol>L
+              
+              )
 
-                ||
-                selectedCategory === '2' && (
-                  <CContainer>
+              ||
+              selectedCategory === '2' && (
+                <CCol xs={12}>
+                  <CCard className="mb-4">
+                    <CCardHeader>
+                      <strong>{stepLabels[activeStep].title} - </strong>
+                      <small>{stepLabels[activeStep].subtitle}</small>
+                    </CCardHeader>
+                    <CCardBody>
                       <CCol md={6}>
                         <CFormInput
-                                type="text"
-                                id="descricao"
-                                floatingClassName="mb-3"
-                                floatingLabel="Descricao"
-                                value={formData.descricao}
-                                onChange={handleChange}
-                                className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
-                                required
-                              />
+                          type="text"
+                          id="descricao"
+                          floatingClassName="mb-3"
+                          floatingLabel="Descricao"
+                          value={formData.descricao}
+                          onChange={handleChange}
+                          className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
+                          required
+                        />
                       </CCol>
                       <CCol md={2}>
-                      <CFormInput
-                            type="number"
-                            id="quantidade"
-                            floatingClassName="mb-3"
-                            floatingLabel="Quantidade"
-                            value={formData.quantidade}
-                            onChange={handleChange} required
-                            className={stepErrors[activeStep] && (!formData.quantidade) ? 'is-invalid' : ''}
-                          />
+                        <CFormInput
+                          type="number"
+                          id="quantidade"
+                          floatingClassName="mb-3"
+                          floatingLabel="Quantidade"
+                          value={formData.quantidade}
+                          onChange={handleChange} required
+                          className={stepErrors[activeStep] && (!formData.quantidade) ? 'is-invalid' : ''}
+                        />
                       </CCol>
                       <CCol md={4}>
-                      <CFormSelect
-                            id="unidade_medida"
-                            floatingLabel="Unidade de Medida"
-                            aria-label="Floating label select example"
-                            value={formData.unidade_medida}
-                            onChange={handleChange}
-                            size="lg"
-                            className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'is-invalid' : ''}
-                            required
-                          >
+                        <CFormSelect
+                          id="unidade_medida"
+                          floatingLabel="Unidade de Medida"
+                          aria-label="Floating label select example"
+                          value={formData.unidade_medida}
+                          onChange={handleChange}
+                          size="lg"
+                          className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'is-invalid' : ''}
+                          required
+                        >
                           <option value="" disabled>Escolha...</option>
                           <option value="sc">Sacos</option>
                           <option value="g">Gramas</option>
                           <option value="und">Unidades</option>
                           <option value="l">Litro</option>
-                        </CFormSelect>
-                      </CCol>
-                      <CCol md={2}>
+                      </CFormSelect>
+                    </CCol>
+                    <CCol md={2}>
                       <CFormInput
-                            type="number"
-                            id="estoque_minimo"
-                            floatingClassName="mb-3"
-                            floatingLabel="Estoque Mínimo"
-                            value={formData.estoque_minimo}
-                            onChange={handleChange} required
-                            className={stepErrors[activeStep] && (!formData.estoque_minimo) ? 'is-invalid' : ''}
-                          />
-                      </CCol>
-                </CContainer>
-                )
-              )}
+                        type="number"
+                        id="estoque_minimo"
+                        floatingClassName="mb-3"
+                        floatingLabel="Estoque Mínimo"
+                        value={formData.estoque_minimo}
+                        onChange={handleChange} required
+                        className={stepErrors[activeStep] && (!formData.estoque_minimo) ? 'is-invalid' : ''}
+                      />
+                    </CCol>
+                  </CCardBody>
+                </CCard>
+                </CCol>
+              )
+            )}
 
               {activeStep === 3 && (
                 selectedCategory === '1' && (
+                  <CCol xs={12}>
+                  <CCard className="mb-4">
+              <CCardHeader>
+                <strong>{stepLabels[activeStep].title} - </strong>
+                <small>{stepLabels[activeStep].subtitle}</small>
+              </CCardHeader>
+              <CCardBody>
                 <div>
                   <h2 className="text-xl font-bold">Resumo</h2>
                   <p><strong>Categoria:</strong> {categoryNames[formData.category]}</p>
@@ -440,11 +560,21 @@ const handleBack = (e) => {
                   <p><strong>Colocar Peso:</strong> {formData.colocar_peso ? "Sim" : "Não"}</p>
                   <p><strong>Substrato:</strong> {formData.substrato ? "Sim" : "Não"}</p>
                 </div>
+                </CCardBody>
+                </CCard>
+              </CCol>
               )
             )
               }
               {activeStep === 3 && (
                 selectedCategory === '2' && (
+                  <CCol xs={12}>
+                  <CCard className="mb-4">
+              <CCardHeader>
+                <strong>{stepLabels[activeStep].title} - </strong>
+                <small>{stepLabels[activeStep].subtitle}</small>
+              </CCardHeader>
+              <CCardBody>
                 <div>
                   <h2 className="text-xl font-bold">Resumo</h2>
                   <p><strong>Categoria:</strong> {categoryNames[formData.category]}</p>
@@ -453,6 +583,9 @@ const handleBack = (e) => {
                   <p><strong>Unidade de Medida:</strong> {formData.unidade_medida}</p>
                   <p><strong>Estoque Mínimo:</strong> {formData.estoque_minimo}</p>
                 </div>
+                </CCardBody>
+                </CCard>
+                </CCol>
               )
             )
               }
@@ -473,12 +606,53 @@ const handleBack = (e) => {
                 </CCol>
               )}
             </CRow>
-            </CCardBody>
-          </CCard>
-        </CCol>
         
       </CForm>
+      {/* Modal para campos adicionais */}
+      <CModal visible={showAdditionalFieldsModal} onClose={handleCloseAdditionalFieldsModal}>
+        <CModalHeader closeButton>
+          <strong>Informações Adicionais (Saco)</strong>
+        </CModalHeader>
+        <CModalBody>
+          <CFormInput
+            type="number"
+            id="quantidade_inicial"
+            floatingClassName="mb-3"
+            floatingLabel="Quantidade Inicial"
+            value={additionalFields.quantidade_inicial}
+            onChange={handleAdditionalFieldsChange}
+          />
+          <CFormSelect
+            id="unidade_medida_conteudo"
+            floatingLabel="Unidade de Medida do Conteúdo"
+            value={additionalFields.unidade_medida_conteudo}
+            onChange={handleAdditionalFieldsChange}
+          >
+            <option value="g">Gramas</option>
+            <option value="kg">Kilogramas</option>
+            {/* ... outras opções */}
+          </CFormSelect>
+          <CFormInput
+            type="number"
+            id="quantidade_consumida"
+            floatingClassName="mb-3"
+            floatingLabel="Quantidade Consumida"
+            value={additionalFields.quantidade_consumida}
+            onChange={handleAdditionalFieldsChange}
+          />
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={handleCloseAdditionalFieldsModal}>
+            Fechar
+          </CButton>
+          <CButton color="primary" onClick={handleSaveAdditionalFields}>
+            Salvar
+          </CButton>
+        </CModalFooter>
+      </CModal>
     </CContainer>
+
+    
   );
 };
 
