@@ -304,7 +304,7 @@ const handleBack = (e) => {
           {activeStep === 2 && (
             selectedCategory === '1' && (
               <CRow>
-                <CCol xs={8}>
+                <CCol xs={12} md={8}>
                   <CCard className="mb-4">
                     <CCardHeader>
                       <strong>{stepLabels[2].title} - </strong>
@@ -406,7 +406,7 @@ const handleBack = (e) => {
                     </CCardBody>
                   </CCard>
                 </CCol>
-                <CCol xs={4}>
+                <CCol xs={12} md={4}>
                   <CCard className="mb-4">
                     <CCardHeader>
                       <strong>Especificação</strong>
@@ -437,36 +437,6 @@ const handleBack = (e) => {
                   </CCard>
                 </CCol>
               </CRow>
-              //   <CCol lg={4}>
-              //     <CCard className="mb-4">
-              //       <CCardHeader>
-              //         <strong>{stepLabels[activeStep].title} - </strong>
-              //         <small>{stepLabels[activeStep].subtitle}</small>
-              //       </CCardHeader>
-              //       <CCardBody>
-              //     <CInputGroup className="mb-3">
-              //       <CInputGroupText>Dias em Pilha</CInputGroupText>
-              //       <CFormInput type="number" id="dias_pilha" value={formData.dias_pilha} onChange={handleChange} required />
-              //     </CInputGroup>
-              //     <CInputGroup className="mb-3">
-              //       <CInputGroupText>Dias em Blackout</CInputGroupText>
-              //       <CFormInput type="number" id="dias_blackout" value={formData.dias_blackout} onChange={handleChange} required />
-              //     </CInputGroup>
-              //     <CInputGroup className="mb-3">
-              //       <CInputGroupText>Dias até a Colheita</CInputGroupText>
-              //       <CFormInput type="number" id="dias_colheita" value={formData.dias_colheita} onChange={handleChange} required />
-              //     </CInputGroup>
-              //     <CInputGroup className="mb-3">
-              //       <CInputGroupText>Hidratação</CInputGroupText>
-              //       <CFormSelect id="hidratacao" value={formData.hidratacao} onChange={handleChange} required>
-              //         <option value="Irrigação">Irrigação</option>
-              //         <option value="Aspersão">Aspersão</option>
-              //       </CFormSelect>
-              //     </CInputGroup>
-              //     <CFormCheck label="Colocar peso" value={formData.colocar_peso}/>
-              //     <CFormCheck label="Substrato (cobertura)" value={formData.substrato}/>
-              //     </CCardBody>
-              // </CCol>L
               
               )
 
