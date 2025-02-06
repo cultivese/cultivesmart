@@ -196,6 +196,7 @@ const handleBack = (e) => {
             <CCardBody>
               
               {activeStep === 0 && (
+                
                   <DocsExample href="components/card/#background-and-color">
                     <CRow xs={{ gutterY: 5 }} >
                       <CCol lg={4} key='1'>
@@ -238,7 +239,7 @@ const handleBack = (e) => {
               {activeStep === 1 && (
                 <DocsExample href="components/card/#background-and-color">
                   <CRow>
-                      {fornecedores.map((fornecedor) => {
+                      {fornecedores.records.map((fornecedor) => {
                         return (
                         <CCol lg={4} key='1'>
                           <CCard key={fornecedor.id} color={ selectedFornecedor === fornecedor.id ? 'success' : 'light'} textColor={ selectedFornecedor === fornecedor.id ? 'white' : ''} className="mb-3" onClick={() => handleFornecedorSelect (fornecedor.id)}>
@@ -428,7 +429,7 @@ const handleBack = (e) => {
                 <div>
                   <h2 className="text-xl font-bold">Resumo</h2>
                   <p><strong>Categoria:</strong> {categoryNames[formData.category]}</p>
-                  <p><strong>Fornecedor:</strong> {fornecedores[0].nome}</p>
+                  <p><strong>Fornecedor:</strong> {fornecedores.records[0].nome}</p>
                   <p><strong>Descrição:</strong> {formData.descricao}</p>
                   <p><strong>Unidade de Medida:</strong> {formData.unidade_medida}</p>
                   <p><strong>Estoque Mínimo:</strong> {formData.estoque_minimo}</p>
@@ -447,7 +448,7 @@ const handleBack = (e) => {
                 <div>
                   <h2 className="text-xl font-bold">Resumo</h2>
                   <p><strong>Categoria:</strong> {categoryNames[formData.category]}</p>
-                  <p><strong>Fornecedor:</strong> {fornecedores[0].nome}</p>
+                  <p><strong>Fornecedor:</strong> {fornecedores.records[0].nome}</p>
                   <p><strong>Dados Básicos:</strong> {formData.descricao}</p>
                   <p><strong>Unidade de Medida:</strong> {formData.unidade_medida}</p>
                   <p><strong>Estoque Mínimo:</strong> {formData.estoque_minimo}</p>

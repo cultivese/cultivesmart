@@ -1,92 +1,66 @@
+
 import React, { useEffect, useState } from 'react'
-import {
-  CCard,
-  CCardBody,
-  CCardHeader,
-  CCol,
-  CRow,
-  CTable,
-  CTableBody,
-  CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
-  CTabContent,
-  CTabPane,
-  CSpinner,
-} from '@coreui/react'
+import { CSmartTable } from '@coreui/react-pro'
 
 const FornecedoresListar = () => {
-  const [fornecedores, setFornecedores] = useState([]) // Estado para armazenar os fornecedores
-  const [loading, setLoading] = useState(true) // Estado para gerenciar o carregamento
+  const [activePage, setActivePage] = useState(3)
+  const [columnFilter, setColumnFilter] = useState({})
+  const [columnSorter, setColumnSorter] = useState()
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [loading, setLoading] = useState(false)
+  const [users, setUsers] = useState([])
+  const [records, setRecords] = useState(0)
+
+  const columns = [
+    { key: 'id', _style: { minWidth: '130px' } },
+    { key: 'nome', _style: { minWidth: '130px' } },
+    { key: 'cnpj', _style: { minWidth: '130px' } },
+    { key: 'telefone', _style: { minWidth: '130px' } },
+    'email',
+    { key: 'cidade', _style: { minWidth: '120px' } },
+    { key: 'estado', label: 'UF' },
+  ]
 
   useEffect(() => {
-    const fetchFornecedores = async () => {
-      try {
-        const response = await fetch('https://backend.cultivesmart.com.br/api/fornecedores') // URL da API
-        if (!response.ok) {
-          throw new Error('Erro ao buscar fornecedores.')
-        }
-        const data = await response.json() // Converte a resposta em JSON
-        setFornecedores(data) // Define os fornecedores no estado
-      } catch (error) {
-        console.error(error.message)
-        alert('Não foi possível carregar os fornecedores.')
-      } finally {
-        setLoading(false) // Finaliza o carregamento
-      }
-    }
+    const fetchData = async () => {
 
-    fetchFornecedores()
-  }, [])
+    try {
+      setLoading(true)
+
+      const response = await fetch(
+        `https://backend.cultivesmart.com.br/api/fornecedores`, //?offset=${offset}&limit=${itemsPerPage}&${params}`,
+      )
+
+      const result = await response.json()
+
+      setRecords(result.number_of_matching_records)
+      setUsers(result.number_of_matching_records ? result.records : [])
+
+    } catch (error) {
+      console.error('Error fetching users:', error)
+      setUsers([]) // Optionally show an error state
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  fetchData()
+  }, [activePage, columnFilter, columnSorter, itemsPerPage])
 
   return (
-    <CRow>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>Fornecedor</strong> <small>Listar</small>
-          </CCardHeader>
-          <CCardBody>
-            <CTabContent className={`rounded-bottom`}>
-              <CTabPane className="p-3 preview" visible>
-                {loading ? (
-                  <CSpinner color="primary" /> // Exibe um spinner enquanto carrega os dados
-                ) : (
-                  <CTable color="dark" striped>
-                    <CTableHead>
-                      <CTableRow>
-                        <CTableHeaderCell scope="col">Id</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Nome</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">CNPJ</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Data de Inclusão</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Telefone</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Email</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Ativo</CTableHeaderCell>
-                      </CTableRow>
-                    </CTableHead>
-                    <CTableBody>
-                      {fornecedores.map((fornecedor) => (
-                        <CTableRow key={fornecedor.id}>
-                          <CTableHeaderCell scope="row">{fornecedor.id}</CTableHeaderCell>
-                          <CTableDataCell>{fornecedor.nome}</CTableDataCell>
-                          <CTableDataCell>{fornecedor.cnpj}</CTableDataCell>
-                          <CTableDataCell>{new Date(fornecedor.dataInclusao).toLocaleDateString()}</CTableDataCell>
-                          <CTableDataCell>{fornecedor.telefone}</CTableDataCell>
-                          <CTableDataCell>{fornecedor.email}</CTableDataCell>
-                          <CTableDataCell>{fornecedor.ativo ? 'Sim' : 'Não'}</CTableDataCell>
-                        </CTableRow>
-                      ))}
-                    </CTableBody>
-                  </CTable>
-                )}
-              </CTabPane>
-            </CTabContent>
-          </CCardBody>
-        </CCard>
-      </CCol>
-    </CRow>
-  )
+    <CSmartTable
+      columns={columns}
+      items={users}
+      columnFilter
+      loading = {loading}
+      columnSorter
+      pagination
+      itemsPerPage={5}
+      tableProps={{
+        hover: true,
+      }}
+    />
+    ) 
 }
 
 export default FornecedoresListar

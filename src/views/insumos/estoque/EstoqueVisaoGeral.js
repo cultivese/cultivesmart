@@ -145,11 +145,12 @@ const EstoqueVisaoGeral = () => {
                         onChange={handleFilterChange}
                     >
                         <option value="">Filtrar por Fornecedor</option>
-                        {fornecedores.map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                                {cat.nome}
-                            </option>
-                        ))}
+                        {fornecedores.records && fornecedores.records.length > 0 ?
+                            fornecedores.records.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.nome}
+                                </option>
+                            )) : (<option>Nenhum fornecedor encontrado</option>)}
                     </CFormSelect>
                 </CCol>
                 <CCol md={4}>
@@ -184,48 +185,46 @@ const EstoqueVisaoGeral = () => {
             <CRow className="g-3">
                 {filteredData.map((item) => (
                     <CCol md={4} key={item.id}>
+                        <CCard style={{ width: '18rem' }}>
+                            <CCardImage orientation="top" alt={item.produto} src={item.imagem || product_default} />
+                            <CCardBody>
+                                <CCardTitle>{item.nome}</CCardTitle>
+                                <CCardText>
+                                    <p className="mb-2">
+                                        <strong>Nome:</strong> {item.nome}
+                                    </p>
+                                    <div className="mb-2">
+                                        <strong>Quantidade:</strong> {item.quantidade} {item.unidade_medida} 
+                                    </div>
+                                    <div className="mb-2">
+                                        <strong>Estoque Mínimo:</strong> {item.estoque_minimo}
+                                    </div>
+                                    <div className="mb-2">
+                                        <strong>Status:</strong>{' '}
+                                        <CBadge color={getStatusBadge(item.status)}>
+                                            {item.status}
+                                        </CBadge>
+                                    </div>
+                                </CCardText>
 
-<CCard style={{ width: '18rem' }}>
-      <CCardImage orientation="top" alt={item.produto} src={item.imagem || product_default} />
-      <CCardBody>
-        <CCardTitle>{item.nome}</CCardTitle>
-        <CCardText>
-          <p className="mb-2">
-            <strong>Nome:</strong> {item.nome}
-          </p>
-          <p className="mb-2">
-            <strong>Quantidade:</strong> {item.quantidade} {item.unidade_medida} 
-          </p>
-          <p className="mb-2">
-            <strong>Estoque Mínimo:</strong> {item.estoque_minimo}
-          </p>
-          <p className="mb-2">
-              <strong>Status:</strong>{' '}
-              <CBadge color={getStatusBadge(item.status)}>
-                  {item.status}
-              </CBadge>
-          </p>
-        </CCardText>
+                                <CButton color="primary" onClick={() => {
+                                        setModalType('registrar');
+                                        setModalData(item);
+                                        setModalVisible(true);
+                                    }}>Registrar</CButton>
 
-        <CButton color="primary" onClick={() => {
-                setModalType('registrar');
-                setModalData(item);
-                setModalVisible(true);
-            }}>Registrar</CButton>
-
-        <CButton color="danger" onClick={() => {
-                setModalType('saida');
-                setModalData(item);
-                setModalVisible(true);
-            }}>Dar Saída</CButton>
-      </CCardBody>
-    </CCard>
-
+                                <CButton color="danger" onClick={() => {
+                                        setModalType('saida');
+                                        setModalData(item);
+                                        setModalVisible(true);
+                                    }}>Dar Saída</CButton>
+                            </CCardBody>
+                        </CCard>
                     </CCol>
                 ))}
-            </CRow>
-                  </CCardBody>
-              </CCard>
+                </CRow>
+                </CCardBody>
+            </CCard>
           </CCol>
 
           <CModal visible={modalVisible} onClose={handleModalClose}>
@@ -234,12 +233,12 @@ const EstoqueVisaoGeral = () => {
               </CModalHeader>
               <CModalBody>
                   <CCol>
-                      <p>
+                      <div>
                           <strong>Produto:</strong> {modalData?.produto}
-                      </p>
-                      <p>
+                      </div>
+                      <div>
                           <strong>Quantidade Atual:</strong> {modalData?.quantidade} {modalData?.unidade}
-                      </p>
+                      </div>
                       <CFormInput type="number" placeholder="Quantidade" min="1" />
                   </CCol>
               </CModalBody>

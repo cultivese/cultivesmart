@@ -26,13 +26,16 @@ import {
 
 const InsumosListar = () => {
   const [insumos, setInsumos] = useState([])
+  const [filteredInsumos, setFilteredInsumos] = useState([])
   const [loading, setLoading] = useState(true)
   const [modalVisible, setModalVisible] = useState(false)
   const [selectedInsumo, setSelectedInsumo] = useState(null)
   const [fornecedores, setFornecedores] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [filters, setFilters] = useState({
-        categoria: '',
+    categoria: '',
+    fornecedor: '',
+    produto: '',
     });
   
   const handleFilterChange = (e) => {
@@ -55,7 +58,7 @@ const InsumosListar = () => {
       try {
           const response = await fetch('https://backend.cultivesmart.com.br/api/fornecedores');
           const data = await response.json();
-          setFornecedores(data);
+          setFornecedores(data.records);
       } catch (error) {
           console.error('Erro ao buscar fornecedores:', error);
       }
@@ -81,6 +84,31 @@ const InsumosListar = () => {
     fetchCategorias();
     fetchInsumos()
   }, [])
+
+  useEffect(() => {
+    // Este useEffect é executado quando os filtros mudam
+    applyFilters();
+  }, [filters]);
+
+  const applyFilters = () => {
+    let filtered = insumos;
+
+    if (filters.categoria) {
+      filtered = filtered.filter((insumo) => insumo.category === filters.categoria);
+    }
+
+    if (filters.fornecedor) {
+      filtered = filtered.filter((insumo) => insumo.fornecedor.id === parseInt(filters.fornecedor)); // Converte para número
+    }
+
+    if (filters.produto) {
+      filtered = filtered.filter((insumo) =>
+        insumo.nome.toLowerCase().includes(filters.produto.toLowerCase())
+      );
+    }
+
+    setFilteredInsumos(filtered);
+  };
 
   const handleRowClick = (insumo) => {
     setSelectedInsumo(insumo)
@@ -135,7 +163,7 @@ const InsumosListar = () => {
                   />
                 </CCol>
                 <CCol md={1}>
-                  <CButton type="button" color="primary">
+                  <CButton type="button" color="primary" onClick={applyFilters}> {/* Chama applyFilters ao clicar no botão */}
                     Filtrar
                   </CButton>
                 </CCol>
@@ -162,11 +190,7 @@ const InsumosListar = () => {
                     </CTableHead>
                     <CTableBody>
                       {insumos.map((insumo) => (
-                        <CTableRow
-                          key={insumo.id}
-                          onClick={() => handleRowClick(insumo)} // Adiciona o evento onClick
-                          style={{ cursor: 'pointer' }} // Estilo para indicar que é clicável
-                        >
+                        <CTableRow key={insumo.id} onClick={() => handleRowClick(insumo)}>
                           <CTableHeaderCell scope="row">{insumo.id}</CTableHeaderCell>
                           <CTableDataCell>{insumo.nome}</CTableDataCell>
                           <CTableDataCell>{insumo.category}</CTableDataCell>

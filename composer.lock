@@ -1,0 +1,72 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "e4c7c848fb4221d427ab933e942f0239",
+    "packages": [
+        {
+            "name": "coreui/coreui-pro",
+            "version": "v5.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/coreui/coreui-pro.git",
+                "reference": "4e5ca2b531f6fcfdf86fd2aa3b2e21438ab6ae31"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/coreui/coreui-pro/zipball/4e5ca2b531f6fcfdf86fd2aa3b2e21438ab6ae31",
+                "reference": "4e5ca2b531f6fcfdf86fd2aa3b2e21438ab6ae31",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "SEE LICENSE IN LICENSE"
+            ],
+            "authors": [
+                {
+                    "name": "The CoreUI Team",
+                    "homepage": "https://github.com/orgs/coreui/people"
+                }
+            ],
+            "description": "The most popular front-end framework for developing responsive, mobile-first projects on the web rewritten and maintain by the CoreUI Team",
+            "homepage": "https://coreui.io/",
+            "keywords": [
+                "JS",
+                "css",
+                "framework",
+                "front-end",
+                "mobile-first",
+                "responsive",
+                "sass",
+                "web"
+            ],
+            "support": {
+                "issues": "https://github.com/coreui/coreui/issues",
+                "source": "https://github.com/coreui/coreui-pro/tree/v5.9.0"
+            },
+            "funding": [
+                {
+                    "url": "https://coreui.io/pricing/?support=true",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://opencollective.com/coreui",
+                    "type": "open_collective"
+                }
+            ],
+            "time": "2025-01-06T14:01:08+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {},
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
+}
