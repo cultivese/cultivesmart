@@ -600,16 +600,7 @@ const handleBack = (e) => {
           >
             <option value="g">Gramas</option>
             <option value="kg">Kilogramas</option>
-            {/* ... outras opções */}
           </CFormSelect>
-          <CFormInput
-            type="number"
-            id="quantidade_consumida"
-            floatingClassName="mb-3"
-            floatingLabel="Quantidade Consumida"
-            value={additionalFields.quantidade_consumida}
-            onChange={handleAdditionalFieldsChange}
-          />
         </CModalBody>
         <CModalFooter>
           <CButton color="secondary" onClick={handleCloseAdditionalFieldsModal}>
