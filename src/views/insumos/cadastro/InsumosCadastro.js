@@ -78,6 +78,26 @@ const InsumosCadastro = () => {
     '3': 'Substrato',
   };
 
+  const [showSubstratoDropdown, setShowSubstratoDropdown] = useState(false);
+  const [selectedSubstratos, setSelectedSubstratos] = useState([]); // Array para armazenar os substratos selecionados
+
+  const substratosOptions = [
+    { value: 'argiloso', label: 'Argiloso' },
+    { value: 'arenoso', label: 'Arenoso' },
+    { value: 'humoso', label: 'Humoso' },
+    { value: 'calcario', label: 'Calcário' },
+    // ... adicione mais opções de substratos
+  ];
+
+  const handleSubstratoCheck = (event) => {
+    setShowSubstratoDropdown(event.target.checked);
+  };
+
+  const handleSubstratoSelect = (event) => {
+    const selectedOptions = Array.from(event.target.selectedOptions, (option) => option.value);
+    setSelectedSubstratos(selectedOptions);
+  };
+
   useEffect(() => {
     fetch('https://backend.cultivesmart.com.br/api/fornecedores')
       .then(response => response.json())
@@ -394,7 +414,7 @@ const handleBack = (e) => {
                                 handleOpenAdditionalFieldsModal();
                               }
                             }}
-                            className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'is-invalid' : ''}
+                            className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'mb-3 is-invalid' : 'mb-3'}
                             required
                           >
                           <option value="" disabled>Escolha...</option>
@@ -476,7 +496,28 @@ const handleBack = (e) => {
                           </CFormSelect>
                       </CInputGroup>
                       <CFormCheck disabled={!showSpecificationFields} onChange={handleChange} label="Colocar peso" value={formData.colocar_peso}/>
-                      <CFormCheck disabled={!showSpecificationFields} onChange={handleChange} label="Substrato (cobertura)" value={formData.substrato}/>
+                      <CFormCheck id="substrato" disabled={!showSpecificationFields} onChange={handleSubstratoCheck} label="Substrato (cobertura)" value={formData.substrato}/>
+
+                      {showSubstratoDropdown && ( // Condicional para exibir o dropdown
+        <CFormSelect
+          multiple // Permite selecionar múltiplos substratos
+          onChange={handleSubstratoSelect}
+          value={selectedSubstratos} // Define os substratos selecionados
+        >
+          {substratosOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </CFormSelect>
+      )}
+
+       {/* Exibe os substratos selecionados (opcional) */}
+       {selectedSubstratos.length > 0 && (
+         <div>
+           Substratos selecionados: {selectedSubstratos.join(', ')}
+         </div>
+       )}
                     </CCardBody>
                   </CCard>
                 </CCol>
