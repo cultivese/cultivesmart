@@ -42,6 +42,11 @@ const InsumosCadastro = () => {
     unidade_medida_conteudo: '',
     quantidade_consumida: '',
   });
+  const [showSpecificationFields, setShowSpecificationFields] = useState(false);
+  const [checkboxes, setCheckboxes] = useState({
+    defaultCheck1: false,
+    defaultCheck2: false,
+  });
 
   const stepLabels = [
     { title: "Categoria", subtitle: "Escolha a categoria" },
@@ -89,6 +94,10 @@ const InsumosCadastro = () => {
         [id]: type === 'checkbox' ? checked : value,
     }));
 
+    if (event.target.name === 'define_especificacao') { // Assuming this is the id of your radio button group
+      setShowSpecificationFields(value === '1'); // Show if value is '1' (Sim)
+    }
+
     // Clear error for the current field when it's changed
     setStepErrors(prevErrors => {
         const newErrors = [...prevErrors];
@@ -98,6 +107,11 @@ const InsumosCadastro = () => {
         if (activeStep === 3 && ['dias_pilha', 'dias_blackout', 'dias_colheita', 'hidratacao'].includes(id)) newErrors[activeStep] = false;
         return newErrors;
     });
+};
+
+const handleChange1 = (event) => {
+  const { value } = event.target;
+  setShowSpecificationFields(value === '1'); // Atualiza o estado com base no valor do rádio
 };
 
   const handleNext = (e) => {
@@ -287,7 +301,7 @@ const handleBack = (e) => {
                     <CRow>
                         {fornecedores.records.map((fornecedor) => {
                           return (
-                          <CCol lg={4} key='1'>
+                          <CCol lg={4} key={fornecedor.id}>
                             <CCard key={fornecedor.id} color={ selectedFornecedor === fornecedor.id ? 'success' : 'light'} textColor={ selectedFornecedor === fornecedor.id ? 'white' : ''} className="mb-3" onClick={() => handleFornecedorSelect (fornecedor.id)}>
                               <CCardHeader>{fornecedor.nome}</CCardHeader>
                               <CCardImage src={isla_fornecedor} />
@@ -339,7 +353,8 @@ const handleBack = (e) => {
                         <CFormTextarea
                           id="descricao"
                           value={formData.descricao}
-                          floatingLabel="Descricao"                          
+                          floatingLabel="Descricao" 
+                          floatingClassName="mb-3"                         
                           onChange={handleChange}
                           style={{ minHeight: '200px' }} // Altura mínima
                           className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
@@ -397,11 +412,39 @@ const handleBack = (e) => {
                             floatingClassName="mb-3"
                             floatingLabel="Estoque Mínimo"
                             value={formData.estoque_minimo}
+                            
                             onChange={handleChange} required
                             className={stepErrors[activeStep] && (!formData.estoque_minimo) ? 'is-invalid' : ''}
                           />
                         {stepErrors[activeStep] && (!formData.estoque_minimo) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
                       </CCol>
+
+                      <CCol md={4}>
+                        <div>Definir especificação?</div>
+                        <CFormCheck
+        button={{ color: 'success', variant: 'outline' }}
+        type="radio"
+        name="define_especificacao"
+        id="defaultCheck1"
+        autoComplete="off"
+        label="Sim"
+        value="1"
+        checked={showSpecificationFields}
+        onChange={handleChange1}
+      />
+      <CFormCheck
+        button={{ color: 'danger', variant: 'outline' }}
+        type="radio"
+        name="define_especificacao"
+        id="defaultCheck2"
+        autoComplete="off"
+        label="Não"
+        value="0"
+        checked={!showSpecificationFields}
+        onChange={handleChange1}
+      />
+                        </CCol>
+
                       </CRow>
                     </CCardBody>
                   </CCard>
@@ -414,25 +457,26 @@ const handleBack = (e) => {
                     <CCardBody>
                       <CInputGroup className="mb-3">
                         <CInputGroupText>Dias em Pilha</CInputGroupText>
-                        <CFormInput type="number" id="dias_pilha" value={formData.dias_pilha} onChange={handleChange} required />
+                        <CFormInput disabled={!showSpecificationFields} type="number" id="dias_pilha" value={formData.dias_pilha} onChange={handleChange} required />
                       </CInputGroup>
                       <CInputGroup className="mb-3">
                         <CInputGroupText>Dias em Blackout</CInputGroupText>
-                        <CFormInput type="number" id="dias_blackout" value={formData.dias_blackout} onChange={handleChange} required />
+                        <CFormInput disabled={!showSpecificationFields} type="number" id="dias_blackout" value={formData.dias_blackout} onChange={handleChange} required />
                       </CInputGroup>
                       <CInputGroup className="mb-3">
                         <CInputGroupText>Dias até a Colheita</CInputGroupText>
-                        <CFormInput type="number" id="dias_colheita" value={formData.dias_colheita} onChange={handleChange} required />
+                        <CFormInput disabled={!showSpecificationFields} type="number" id="dias_colheita" value={formData.dias_colheita} onChange={handleChange} required />
                       </CInputGroup>
                       <CInputGroup className="mb-3">
                         <CInputGroupText>Hidratação</CInputGroupText>
-                        <CFormSelect id="hidratacao" value={formData.hidratacao} onChange={handleChange} required>
+                        <CFormSelect disabled={!showSpecificationFields} id="hidratacao" value={formData.hidratacao} onChange={handleChange} required>
+                          <option value="">Escolha...</option>
                           <option value="Irrigação">Irrigação</option>
                           <option value="Aspersão">Aspersão</option>
                           </CFormSelect>
                       </CInputGroup>
-                      <CFormCheck label="Colocar peso" value={formData.colocar_peso}/>
-                      <CFormCheck label="Substrato (cobertura)" value={formData.substrato}/>
+                      <CFormCheck disabled={!showSpecificationFields} onChange={handleChange} label="Colocar peso" value={formData.colocar_peso}/>
+                      <CFormCheck disabled={!showSpecificationFields} onChange={handleChange} label="Substrato (cobertura)" value={formData.substrato}/>
                     </CCardBody>
                   </CCard>
                 </CCol>
@@ -501,6 +545,7 @@ const handleBack = (e) => {
                         className={stepErrors[activeStep] && (!formData.estoque_minimo) ? 'is-invalid' : ''}
                       />
                     </CCol>
+
                   </CCardBody>
                 </CCard>
                 </CCol>
