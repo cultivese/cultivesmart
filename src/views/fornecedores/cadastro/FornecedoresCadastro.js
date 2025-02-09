@@ -1,4 +1,4 @@
-import React, { useState, useRef  } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import InputMask from 'react-input-mask'
 import {
   CButton,
@@ -43,7 +43,6 @@ const FornecedoresCadastro = () => {
   const navigate = useNavigate()
   const hiddenFileInput = useRef(null);
 
-
   const handleChange = (e) => {
     const { id, value } = e.target
     setFormData((prevData) => ({
@@ -54,11 +53,16 @@ const FornecedoresCadastro = () => {
 
   const handleLogoChange = (event) => {
     const file = event.target.files[0];
+
     setFormData((prevData) => ({
         ...prevData,
         logo: file,
-        logoUrl: URL.createObjectURL(file), // Pré-visualização da imagem
-    }));
+        logoUrl: URL.createObjectURL(file),
+    }), () => {
+        console.log(formData); // Agora o estado estará atualizado
+    });
+
+    console.log(formData)
   };
 
   const handleImageClick = () => {
@@ -72,23 +76,26 @@ const FornecedoresCadastro = () => {
       event.stopPropagation()
     } else {
       try {
+
+        console.log(formData);
+        
         const formDataToSend = new FormData(); // Use FormData para enviar arquivos
 
         for (const key in formData) {
-          // Certifique-se de anexar corretamente a logo
-          if (key === "logo" && formData[key]) {
-            formDataToSend.append(key, formData[key]); 
-          } else {
-            formDataToSend.append(key, formData[key]);
-          }
+          formDataToSend.append(key, formData[key]); // Append all data to FormData
         }
 
-        const response = await fetch('https://backend.cultivesmart.com.br/api/fornecedores', {
+        console.log(formDataToSend.get('logo')); // Verifique se o arquivo logo está no FormData
+
+
+        const response = await fetch('http://localhost:53621/api/fornecedores', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
+          // headers: {
+          //   'Content-Type': 'application/json',
+          // },
+          //body: JSON.stringify(formData),
+          body: formDataToSend
+          
         })
 
         if (response.ok) {
@@ -193,7 +200,7 @@ const FornecedoresCadastro = () => {
                       />
                       <CFormFeedback valid>Looks good!</CFormFeedback>
                     </CCol>
-                    <CCol md={7}>
+                    <CCol md={8}>
                       <InputMask mask="99.999.999/9999-99" value={formData.cnpj} onChange={handleChange}>
                           {(inputProps) => 
                           <CFormInput {...inputProps}
@@ -207,7 +214,7 @@ const FornecedoresCadastro = () => {
                       </InputMask>
                       <CFormFeedback valid>Looks good!</CFormFeedback>
                     </CCol>
-                    <CCol md={6}>
+                    <CCol md={7}>
                       <InputMask mask="(99) 99999-9999" value={formData.telefone} onChange={handleChange}>
                         {(inputProps) =>  <CFormInput {...inputProps} 
                             type="text"
