@@ -54,6 +54,9 @@ const FornecedoresCadastro = () => {
   const handleLogoChange = (event) => {
     const file = event.target.files[0];
 
+    console.log(event.target.files[0])
+    console.log(file)
+
     setFormData((prevData) => ({
         ...prevData,
         logo: file,
@@ -80,11 +83,13 @@ const FornecedoresCadastro = () => {
         console.log(formData);
         
         const formDataToSend = new FormData(); // Use FormData para enviar arquivos
-
+        
         for (const key in formData) {
+          console.log(key);
           formDataToSend.append(key, formData[key]); // Append all data to FormData
         }
 
+        console.log(formData);
         console.log(formDataToSend.get('logo')); // Verifique se o arquivo logo está no FormData
 
 
