@@ -55,12 +55,14 @@ const FornecedoresCadastro = () => {
   const handleLogoChange = (event) => {
     const file = event.target.files[0];
 
-    setFormData((prevData) => ({
-        ...prevData,
-        teste: file,
-        logo: file,
-        logoUrl: URL.createObjectURL(file),
-    }));
+    if (file) {
+      setFormData((prevData) => ({
+          ...prevData,
+          teste: file,
+          logo: file,
+          logoUrl: URL.createObjectURL(file),
+      }));
+    }
 
   };
 
