@@ -35,6 +35,7 @@ const FornecedoresCadastro = () => {
     cep: '',
     telefone: '',
     email: '',
+    teste: null,
     logo: null, // Armazena o arquivo da imagem do logo
     logoUrl: null, // Armazena a URL da pré-visualização do logo
   })
@@ -54,18 +55,13 @@ const FornecedoresCadastro = () => {
   const handleLogoChange = (event) => {
     const file = event.target.files[0];
 
-    console.log(event.target.files[0])
-    console.log(file)
-
     setFormData((prevData) => ({
         ...prevData,
+        teste: file,
         logo: file,
         logoUrl: URL.createObjectURL(file),
-    }), () => {
-        console.log(formData); // Agora o estado estará atualizado
-    });
+    }));
 
-    console.log(formData)
   };
 
   const handleImageClick = () => {
@@ -85,7 +81,6 @@ const FornecedoresCadastro = () => {
         const formDataToSend = new FormData(); // Use FormData para enviar arquivos
         
         for (const key in formData) {
-          console.log(key);
           formDataToSend.append(key, formData[key]); // Append all data to FormData
         }
 
