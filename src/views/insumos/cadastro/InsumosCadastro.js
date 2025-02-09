@@ -324,7 +324,10 @@ const handleBack = (e) => {
                           <CCol lg={4} key={fornecedor.id}>
                             <CCard key={fornecedor.id} color={ selectedFornecedor === fornecedor.id ? 'success' : 'light'} textColor={ selectedFornecedor === fornecedor.id ? 'white' : ''} className="mb-3" onClick={() => handleFornecedorSelect (fornecedor.id)}>
                               <CCardHeader>{fornecedor.nome}</CCardHeader>
-                              <CCardImage src={isla_fornecedor} />
+                              <CCardImage
+                                src={fornecedor.logo ? `/storage/${fornecedor.logo}` : avatar8} 
+                                onError={(e) => (e.target.src = avatar8)}
+                              />
                             </CCard>
                           </CCol>);
                         })}
