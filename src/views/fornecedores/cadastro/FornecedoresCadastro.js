@@ -58,7 +58,6 @@ const FornecedoresCadastro = () => {
     if (file) {
       setFormData((prevData) => ({
           ...prevData,
-          teste: file,
           logo: file,
           logoUrl: URL.createObjectURL(file),
       }));
@@ -77,20 +76,13 @@ const FornecedoresCadastro = () => {
       event.stopPropagation()
     } else {
       try {
-
-        console.log(formData);
-        
         const formDataToSend = new FormData(); // Use FormData para enviar arquivos
         
         for (const key in formData) {
           formDataToSend.append(key, formData[key]); // Append all data to FormData
         }
 
-        console.log(formData);
-        console.log(formDataToSend.get('logo')); // Verifique se o arquivo logo está no FormData
-
-
-        const response = await fetch('https://backend.vcultivesmart.com.br/api/fornecedores', {
+        const response = await fetch('https://backend.cultivesmart.com.br/api/fornecedores', {
           method: 'POST',
           // headers: {
           //   'Content-Type': 'application/json',
