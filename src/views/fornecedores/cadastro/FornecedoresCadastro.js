@@ -90,7 +90,7 @@ const FornecedoresCadastro = () => {
         console.log(formDataToSend.get('logo')); // Verifique se o arquivo logo está no FormData
 
 
-        const response = await fetch('http://localhost:53621/api/fornecedores', {
+        const response = await fetch('https://backend.vcultivesmart.com.br/api/fornecedores', {
           method: 'POST',
           // headers: {
           //   'Content-Type': 'application/json',
