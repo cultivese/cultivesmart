@@ -35,9 +35,7 @@ const FornecedoresCadastro = () => {
     cep: '',
     telefone: '',
     email: '',
-    teste: null,
-    logo: null, // Armazena o arquivo da imagem do logo
-    logoUrl: null, // Armazena a URL da pré-visualização do logo
+    logo: null,
   })
   const [validated, setValidated] = useState(false)
   const [toast, setToast] = useState(null)
@@ -59,7 +57,7 @@ const FornecedoresCadastro = () => {
       setFormData((prevData) => ({
           ...prevData,
           logo: file,
-          logoUrl: URL.createObjectURL(file),
+          //logoUrl: URL.createObjectURL(file),
       }));
     }
 
