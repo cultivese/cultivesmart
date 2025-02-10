@@ -325,7 +325,7 @@ const handleBack = (e) => {
                             <CCard key={fornecedor.id} color={ selectedFornecedor === fornecedor.id ? 'success' : 'light'} textColor={ selectedFornecedor === fornecedor.id ? 'white' : ''} className="mb-3" onClick={() => handleFornecedorSelect (fornecedor.id)}>
                               <CCardHeader>{fornecedor.nome}</CCardHeader>
                               <CCardImage
-                                src={`/storage/app/public/${fornecedor.logoPath}`} 
+                                src={`/api/storage/app/public/${fornecedor.logoPath}`} 
 //                                onError={(e) => (e.target.src = isla_fornecedor)}
                                 onError={(e) => console.error('Erro ao carregar imagem:', e.target.src, e)}
 
