@@ -241,9 +241,9 @@ const handleBack = (e) => {
                                   style={{cursor: 'pointer'}}>
                             <CCardImage orientation="top" src={microverdes_logo} />
                             <CCardBody>
-                              <CCardTitle>Microverde</CCardTitle>
+                              <CCardTitle>Microverdes</CCardTitle>
                               <CCardText>
-                                Rabanete, Amaranto, Acelga, Girassol, Salsa, Mostarda, Manjericão, Cebola, Cenoura
+                                  <small>Rabanete, Amaranto, Acelga, Girassol, Salsa, Mostarda, Manjericão, Cebola, Cenoura</small>
                               </CCardText>
                             </CCardBody>
                           </CCard>
@@ -257,9 +257,9 @@ const handleBack = (e) => {
                                   style={{cursor: 'pointer'}}>
                             <CCardImage orientation="top" src={flores_comestiveis} />
                             <CCardBody>
-                              <CCardTitle>Sementes</CCardTitle>
+                              <CCardTitle>Flores Comestíveis</CCardTitle>
                               <CCardText>
-                              Amor-Perfeito Gigante Suico Purpura, Amor-Perfeito Gigante Suico Branco, Amor-Perfeito Gigante Suico Roxo
+                                <small>Amor-Perfeito Gigante Suico Purpura, Amor-Perfeito Gigante Suico Branco, Amor-Perfeito Gigante Suico Roxo</small>
                               </CCardText>
                             </CCardBody>
                           </CCard>
@@ -272,9 +272,9 @@ const handleBack = (e) => {
                                   style={{cursor: 'pointer'}}>
                             <CCardImage orientation="top" src={substrato} />
                             <CCardBody>
-                              <CCardTitle>Substrato</CCardTitle>
+                              <CCardTitle>Substratos</CCardTitle>
                               <CCardText>
-                                Carolina Soil, Pó de Coco
+                                <small>Carolina Soil, Pó de Coco</small>
                               </CCardText>
                             </CCardBody>
                           </CCard>
