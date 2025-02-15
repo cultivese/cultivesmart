@@ -2,15 +2,27 @@ import React, { useState, useEffect } from 'react';
 import {
     CCard,
     CCardBody,
+    CCardGroup,
     CCardHeader,
     CCol,
+    CLink,
     CRow,
+    CWidgetStatsB,
+    CWidgetStatsC,
+    CWidgetStatsE,
+    CWidgetStatsF,
+  } from '@coreui/react-pro'
+import CIcon from '@coreui/icons-react'
+import {
     CBadge,
     CForm,
     CFormInput,
     CFormSelect,
     CButton,
     CCardTitle,
+    CInputGroup,
+    CInputGroupText,
+    CCardSubtitle,
     CCardText,
     CCardImage,
     CModal,
@@ -18,7 +30,21 @@ import {
     CModalBody,
     CModalFooter,
 } from '@coreui/react';
-
+import {
+    cilArrowRight,
+    cilBasket,
+    cilBell,
+    cilChartPie,
+    cilMoon,
+    cilLaptop,
+    cilPeople,
+    cilSettings,
+    cilSpeech,
+    cilSpeedometer,
+    cilUser,
+    cilUserFollow,
+  } from '@coreui/icons'
+import { DocsExample } from 'src/components'
 import product_default from './../../../assets/images/microverdes/product_default.png';
 
 const EstoqueVisaoGeral = () => {
@@ -116,6 +142,7 @@ const EstoqueVisaoGeral = () => {
     return (
         <CRow>
             <CCol xs={12}>
+            
                 <CCard className="mb-4">
                     <CCardHeader>
                         <strong>Estoque Atual</strong> <small>Gestão de Estoque</small>
@@ -184,42 +211,37 @@ const EstoqueVisaoGeral = () => {
             
             <CRow className="g-3">
                 {filteredData.map((item) => (
-                    <CCol md={4} key={item.id}>
-                        <CCard style={{ width: '18rem' }}>
-                            <CCardImage orientation="top" alt={item.produto} src={item.imagem || product_default} />
-                            <CCardBody>
-                                <CCardTitle>{item.nome}</CCardTitle>
-                                <CCardText>
-                                    <p className="mb-2">
-                                        <strong>Nome:</strong> {item.nome}
-                                    </p>
-                                    <div className="mb-2">
-                                        <strong>Quantidade:</strong> {item.quantidade} {item.unidade_medida} 
-                                    </div>
-                                    <div className="mb-2">
-                                        <strong>Estoque Mínimo:</strong> {item.estoque_minimo}
-                                    </div>
-                                    <div className="mb-2">
-                                        <strong>Status:</strong>{' '}
-                                        <CBadge color={getStatusBadge(item.status)}>
-                                            {item.status}
-                                        </CBadge>
-                                    </div>
-                                </CCardText>
-
-                                <CButton color="primary" onClick={() => {
-                                        setModalType('registrar');
-                                        setModalData(item);
-                                        setModalVisible(true);
-                                    }}>Registrar</CButton>
-
-                                <CButton color="danger" onClick={() => {
-                                        setModalType('saida');
-                                        setModalData(item);
-                                        setModalVisible(true);
-                                    }}>Dar Saída</CButton>
-                            </CCardBody>
-                        </CCard>
+                    <CCol md={6} key={item.id}>
+                        <CCard>
+                            <CRow className="g-0">
+                                <CCol md={3}>
+                                    <CCardImage src={product_default} />
+                                </CCol>
+                                <CCol md={7}>
+                                    <CCardBody>
+                                        <CCardTitle>{item.nome}</CCardTitle>
+                                        <CCardSubtitle>{item.descricao}</CCardSubtitle>
+                                        <CCardText>
+                                            <CRow>
+                                                {/* Quantidade: {item.quantidade} {item.unidade_medida} */}
+                                            </CRow>
+                                            <CRow>
+                                                <div><CBadge color="success">Disponível</CBadge></div>
+                                                {/* <CBadge color={getStatusBadge(item.status)}>{item.status}</CBadge>  */}
+                                            </CRow>
+                                        </CCardText>
+                                        <CInputGroup>
+                                            <CFormInput
+                                            placeholder="1"
+                                            aria-label="Recipient's username with two button addons"
+                                            />
+                                            <CButton type="button" color="secondary" variant="outline">-</CButton>
+                                            <CButton type="button" color="secondary" variant="outline">+</CButton>
+                                        </CInputGroup>
+                                    </CCardBody>
+                                </CCol>
+                            </CRow>
+                            </CCard>
                     </CCol>
                 ))}
                 </CRow>

@@ -68,35 +68,23 @@ const _nav = [
   // },
   {
     component: CNavTitle,
-    name: 'Fornecedores',
+    name: 'Estoque',
   },
   {
     component: CNavItem,
-    name: 'Cadastro',
-    to: '/fornecedores/cadastro',
+    name: 'Visão Geral',
+    to: '/estoque/visao_geral',
     icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
-    name: 'Listar',
-    to: '/fornecedores/listar',
+    name: 'Registrar',
+    to: '/estoque/registrar',
     icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
   },
-  // {
-  //   component: CNavItem,
-  //   name: 'Historico',
-  //   to: '/fornecedores/historico',
-  //   icon: <CIcon icon={cilList} customClassName="nav-icon" />,
-  // },
   {
     component: CNavTitle,
     name: 'Insumos',
-  },
-  {
-    component: CNavItem,
-    name: 'Cadastro',
-    to: '/insumos/cadastro',
-    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
@@ -106,10 +94,45 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: 'Estoque',
-    to: '/insumos/estoque',
-    icon: <CIcon icon={cilApplications} customClassName="nav-icon" />,
+    name: 'Especificação',
+    to: '/insumos/especificacao',
+    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
   },
+  {
+    component: CNavItem,
+    name: 'Cadastro',
+    to: '/insumos/cadastrar',
+    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'Fornecedores',
+  },
+  {
+    component: CNavItem,
+    name: 'Listar',
+    to: '/fornecedores/listar',
+    icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Cadastro',
+    to: '/fornecedores/cadastro',
+    icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Historico',
+  //   to: '/fornecedores/historico',
+  //   icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+  // },
+  
+  // {
+  //   component: CNavItem,
+  //   name: 'Estoque',
+  //   to: '/insumos/estoque',
+  //   icon: <CIcon icon={cilApplications} customClassName="nav-icon" />,
+  // },
   // {
   //   component: CNavTitle,
   //   name: 'Clientes',

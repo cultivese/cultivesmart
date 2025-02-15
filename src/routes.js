@@ -7,15 +7,19 @@ const VisaoGeral = React.lazy(() => import('./views/producao/VisaoGeral'))
 const NovoLote = React.lazy(() => import('./views/producao/NovoLote'))
 const EncerrarLote = React.lazy(() => import('./views/producao/EncerrarLote'))
 
-// Fornecedores
-const FornecedoresCadastro = React.lazy(() => import('./views/fornecedores/cadastro/FornecedoresCadastro'))
-const FornecedoresListar = React.lazy(() => import('./views/fornecedores/listar/FornecedoresListar'))
+// Estoque
+const EstoqueVisaoGeral = React.lazy(() => import('./views/estoque/visao_geral/EstoqueVisaoGeral'))
+const EstoqueRegistrar = React.lazy(() => import('./views/estoque/registrar/EstoqueRegistrar'))
 
 // Insumos
 const InsumosCadastro = React.lazy(() => import('./views/insumos/cadastro/InsumosCadastro'))
 const InsumosEntrada = React.lazy(() => import('./views/insumos/entrada/InsumosEntrada'))
 const InsumosSaida = React.lazy(() => import('./views/insumos/saida/InsumosSaida'))
-const EstoqueVisaoGeral = React.lazy(() => import('./views/insumos/estoque/EstoqueVisaoGeral'))
+
+// Fornecedores
+const FornecedoresListar = React.lazy(() => import('./views/fornecedores/listar/FornecedoresListar'))
+const FornecedoresCadastro = React.lazy(() => import('./views/fornecedores/cadastro/FornecedoresCadastro'))
+
 
 const ProducaoCadastro = React.lazy(() => import('./views/producao/cadastro/ProducaoCadastro'))
 
@@ -31,16 +35,22 @@ const routes = [
   // { path: '/producao/novo_lote', name: 'NovoLote', element: NovoLote },
   // { path: '/producao/encerrar_lote', name: 'EncerrarLote', element: EncerrarLote },
   
+  // Estoque
+  { path: '/estoque', name: 'Estoque', element: Cards, exact: true },
+  { path: '/estoque/visao_geral', name: 'Visão Geral', element: EstoqueVisaoGeral },
+  { path: '/estoque/registrar', name: 'Registrar', element: EstoqueRegistrar },
+
+  // Insumos
+  { path: '/insumos', name: 'Insumos', element: Cards, exact: true },
+  { path: '/insumos/listar', name: 'Listar', element: InsumosEntrada },
+  { path: '/insumos/especificacao', name: 'Especificação', element: InsumosCadastro },
+  { path: '/insumos/cadastrar', name: 'Cadastrar', element: InsumosCadastro },
+
   // Fornecedores
   { path: '/fornecedores', name: 'Fornecedores', element: Cards, exact: true },
   { path: '/fornecedores/cadastro', name: 'Cadastro', element: FornecedoresCadastro },
   { path: '/fornecedores/listar', name: 'Listar', element: FornecedoresListar },
   
-  // Insumos
-  { path: '/insumos', name: 'Insumos', element: Cards, exact: true },
-  { path: '/insumos/cadastro', name: 'Cadastro', element: InsumosCadastro },
-  { path: '/insumos/listar', name: 'Listar', element: InsumosEntrada },
-  { path: '/insumos/estoque', name: 'Estoque', element: EstoqueVisaoGeral },
 
   // Fornecedores
   { path: '/planejamento', name: 'Planejamento', element: Cards, exact: true },
