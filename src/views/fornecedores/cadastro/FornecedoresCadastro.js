@@ -57,7 +57,7 @@ const FornecedoresCadastro = () => {
       setFormData((prevData) => ({
           ...prevData,
           logo: file,
-          //logoUrl: URL.createObjectURL(file),
+          logoUrl: URL.createObjectURL(file),
       }));
     }
 
