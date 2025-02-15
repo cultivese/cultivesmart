@@ -21,7 +21,7 @@ import {
 } from '@coreui/react'
 import { useNavigate } from 'react-router-dom'
 
-import avatar8 from './../../../assets/images/microverdes/fornecedores/isla.png'
+import avatar8 from './../../../assets/images/microverdes/product_default.png'
 
 const FornecedoresCadastro = () => {
   const [formData, setFormData] = useState({
