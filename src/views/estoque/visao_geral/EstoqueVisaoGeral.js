@@ -2,18 +2,9 @@ import React, { useState, useEffect } from 'react';
 import {
     CCard,
     CCardBody,
-    CCardGroup,
     CCardHeader,
     CCol,
-    CLink,
     CRow,
-    CWidgetStatsB,
-    CWidgetStatsC,
-    CWidgetStatsE,
-    CWidgetStatsF,
-  } from '@coreui/react-pro'
-import CIcon from '@coreui/icons-react'
-import {
     CBadge,
     CForm,
     CFormInput,
@@ -21,7 +12,6 @@ import {
     CButton,
     CCardTitle,
     CInputGroup,
-    CInputGroupText,
     CCardSubtitle,
     CCardText,
     CCardImage,
@@ -29,22 +19,7 @@ import {
     CModalHeader,
     CModalBody,
     CModalFooter,
-} from '@coreui/react';
-import {
-    cilArrowRight,
-    cilBasket,
-    cilBell,
-    cilChartPie,
-    cilMoon,
-    cilLaptop,
-    cilPeople,
-    cilSettings,
-    cilSpeech,
-    cilSpeedometer,
-    cilUser,
-    cilUserFollow,
-  } from '@coreui/icons'
-import { DocsExample } from 'src/components'
+  } from '@coreui/react-pro'
 import product_default from './../../../assets/images/microverdes/product_default.png';
 
 const EstoqueVisaoGeral = () => {
@@ -150,19 +125,18 @@ const EstoqueVisaoGeral = () => {
                     <CCardBody>
 					
 					<CForm className="mb-4">
-              <CRow className="g-3">
-			          <CCol md={2}>
-                    <CFormSelect
-                        name="categoria"
-                        value={filters.categoria}
-                        onChange={handleFilterChange}
-                    >
-                        <option value="">Filtrar por Categoria</option>
-                        {categorias.map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                                {cat.descricao}
-                            </option>
-                        ))}
+                        <CRow className="g-3">
+                            <CCol md={2}>
+                            <CFormSelect
+                                name="categoria"
+                                value={filters.categoria}
+                                onChange={handleFilterChange}>
+                                <option value="">Filtrar por Categoria</option>
+                                {categorias.map((cat) => (
+                                    <option key={cat.id} value={cat.id}>
+                                        {cat.descricao}
+                                    </option>
+                                ))}
                     </CFormSelect>
                 </CCol>
                 <CCol md={3}>
@@ -211,32 +185,35 @@ const EstoqueVisaoGeral = () => {
             
             <CRow className="g-3">
                 {filteredData.map((item) => (
-                    <CCol md={6} key={item.id}>
-                        <CCard>
-                            <CRow className="g-0">
-                                <CCol md={3}>
-                                    <CCardImage src={product_default} />
+                    <CCol md={12} key={item.id}>
+                        <CCard  className="mb-3" style={{ maxHeight: '200px' }}>
+                            <CRow>
+                                <CCol xs={3} md={3}>
+                                    <CCardImage src={product_default} width={150} height={200}/>
                                 </CCol>
-                                <CCol md={7}>
+                                <CCol xs={9} md={9}>
                                     <CCardBody>
                                         <CCardTitle>{item.nome}</CCardTitle>
-                                        <CCardSubtitle>{item.descricao}</CCardSubtitle>
                                         <CCardText>
                                             <CRow>
-                                                {/* Quantidade: {item.quantidade} {item.unidade_medida} */}
+                                                <p style={{'background-color:':'red'}}>{item.descricao}</p>
                                             </CRow>
                                             <CRow>
-                                                <div><CBadge color="success">Disponível</CBadge></div>
+                                                <div><CBadge color="warning">Estoque mínimo</CBadge></div>
                                                 {/* <CBadge color={getStatusBadge(item.status)}>{item.status}</CBadge>  */}
                                             </CRow>
                                         </CCardText>
-                                        <CInputGroup>
-                                            <CFormInput
-                                            placeholder="1"
-                                            aria-label="Recipient's username with two button addons"
-                                            />
-                                            <CButton type="button" color="secondary" variant="outline">-</CButton>
-                                            <CButton type="button" color="secondary" variant="outline">+</CButton>
+                                        <CInputGroup >
+                                            <CCol xs={3} md={3}>
+                                                <CFormInput
+                                                placeholder="1"
+                                                aria-label="Recipient's username with two button addons"
+                                                />
+                                            </CCol>
+                                            <CCol xs={9} md={9}>
+                                                <CButton type="button" color="secondary" variant="outline">-</CButton>
+                                                <CButton type="button" color="secondary" variant="outline">+</CButton>
+                                            </CCol>
                                         </CInputGroup>
                                     </CCardBody>
                                 </CCol>
