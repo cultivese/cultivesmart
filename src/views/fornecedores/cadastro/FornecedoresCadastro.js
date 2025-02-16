@@ -191,7 +191,7 @@ const FornecedoresCadastro = () => {
                         />
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                       </CCol>
-                      <CCol md={8} xs={8}>
+                      <CCol md={8} xs={12}>
                         <InputMask mask="99.999.999/9999-99" value={formData.cnpj} onChange={handleChange}>
                             {(inputProps) => 
                             <CFormInput {...inputProps}
@@ -282,7 +282,7 @@ const FornecedoresCadastro = () => {
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                       </CCol>
 
-                      <CCol md={8} xs={8}>
+                      <CCol md={8} xs={12}>
                         <CFormInput
                               type="text"
                               id="bairro"
@@ -317,7 +317,7 @@ const FornecedoresCadastro = () => {
                             />
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                       </CCol>
-                      <CCol md={8} xs={8}>
+                      <CCol md={8} xs={12}>
                         <CFormInput 
                               type="text"
                               id="cidade"
