@@ -157,7 +157,7 @@ const FornecedoresCadastro = () => {
     <CForm className="row g-3 needs-validation" noValidate validated={validated} onSubmit={handleSubmit}>
       <CToaster push={toast} placement="top-end" />
       <CRow>
-        <CCol xs={7}>
+        <CCol md={7} xs={12}>
           <CCard className="mb-4">
             <CCardHeader>
               <strong>Fornecedor</strong> <small>Dados Básicos</small>
@@ -165,73 +165,72 @@ const FornecedoresCadastro = () => {
             <CCardBody>
               <CTabContent className={`rounded-bottom`}>
                 <CTabPane className="p-3 preview" visible>
-
-                <CRow className="g-0">
-                  <CCol md={4}>
-                    <CImage fluid  orientation="left" src={formData.logoUrl || avatar8}
-                      onClick={handleImageClick}
-                      style={{ cursor: 'pointer' }} />
-                      <input
-                      type="file"
-                      ref={hiddenFileInput}
-                      onChange={handleLogoChange}
-                      style={{ display: 'none' }}
-                      accept="image/*"
-                    />
-                  </CCol>
-
-                  <CCol md={{ span: 6, offset: 1 }}>
-                    <CCol md={12}>
-                      <CFormInput
-                            type="text"
-                            id="nome"
-                            floatingClassName="mb-3"
-                            floatingLabel="Nome"
-                            value={formData.nome}
-                            onChange={handleChange} required
+                  <CRow className="g-0" xs={{gutterY: 3}}>
+                    <CCol md={4}>
+                      <CImage fluid  orientation="left" src={formData.logoUrl || avatar8}
+                        onClick={handleImageClick}
+                        style={{ cursor: 'pointer' }} />
+                        <input
+                        type="file"
+                        ref={hiddenFileInput}
+                        onChange={handleLogoChange}
+                        style={{ display: 'none' }}
+                        accept="image/*"
                       />
-                      <CFormFeedback valid>Looks good!</CFormFeedback>
                     </CCol>
-                    <CCol md={8}>
-                      <InputMask mask="99.999.999/9999-99" value={formData.cnpj} onChange={handleChange}>
-                          {(inputProps) => 
-                          <CFormInput {...inputProps}
-                            type="text"
-                            id="cnpj"
-                            floatingClassName="mb-3"
-                            floatingLabel="CNPJ"
-                            value={formData.cnpj}
-                            onChange={handleChange} required
-                          />}
-                      </InputMask>
-                      <CFormFeedback valid>Looks good!</CFormFeedback>
+
+                    <CCol md={{ span: 6, offset: 1 }}>
+                    <CCol md={12} xs={12}>
+                        <CFormInput
+                              type="text"
+                              id="nome"
+                              floatingClassName="mb-3"
+                              floatingLabel="Nome"
+                              value={formData.nome}
+                              onChange={handleChange} required
+                        />
+                        <CFormFeedback valid>Looks good!</CFormFeedback>
+                      </CCol>
+                      <CCol md={8} xs={8}>
+                        <InputMask mask="99.999.999/9999-99" value={formData.cnpj} onChange={handleChange}>
+                            {(inputProps) => 
+                            <CFormInput {...inputProps}
+                              type="text"
+                              id="cnpj"
+                              floatingClassName="mb-3"
+                              floatingLabel="CNPJ"
+                              value={formData.cnpj}
+                              onChange={handleChange} required
+                            />}
+                        </InputMask>
+                        <CFormFeedback valid>Looks good!</CFormFeedback>
+                      </CCol>
+                      <CCol md={7} xs={7}>
+                        <InputMask mask="(99) 99999-9999" value={formData.telefone} onChange={handleChange}>
+                          {(inputProps) =>  <CFormInput {...inputProps} 
+                              type="text"
+                              id="telefone"
+                              floatingClassName="mb-3"
+                              floatingLabel="Telefone"
+                              value={formData.telefone}
+                              onChange={handleChange} required
+                            />}
+                        </InputMask>
+                        <CFormFeedback valid>Looks good!</CFormFeedback>
+                      </CCol>
+                      <CCol md={12} xs={12}>
+                        <CFormInput 
+                              type="email"
+                              id="email"
+                              floatingClassName="mb-3"
+                              floatingLabel="Email"
+                              value={formData.email}
+                              onChange={handleChange} required
+                            />
+                        <CFormFeedback valid>Looks good!</CFormFeedback>
+                      </CCol>
                     </CCol>
-                    <CCol md={7}>
-                      <InputMask mask="(99) 99999-9999" value={formData.telefone} onChange={handleChange}>
-                        {(inputProps) =>  <CFormInput {...inputProps} 
-                            type="text"
-                            id="telefone"
-                            floatingClassName="mb-3"
-                            floatingLabel="Telefone"
-                            value={formData.telefone}
-                            onChange={handleChange} required
-                          />}
-                      </InputMask>
-                      <CFormFeedback valid>Looks good!</CFormFeedback>
-                    </CCol>
-                      <CFormInput 
-                            type="email"
-                            id="email"
-                            floatingClassName="mb-3"
-                            floatingLabel="Email"
-                            value={formData.email}
-                            onChange={handleChange} required
-                          />
-                      <CFormFeedback valid>Looks good!</CFormFeedback>
-                    </CCol>
-                    
-                    </CRow>
-                  
+                  </CRow>
                 </CTabPane>
               </CTabContent>
             </CCardBody>
@@ -246,32 +245,32 @@ const FornecedoresCadastro = () => {
             <CCardBody>
               <CTabContent className={`rounded-bottom`}>
                 <CTabPane className="p-3 preview" visible>
-                    <CCol md={12}>
-                      <CCol md={4}>
-                        <InputMask
-                              mask="99999-999"
+                    <CRow md={12}>
+                      <CCol md={4} xs={5}>
+                          <InputMask
+                                mask="99999-999"
+                                value={formData.cep}
+                                onChange={handleChange}
+                                onBlur={handleCepBlur} // Adiciona o evento onBlur
+                              >
+                                {(inputProps) => (
+                              <CFormInput
+                              {...inputProps}
+                              type="text"
+                              id="cep"
+                              floatingClassName="mb-3"
+                              floatingLabel="CEP"
                               value={formData.cep}
                               onChange={handleChange}
-                              onBlur={handleCepBlur} // Adiciona o evento onBlur
-                            >
-                              {(inputProps) => (
-                            <CFormInput
-                            {...inputProps}
-                            type="text"
-                            id="cep"
-                            floatingClassName="mb-3"
-                            floatingLabel="CEP"
-                            value={formData.cep}
-                            onChange={handleChange}
-                            onBlur={handleCepBlur}
-                            required
-                          />
-                        )}
-                        </InputMask>
-                        <CFormFeedback valid>Looks good!</CFormFeedback>
+                              onBlur={handleCepBlur}
+                              required
+                            />
+                          )}
+                          </InputMask>
+                          <CFormFeedback valid>Looks good!</CFormFeedback>
                       </CCol>
-                      <CRow>
-                      <CCol md={8}>
+                      
+                      <CCol md={12} xs={12}>
                         <CFormInput
                             type="text"
                             id="endereco"
@@ -282,19 +281,8 @@ const FornecedoresCadastro = () => {
                             />
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                       </CCol>
-                      <CCol md={4}>
-                      <CFormInput
-                              type="text"
-                              id="numero"
-                              floatingClassName="mb-3"
-                              floatingLabel="Número"
-                              value={formData.numero}
-                              onChange={handleChange} required
-                              />
-                        <CFormFeedback valid>Looks good!</CFormFeedback>
-                      </CCol>
-                              </CRow>
-                      <CCol md={12}>
+
+                      <CCol md={8} xs={6}>
                         <CFormInput
                               type="text"
                               id="bairro"
@@ -305,8 +293,20 @@ const FornecedoresCadastro = () => {
                             />
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                       </CCol>
-                      <CRow>
-                      <CCol md={4}>
+
+                      <CCol md={4} xs={4}>
+                      <CFormInput
+                              type="text"
+                              id="numero"
+                              floatingClassName="mb-3"
+                              floatingLabel="Número"
+                              value={formData.numero}
+                              onChange={handleChange} required
+                              />
+                        <CFormFeedback valid>Looks good!</CFormFeedback>
+                      </CCol>
+                      
+                      <CCol md={4} xs={4}>
                         <CFormInput
                               type="text"
                               id="estado"
@@ -317,7 +317,7 @@ const FornecedoresCadastro = () => {
                             />
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                       </CCol>
-                      <CCol md={8}>
+                      <CCol md={8} xs={8}>
                         <CFormInput 
                               type="text"
                               id="cidade"
@@ -328,8 +328,7 @@ const FornecedoresCadastro = () => {
                             />
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                       </CCol>
-                      </CRow>
-                      </CCol>
+                    </CRow>
 
                 </CTabPane>
               </CTabContent>
