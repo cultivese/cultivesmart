@@ -39,6 +39,7 @@ const EstoqueRegistrar = () => {
         unidade_medida_conteudo: '',
         quantidade_consumida: '',
     });
+    const [insumos, setInsumos] = useState([])
     const [fornecedores, setFornecedores] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedFornecedor, setSelectedFornecedor] = useState(null);
@@ -89,7 +90,27 @@ const EstoqueRegistrar = () => {
         setFornecedores(data);
       })
       .catch(error => console.error('Erro ao buscar fornecedores:', error));
+
+      const fetchInsumos = async () => {
+        try {
+          const response = await fetch('https://backend.cultivesmart.com.br/api/insumos')
+          if (!response.ok) {
+            throw new Error('Erro ao buscar insumos.')
+          }
+          const data = await response.json()
+          setInsumos(data)
+        } catch (error) {
+          console.error(error.message)
+          alert('Não foi possível carregar os insumos.')
+        } finally {
+          setLoading(false)
+        }
+      }
+
+      fetchInsumos();
   }, []);
+
+   
 
       const handleNext = (e) => {
         e.preventDefault();
@@ -345,16 +366,18 @@ const EstoqueRegistrar = () => {
                       <small>{stepLabels[2].subtitle}</small>
                     </CCardHeader>
                     <CCardBody>
-                      <CRow xs={{ cols: 1, gutter: 4 }} md={{ cols: 5 }}>
+                      <CRow xs={{ cols: 1, gutter: 4 }} md={{ cols: 4 }}>
+
+                      {insumos.map((insumo) => (
                         <CCol xs>
                           <CCard>
                             <CCardImage orientation="top" src="./../../../src/assets/images/microverdes/beterraba.webp" />
                             <CCardBody>
-                              <CCardTitle>Card title</CCardTitle>
+                              <CCardTitle>{insumo.nome}</CCardTitle>
                               <CCardText>
-                                Beterraba Jubart
-                                500g
-                                Saco
+                                {insumo.category}
+                                {insumo.quantidade}
+                                {insumo.estoque_minimo}
                               </CCardText>
                             </CCardBody>
                             <CCardFooter>
@@ -362,102 +385,7 @@ const EstoqueRegistrar = () => {
                             </CCardFooter>
                           </CCard>
                         </CCol>
-                        <CCol xs>
-                          <CCard>
-                          <CCardImage orientation="top" src="./../../../src/assets/images/microverdes/beterraba.webp" />
-                            <CCardBody>
-                              <CCardTitle>Card title</CCardTitle>
-                              <CCardText>
-                                Beterraba Jubart
-                                500g
-                                Saco
-                              </CCardText>
-                            </CCardBody>
-                            <CCardFooter>
-                              <small className="text-body-secondary">Adicionar</small>
-                            </CCardFooter>
-                          </CCard>
-                        </CCol>
-                        <CCol xs>
-                          <CCard>
-                          <CCardImage orientation="top" src="./../../../src/assets/images/microverdes/beterraba.webp" />
-                            <CCardBody>
-                              <CCardTitle>Card title</CCardTitle>
-                              <CCardText>
-                                Beterraba Jubart
-                                500g
-                                Saco
-                              </CCardText>
-                            </CCardBody>
-                            <CCardFooter>
-                              <small className="text-body-secondary">Adicionar</small>
-                            </CCardFooter>
-                          </CCard>
-                        </CCol>
-                        <CCol xs>
-                          <CCard>
-                          <CCardImage orientation="top" src="./../../../src/assets/images/microverdes/beterraba.webp" />
-                            <CCardBody>
-                              <CCardTitle>Card title</CCardTitle>
-                              <CCardText>
-                                Beterraba Jubart
-                                500g
-                                Saco
-                              </CCardText>
-                            </CCardBody>
-                            <CCardFooter>
-                              <small className="text-body-secondary">Adicionar</small>
-                            </CCardFooter>
-                          </CCard>
-                        </CCol>
-                        <CCol xs>
-                          <CCard>
-                          <CCardImage orientation="top" src="./../../../src/assets/images/microverdes/beterraba.webp" />
-                            <CCardBody>
-                              <CCardTitle>Card title</CCardTitle>
-                              <CCardText>
-                                Beterraba Jubart
-                                500g
-                                Saco
-                              </CCardText>
-                            </CCardBody>
-                            <CCardFooter>
-                              <small className="text-body-secondary">Adicionar</small>
-                            </CCardFooter>
-                          </CCard>
-                        </CCol>
-                        <CCol xs>
-                          <CCard>
-                          <CCardImage orientation="top" src="./../../../src/assets/images/microverdes/beterraba.webp" />
-                            <CCardBody>
-                              <CCardTitle>Card title</CCardTitle>
-                              <CCardText>
-                                Beterraba Jubart
-                                500g
-                                Saco
-                              </CCardText>
-                            </CCardBody>
-                            <CCardFooter>
-                              <small className="text-body-secondary">Adicionar</small>
-                            </CCardFooter>
-                          </CCard>
-                        </CCol>
-                        <CCol xs>
-                          <CCard>
-                          <CCardImage orientation="top" src="./../../../src/assets/images/microverdes/beterraba.webp" />
-                            <CCardBody>
-                              <CCardTitle>Card title</CCardTitle>
-                              <CCardText>
-                                Beterraba Jubart
-                                500g
-                                Saco
-                              </CCardText>
-                            </CCardBody>
-                            <CCardFooter>
-                              <small className="text-body-secondary">Adicionar</small>
-                            </CCardFooter>
-                          </CCard>
-                        </CCol>
+                      ))}
                         {/* <CCol md={7}>
                           <CFormInput
                                 type="text"
