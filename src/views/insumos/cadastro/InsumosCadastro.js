@@ -307,9 +307,8 @@ const handleBack = (e) => {
                               style={{cursor: 'pointer'}}>
                               <CCardHeader>{fornecedor.nome}</CCardHeader>
                               <CCardImage
-                                src={`data:image/png;base64,${fornecedor.logoPath}`} 
-                                //src={`/storage/app/public/${fornecedor.logoPath}`} 
-//                                onError={(e) => (e.target.src = isla_fornecedor)}
+                                src={`data:image/png;base64,${fornecedor.logoPath}`}
+                                style={{cursor: 'pointer', maxHeight: '20em', width: '100%', height: '100%', objectFit: 'cover'}}
                                 onError={(e) => console.error('Erro ao carregar imagem:', e.target.src, e)}
 
                               />
@@ -334,18 +333,18 @@ const handleBack = (e) => {
                     </CCardHeader>
                     <CCardBody>
                       <CRow>
-                      <CCol md={7}>
-                        <CFormInput
-                              type="text"
-                              id="nome"
-                              floatingClassName="mb-3"
-                              floatingLabel="Nome"
-                              value={formData.nome}
-                              onChange={handleChange} required
-                              className={stepErrors[activeStep] && (!formData.nome) ? 'is-invalid' : ''}
-                            />
-                      </CCol>
-                      <CCol md={5}>
+                        <CCol md={6}>
+                          <CFormInput
+                                type="text"
+                                id="nome"
+                                floatingClassName="mb-3"
+                                floatingLabel="Nome"
+                                value={formData.nome}
+                                onChange={handleChange} required
+                                className={stepErrors[activeStep] && (!formData.nome) ? 'is-invalid' : ''}
+                              />
+                        </CCol>
+                      <CCol md={4}>
                         <CFormInput
                                 type="text"
                                 id="variedade"
@@ -357,19 +356,7 @@ const handleBack = (e) => {
                                 className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
                               />
                       </CCol>
-                      <CCol md={12}  xs={{ gutterY: 5}}>
-                        <CFormTextarea
-                          id="descricao"
-                          value={formData.descricao}
-                          floatingLabel="Descricao" 
-                          floatingClassName="mb-3"                         
-                          onChange={handleChange}
-                          style={{ minHeight: '200px' }} // Altura mínima
-                          className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
-                          required
-                        ></CFormTextarea>
-                      </CCol>
-                      <CCol md={4}>
+                      <CCol md={2}>
                       <CFormSelect
                             id="unidade_medida"
                             floatingLabel="Unidade de Medida"
@@ -392,6 +379,19 @@ const handleBack = (e) => {
                         </CFormSelect>
                         {stepErrors[activeStep] && (!formData.unidade_medida) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
                       </CCol>
+                      <CCol md={12}  xs={{ gutterY: 5}}>
+                        <CFormTextarea
+                          id="descricao"
+                          value={formData.descricao}
+                          floatingLabel="Descricao" 
+                          floatingClassName="mb-3"                         
+                          onChange={handleChange}
+                          style={{ minHeight: '200px' }} // Altura mínima
+                          className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
+                          required
+                        ></CFormTextarea>
+                      </CCol>
+                      
 
                       </CRow>
                     </CCardBody>
@@ -401,69 +401,157 @@ const handleBack = (e) => {
               )
               ||
               selectedCategory === '2' && (
-                <CCol xs={12}>
-                  <CCard className="mb-4">
+                <CRow>
+                <CCol xs={12} md={12}>
+                  <CCard className="mb-4" style={{cursor: 'pointer'}}>
                     <CCardHeader>
-                      <strong>{stepLabels[activeStep].title} - </strong>
-                      <small>{stepLabels[activeStep].subtitle}</small>
+                      <strong>{stepLabels[2].title} - </strong>
+                      <small>{stepLabels[2].subtitle}</small>
                     </CCardHeader>
                     <CCardBody>
-                      <CCol md={6}>
+                      <CRow>
+                        <CCol md={6}>
+                          <CFormInput
+                                type="text"
+                                id="nome"
+                                floatingClassName="mb-3"
+                                floatingLabel="Nome"
+                                value={formData.nome}
+                                onChange={handleChange} required
+                                className={stepErrors[activeStep] && (!formData.nome) ? 'is-invalid' : ''}
+                              />
+                        </CCol>
+                      <CCol md={4}>
                         <CFormInput
-                          type="text"
-                          id="descricao"
-                          floatingClassName="mb-3"
-                          floatingLabel="Descricao"
-                          value={formData.descricao}
-                          onChange={handleChange}
-                          className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
-                          required
-                        />
+                                type="text"
+                                id="variedade"
+                                floatingClassName="mb-3"
+                                floatingLabel="Variedade"
+                                value={formData.variedade}
+                                onChange={handleChange}
+                                required
+                                className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
+                              />
                       </CCol>
                       <CCol md={2}>
-                        <CFormInput
-                          type="number"
-                          id="quantidade"
-                          floatingClassName="mb-3"
-                          floatingLabel="Quantidade"
-                          value={formData.quantidade}
-                          onChange={handleChange} required
-                          className={stepErrors[activeStep] && (!formData.quantidade) ? 'is-invalid' : ''}
-                        />
-                      </CCol>
-                      <CCol md={4}>
-                        <CFormSelect
-                          id="unidade_medida"
-                          floatingLabel="Unidade de Medida"
-                          aria-label="Floating label select example"
-                          value={formData.unidade_medida}
-                          onChange={handleChange}
-                          size="lg"
-                          className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'is-invalid' : ''}
-                          required
-                        >
+                      <CFormSelect
+                            id="unidade_medida"
+                            floatingLabel="Unidade de Medida"
+                            aria-label="Floating label select example"
+                            value={formData.unidade_medida}
+                            onChange={(e) => {
+                              handleChange(e);
+                              if (e.target.value === '1') { // Se for saco (unidade 1), abre o modal
+                                handleOpenAdditionalFieldsModal();
+                              }
+                            }}
+                            className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'mb-3 is-invalid' : 'mb-3'}
+                            required
+                          >
                           <option value="" disabled>Escolha...</option>
-                          <option value="sc">Sacos</option>
-                          <option value="g">Gramas</option>
-                          <option value="und">Unidades</option>
-                          <option value="l">Litro</option>
-                      </CFormSelect>
-                    </CCol>
-                    <CCol md={2}>
-                      <CFormInput
-                        type="number"
-                        id="estoque_minimo"
-                        floatingClassName="mb-3"
-                        floatingLabel="Estoque Mínimo"
-                        value={formData.estoque_minimo}
-                        onChange={handleChange} required
-                        className={stepErrors[activeStep] && (!formData.estoque_minimo) ? 'is-invalid' : ''}
-                      />
-                    </CCol>
+                          <option value="1">Sacos</option>
+                          <option value="2">Gramas</option>
+                          <option value="3">Unidades</option>
+                          <option value="4">Litro</option>
+                        </CFormSelect>
+                        {stepErrors[activeStep] && (!formData.unidade_medida) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
+                      </CCol>
+                      <CCol md={12}  xs={{ gutterY: 5}}>
+                        <CFormTextarea
+                          id="descricao"
+                          value={formData.descricao}
+                          floatingLabel="Descricao" 
+                          floatingClassName="mb-3"                         
+                          onChange={handleChange}
+                          style={{ minHeight: '200px' }} // Altura mínima
+                          className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
+                          required
+                        ></CFormTextarea>
+                      </CCol>
+                      
 
-                  </CCardBody>
-                </CCard>
+                      </CRow>
+                    </CCardBody>
+                  </CCard>
                 </CCol>
+                </CRow>
+              )
+              ||
+              selectedCategory === '3' && (
+                <CRow>
+                <CCol xs={12} md={12}>
+                  <CCard className="mb-4" style={{cursor: 'pointer'}}>
+                    <CCardHeader>
+                      <strong>{stepLabels[2].title} - </strong>
+                      <small>{stepLabels[2].subtitle}</small>
+                    </CCardHeader>
+                    <CCardBody>
+                      <CRow>
+                        <CCol md={6}>
+                          <CFormInput
+                                type="text"
+                                id="nome"
+                                floatingClassName="mb-3"
+                                floatingLabel="Nome"
+                                value={formData.nome}
+                                onChange={handleChange} required
+                                className={stepErrors[activeStep] && (!formData.nome) ? 'is-invalid' : ''}
+                              />
+                        </CCol>
+                      <CCol md={4}>
+                        <CFormInput
+                                type="text"
+                                id="variedade"
+                                floatingClassName="mb-3"
+                                floatingLabel="Variedade"
+                                value={formData.variedade}
+                                onChange={handleChange}
+                                required
+                                className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
+                              />
+                      </CCol>
+                      <CCol md={2}>
+                      <CFormSelect
+                            id="unidade_medida"
+                            floatingLabel="Unidade de Medida"
+                            aria-label="Floating label select example"
+                            value={formData.unidade_medida}
+                            onChange={(e) => {
+                              handleChange(e);
+                              if (e.target.value === '1') { // Se for saco (unidade 1), abre o modal
+                                handleOpenAdditionalFieldsModal();
+                              }
+                            }}
+                            className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'mb-3 is-invalid' : 'mb-3'}
+                            required
+                          >
+                          <option value="" disabled>Escolha...</option>
+                          <option value="1">Sacos</option>
+                          <option value="2">Gramas</option>
+                          <option value="3">Unidades</option>
+                          <option value="4">Litro</option>
+                        </CFormSelect>
+                        {stepErrors[activeStep] && (!formData.unidade_medida) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
+                      </CCol>
+                      <CCol md={12}  xs={{ gutterY: 5}}>
+                        <CFormTextarea
+                          id="descricao"
+                          value={formData.descricao}
+                          floatingLabel="Descricao" 
+                          floatingClassName="mb-3"                         
+                          onChange={handleChange}
+                          style={{ minHeight: '200px' }} // Altura mínima
+                          className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
+                          required
+                        ></CFormTextarea>
+                      </CCol>
+                      
+
+                      </CRow>
+                    </CCardBody>
+                  </CCard>
+                </CCol>
+                </CRow>
               )
             )}
 

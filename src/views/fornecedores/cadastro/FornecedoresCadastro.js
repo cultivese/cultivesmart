@@ -167,9 +167,11 @@ const FornecedoresCadastro = () => {
                 <CTabPane className="p-3 preview" visible>
                   <CRow className="g-0" xs={{gutterY: 3}}>
                     <CCol md={4}>
+                      
                       <CImage fluid  orientation="left" src={formData.logoUrl || avatar8}
                         onClick={handleImageClick}
-                        style={{ cursor: 'pointer' }} />
+                        style={{ cursor: 'pointer', maxHeight: '15em', width: '100%', objectFit: 'cover',
+                          height: '100%' }} />
                         <input
                         type="file"
                         ref={hiddenFileInput}
