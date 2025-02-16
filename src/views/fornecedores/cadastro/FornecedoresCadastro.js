@@ -246,7 +246,7 @@ const FornecedoresCadastro = () => {
               <CTabContent className={`rounded-bottom`}>
                 <CTabPane className="p-3 preview" visible>
                     <CRow md={12}>
-                      <CCol md={4} xs={5}>
+                      <CCol md={4} xs={8}>
                           <InputMask
                                 mask="99999-999"
                                 value={formData.cep}
@@ -282,7 +282,7 @@ const FornecedoresCadastro = () => {
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                       </CCol>
 
-                      <CCol md={8} xs={6}>
+                      <CCol md={8} xs={8}>
                         <CFormInput
                               type="text"
                               id="bairro"
@@ -294,7 +294,7 @@ const FornecedoresCadastro = () => {
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                       </CCol>
 
-                      <CCol md={4} xs={4}>
+                      <CCol md={4} xs={6}>
                       <CFormInput
                               type="text"
                               id="numero"
@@ -306,7 +306,7 @@ const FornecedoresCadastro = () => {
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                       </CCol>
                       
-                      <CCol md={4} xs={4}>
+                      <CCol md={4} xs={6}>
                         <CFormInput
                               type="text"
                               id="estado"
