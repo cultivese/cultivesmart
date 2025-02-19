@@ -83,13 +83,16 @@ const EstoqueRegistrar = () => {
     };
 
       
-  useEffect(() => {
-    fetch('https://backend.cultivesmart.com.br/api/fornecedores')
-      .then(response => response.json())
-      .then(data => {
-        setFornecedores(data);
-      })
-      .catch(error => console.error('Erro ao buscar fornecedores:', error));
+    useEffect(() => {
+      fetch('https://backend.cultivesmart.com.br/api/fornecedores')
+        .then(response => response.json())
+        .then(data => {
+          setFornecedores(data);
+        })
+        .catch(error => console.error('Erro ao buscar fornecedores:', error));
+    }, []);
+
+    useEffect(() => {
 
       const fetchInsumos = async () => {
         try {
@@ -108,7 +111,7 @@ const EstoqueRegistrar = () => {
       }
 
       fetchInsumos();
-  }, []);
+    }, []);
 
    
 
@@ -375,13 +378,12 @@ const EstoqueRegistrar = () => {
                             <CCardBody>
                               <CCardTitle>{insumo.nome}</CCardTitle>
                               <CCardText>
-                                {insumo.category}
-                                {insumo.quantidade}
-                                {insumo.estoque_minimo}
+                                <p>{insumo.variedade}</p>
+                                <p>{insumo.quantidade}</p>
                               </CCardText>
                             </CCardBody>
                             <CCardFooter>
-                              <small className="text-body-secondary">Adicionar</small>
+                              <small className="text-body-secondary">{insumo.category}</small>
                             </CCardFooter>
                           </CCard>
                         </CCol>

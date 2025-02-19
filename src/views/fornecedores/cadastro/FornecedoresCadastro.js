@@ -82,10 +82,6 @@ const FornecedoresCadastro = () => {
 
         const response = await fetch('https://backend.cultivesmart.com.br/api/fornecedores', {
           method: 'POST',
-          // headers: {
-          //   'Content-Type': 'application/json',
-          // },
-          //body: JSON.stringify(formData),
           body: formDataToSend
           
         })

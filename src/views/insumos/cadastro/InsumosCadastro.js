@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   CButton,
   CCard,
@@ -6,6 +6,7 @@ import {
   CCardHeader,
   CCol,
   CContainer,
+  CImage,
   CCardImage,
   CForm,
   CFormTextarea,
@@ -18,11 +19,13 @@ import {
   CRow,
   CCardTitle,
   CCardText,
+  CConditionalPortal,
 } from '@coreui/react';
 import { Stepper, Step } from 'react-form-stepper';
 import microverdes_logo from './../../../assets/images/microverdes/beterraba.webp'
 import flores_comestiveis from './../../../assets/images/microverdes/flores_comestiveis.webp'
 import substrato from  './../../../assets/images/microverdes/substrato.webp'
+import avatar8 from './../../../assets/images/microverdes/product_default.png'
 import { DocsExample } from 'src/components'
 const InsumosCadastro = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -36,7 +39,7 @@ const InsumosCadastro = () => {
     unidade_medida_conteudo: '',
     quantidade_consumida: '',
   });
-
+  const hiddenFileInput = useRef(null);
   const stepLabels = [
     { title: "Categoria", subtitle: "Escolha a categoria" },
     { title: "Fornecedor", subtitle: "Defina o fornecedor" },
@@ -72,6 +75,23 @@ const InsumosCadastro = () => {
       })
       .catch(error => console.error('Erro ao buscar fornecedores:', error));
   }, []);
+
+  const handleLogoChange = (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      setFormData((prevData) => ({
+          ...prevData,
+          logo: file,
+          logoUrl: URL.createObjectURL(file),
+      }));
+    }
+
+  };
+
+  const handleImageClick = () => {
+    hiddenFileInput.current.click();
+  };
 
   const handleChange = (event) => {
     const { id, value, type, checked } = event.target;
@@ -189,13 +209,17 @@ const handleBack = (e) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
+      const formDataToSend = new FormData(); // Use FormData para enviar arquivos
+        
+      for (const key in formData) {
+        formDataToSend.append(key, formData[key]); // Append all data to FormData
+      }
+      
       const response = await fetch('https://backend.cultivesmart.com.br/api/insumos', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        body: formDataToSend,
       });
+      
       if (response.ok) {
         alert('Insumo cadastrado com sucesso!');
         setFormData({
@@ -333,70 +357,89 @@ const handleBack = (e) => {
                     </CCardHeader>
                     <CCardBody>
                       <CRow>
-                        <CCol md={6}>
-                          <CFormInput
-                                type="text"
-                                id="nome"
-                                floatingClassName="mb-3"
-                                floatingLabel="Nome"
-                                value={formData.nome}
-                                onChange={handleChange} required
-                                className={stepErrors[activeStep] && (!formData.nome) ? 'is-invalid' : ''}
-                              />
+                        <CCol md={3}>
+                          <CImage fluid  orientation="left" src={formData.logoUrl || avatar8}
+                            onClick={handleImageClick}
+                            style={{ cursor: 'pointer', maxHeight: '17em', width: '100%', objectFit: 'cover',
+                              height: '100%' }} />
+                            <input
+                            type="file"
+                            ref={hiddenFileInput}
+                            onChange={handleLogoChange}
+                            style={{ display: 'none' }}
+                            accept="image/*"
+                          />
                         </CCol>
-                      <CCol md={4}>
-                        <CFormInput
-                                type="text"
-                                id="variedade"
-                                floatingClassName="mb-3"
-                                floatingLabel="Variedade"
-                                value={formData.variedade}
-                                onChange={handleChange}
-                                required
-                                className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
-                              />
+                        <CCol md={9}>
+                        <CRow>
+                          <CCol md={5}>
+                            <CFormInput
+                                  type="text"
+                                  id="nome"
+                                  floatingClassName="mb-3"
+                                  floatingLabel="Nome"
+                                  value={formData.nome}
+                                  onChange={handleChange} required
+                                  className={stepErrors[activeStep] && (!formData.nome) ? 'is-invalid' : ''}
+                                />
+                          </CCol>
+                          
+                          <CCol md={4}>
+                            <CFormInput
+                                    type="text"
+                                    id="variedade"
+                                    floatingClassName="mb-3"
+                                    floatingLabel="Variedade"
+                                    value={formData.variedade}
+                                    onChange={handleChange}
+                                    required
+                                    className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
+                                  />
+                          </CCol>
+                          
+                          <CCol md={3}>
+                            <CFormSelect
+                                  id="unidade_medida"
+                                  floatingLabel="Unidade de Medida"
+                                  aria-label="Floating label select example"
+                                  value={formData.unidade_medida}
+                                  onChange={(e) => {
+                                    handleChange(e);
+                                    if (e.target.value === '1') { // Se for saco (unidade 1), abre o modal
+                                      handleOpenAdditionalFieldsModal();
+                                    }
+                                  }}
+                                  className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'mb-3 is-invalid' : 'mb-3'}
+                                  required
+                                >
+                                <option value="" disabled>Escolha...</option>
+                                <option value="1">Sacos</option>
+                                <option value="2">Gramas</option>
+                                <option value="3">Unidades</option>
+                                <option value="4">Litro</option>
+                              </CFormSelect>
+                              {stepErrors[activeStep] && (!formData.unidade_medida) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
+                          </CCol>
+                          
+                          <CCol md={12}  xs={{ gutterY: 5}}>
+                            <CFormTextarea
+                              id="descricao"
+                              value={formData.descricao}
+                              floatingLabel="Descricao" 
+                              floatingClassName="mb-3"                         
+                              onChange={handleChange}
+                              style={{ minHeight: '200px' }} // Altura mínima
+                              className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
+                              required
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
                       </CCol>
-                      <CCol md={2}>
-                      <CFormSelect
-                            id="unidade_medida"
-                            floatingLabel="Unidade de Medida"
-                            aria-label="Floating label select example"
-                            value={formData.unidade_medida}
-                            onChange={(e) => {
-                              handleChange(e);
-                              if (e.target.value === '1') { // Se for saco (unidade 1), abre o modal
-                                handleOpenAdditionalFieldsModal();
-                              }
-                            }}
-                            className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'mb-3 is-invalid' : 'mb-3'}
-                            required
-                          >
-                          <option value="" disabled>Escolha...</option>
-                          <option value="1">Sacos</option>
-                          <option value="2">Gramas</option>
-                          <option value="3">Unidades</option>
-                          <option value="4">Litro</option>
-                        </CFormSelect>
-                        {stepErrors[activeStep] && (!formData.unidade_medida) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
-                      </CCol>
-                      <CCol md={12}  xs={{ gutterY: 5}}>
-                        <CFormTextarea
-                          id="descricao"
-                          value={formData.descricao}
-                          floatingLabel="Descricao" 
-                          floatingClassName="mb-3"                         
-                          onChange={handleChange}
-                          style={{ minHeight: '200px' }} // Altura mínima
-                          className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
-                          required
-                        ></CFormTextarea>
-                      </CCol>
+                    </CRow>
                       
-
-                      </CRow>
-                    </CCardBody>
-                  </CCard>
-                </CCol>
+                  </CCardBody>
+                </CCard>
+              </CCol>
               </CRow>
               )
               ||
@@ -413,7 +456,7 @@ const handleBack = (e) => {
                         <CCol md={6}>
                           <CFormInput
                                 type="text"
-                                id="nome"
+                                id="nomde"
                                 floatingClassName="mb-3"
                                 floatingLabel="Nome"
                                 value={formData.nome}
@@ -568,6 +611,8 @@ const handleBack = (e) => {
                   <h2 className="text-xl font-bold">Resumo</h2>
                   <p><strong>Categoria:</strong> {categoryNames[formData.category]}</p>
                   <p><strong>Fornecedor:</strong> {fornecedores.records[0].nome}</p>
+                  <p><strong>Nome:</strong> {formData.nome}</p>
+                  <p><strong>Variedade:</strong> {formData.variedade}</p>
                   <p><strong>Descrição:</strong> {formData.descricao}</p>
                   <p><strong>Unidade de Medida:</strong> {formData.unidade_medida}</p>
                 </div>
