@@ -54,6 +54,7 @@ const InsumosCadastro = () => {
     variedade: '',
     descricao: '',
     unidade_medida: '',
+    logo: null
   });
 
   const categoryNames = {
@@ -219,7 +220,7 @@ const handleBack = (e) => {
         method: 'POST',
         body: formDataToSend,
       });
-      
+
       if (response.ok) {
         alert('Insumo cadastrado com sucesso!');
         setFormData({
