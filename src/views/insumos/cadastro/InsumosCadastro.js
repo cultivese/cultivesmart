@@ -617,7 +617,6 @@ const handleBack = (e) => {
           )}
 
           {activeStep === 3 && (
-            selectedCategory === 1 && (
               <CCol xs={12}>
                 <CCard className="mb-4">
                   <CCardHeader>
@@ -637,32 +636,8 @@ const handleBack = (e) => {
                   </CCardBody>
                 </CCard>
               </CCol>
-              )
           )}
           
-          {activeStep === 3 && (
-            selectedCategory === 2 && (
-              <CCol xs={12}>
-                <CCard className="mb-4">
-                  <CCardHeader>
-                    <strong>{stepLabels[activeStep].title} - </strong>
-                    <small>{stepLabels[activeStep].subtitle}</small>
-                  </CCardHeader>
-                  <CCardBody>
-                    <div>
-                      <h2 className="text-xl font-bold">Resumo</h2>
-                      <p><strong>Categoria:</strong> {categoryNames[formData.category]}</p>
-                      <p><strong>Fornecedor:</strong> {fornecedores.records[0].nome}</p>
-                      <p><strong>Dados Básicos:</strong> {formData.descricao}</p>
-                      <p><strong>Unidade de Medida:</strong> {formData.unidade_medida}</p>
-                      <p><strong>Estoque Mínimo:</strong> {formData.estoque_minimo}</p>
-                    </div>
-                  </CCardBody>
-                </CCard>
-              </CCol>
-              )
-          )} 
-              
           <CRow className="mt-4">
             {activeStep > 0 && (
               <CCol>
