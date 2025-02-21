@@ -50,7 +50,7 @@ const InsumosCadastro = () => {
 
   const [formData, setFormData] = useState({
     nome:'',
-    category: '',
+    categoria_id: '',
     fornecedor_id: '',
     variedade: '',
     descricao: '',
@@ -190,11 +190,11 @@ const handleSaveAdditionalFields = () => {
   setShowAdditionalFieldsModal(false); // Fecha o modal
 };
 
-const handleCategorySelect = (category) => {
-  setSelectedCategory(category);  // Atualiza o estado da categoria selecionada
+const handleCategorySelect = (categoria_id) => {
+  setSelectedCategory(categoria_id);  // Atualiza o estado da categoria selecionada
   setFormData(prevState => ({
     ...prevState,
-    category: category  // Atualiza o valor da categoria no formData
+    categoria_id: categoria_id  // Atualiza o valor da categoria no formData
   }));
 };
 
@@ -235,7 +235,7 @@ const handleBack = (e) => {
         alert('Insumo cadastrado com sucesso!');
         setFormData({
           selectedCategory: 0,
-          category: '', fornecedor_id: '', descricao: '', unidade_medida: '',
+          categoria_id: '', fornecedor_id: '', descricao: '', unidade_medida: '',
           estoque_minimo: 0, dias_pilha: 0, dias_blackout: 0, dias_colheita: 0, hidratacao: '',
           colocar_peso: true, substrato: false
         });
@@ -626,7 +626,7 @@ const handleBack = (e) => {
                   <CCardBody>
                     <div>
                       <h2 className="text-xl font-bold">Resumo</h2>
-                      <p><strong>Categoria:</strong> {categoryNames[formData.category]}</p>
+                      <p><strong>Categoria:</strong> {categoryNames[formData.categoria_id]}</p>
                       <p><strong>Fornecedor:</strong> {fornecedores.records[0].nome}</p>
                       <p><strong>Nome:</strong> {formData.nome}</p>
                       <p><strong>Variedade:</strong> {formData.variedade}</p>
