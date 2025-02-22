@@ -22,16 +22,14 @@ import {
   CConditionalPortal,
 } from '@coreui/react';
 import { Stepper, Step } from 'react-form-stepper';
-import microverdes_logo from './../../../assets/images/microverdes/beterraba.webp'
-import flores_comestiveis from './../../../assets/images/microverdes/flores_comestiveis.webp'
-import substrato from  './../../../assets/images/microverdes/substrato.webp'
 import avatar8 from './../../../assets/images/microverdes/product_default.png'
 import { DocsExample } from 'src/components'
 const InsumosCadastro = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [fornecedores, setFornecedores] = useState([]);
-  const [categorias, setCategorias] = useState([]);  
+  const [categorias, setCategorias] = useState([]); 
+  const [unidadesMedida , setUnidadesMedida ] = useState([]);   
   const [selectedFornecedor, setSelectedFornecedor] = useState(null);
   const [stepErrors, setStepErrors] = useState([false, false, false, false, false]); // Array to track errors for each step
   const [showAdditionalFieldsModal, setShowAdditionalFieldsModal] = useState(false); // Estado para controlar o modal
@@ -76,15 +74,20 @@ const InsumosCadastro = () => {
         setCategorias(data);
       })
       .catch(error => console.error('Erro ao buscar categorias:', error));
-  }, []);
-
-  useEffect(() => {
+ 
     fetch('https://backend.cultivesmart.com.br/api/fornecedores')
       .then(response => response.json())
       .then(data => {
         setFornecedores(data);
       })
       .catch(error => console.error('Erro ao buscar fornecedores:', error));
+
+    fetch('https://backend.cultivesmart.com.br/api/unidades-medida')
+      .then(response => response.json())
+      .then(data => {
+        setUnidadesMedida(data);
+      })
+      .catch(error => console.error('Erro ao buscar unidades de medida:', error));
   }, []);
 
   const handleLogoChange = (event) => {
@@ -151,7 +154,7 @@ const handleChange1 = (event) => {
         hasErrors = true;
         newStepErrors[activeStep] = true;
     } else if (activeStep === 2 &&
-      selectedCategory === 2 && (!formData.descricao ||  !formData.unidade_medida || !formData.estoque_minimo)
+      selectedCategory === 2 && (!formData.nome.trim() ||  !formData.variedade.trim() || !formData.descricao.trim())
     ) {
         hasErrors = true;
         newStepErrors[activeStep] = true;
@@ -382,6 +385,7 @@ const handleBack = (e) => {
                           </CCol>
                           
                           <CCol md={3}>
+                          
                             <CFormSelect
                                   id="unidade_medida"
                                   floatingLabel="Unidade de Medida"
@@ -389,18 +393,21 @@ const handleBack = (e) => {
                                   value={formData.unidade_medida}
                                   onChange={(e) => {
                                     handleChange(e);
-                                    if (e.target.value === '1') { // Se for saco (unidade 1), abre o modal
+                                    if (e.target.value === "3") { // Se for saco (unidade 1), abre o modal
                                       handleOpenAdditionalFieldsModal();
                                     }
                                   }}
                                   className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'mb-3 is-invalid' : 'mb-3'}
                                   required
                                 >
-                                <option value="" disabled>Escolha...</option>
-                                <option value="1">Sacos</option>
-                                <option value="2">Gramas</option>
-                                <option value="3">Unidades</option>
-                                <option value="4">Litro</option>
+                                  <option value="" disabled>Escolha...</option>
+                                  {
+                                    unidadesMedida && unidadesMedida.map((unidadeMedida) => {
+                                      return (
+                                        <option key={unidadeMedida.id} value={unidadeMedida.id}>{unidadeMedida.descricao}</option>
+                                      )
+                                  }
+                                )}
                               </CFormSelect>
                               {stepErrors[activeStep] && (!formData.unidade_medida) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
                           </CCol>
@@ -631,7 +638,9 @@ const handleBack = (e) => {
                       <p><strong>Nome:</strong> {formData.nome}</p>
                       <p><strong>Variedade:</strong> {formData.variedade}</p>
                       <p><strong>Descrição:</strong> {formData.descricao}</p>
-                      <p><strong>Unidade de Medida:</strong> {formData.unidade_medida}</p>
+                      <p><strong>Unidade de Medida:</strong> {unidadesMedida.find(unidade => unidade.id === Number(formData.unidade_medida)).descricao}</p>
+                      <p><strong>Quantidade:</strong> {formData.quantidade_inicial} {unidadesMedida.find(unidade => unidade.id === Number(formData.unidade_medida_conteudo)).sigla}</p>
+
                     </div>
                   </CCardBody>
                 </CCard>
@@ -677,7 +686,12 @@ const handleBack = (e) => {
             value={additionalFields.unidade_medida_conteudo}
             onChange={handleAdditionalFieldsChange}
           >
-            <option value="g">Gramas</option>
+            {
+              unidadesMedida.map((unidadeMedida) => { return (
+                <option key={unidadeMedida.id} value={unidadeMedida.id}>{unidadeMedida.descricao}</option>
+              )
+              })
+            }
             <option value="kg">Kilogramas</option>
           </CFormSelect>
           </CRow>
