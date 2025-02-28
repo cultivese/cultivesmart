@@ -37,24 +37,31 @@ const InsumosEspecificacao = () => {
   
   const [insumos, setInsumos] = useState([]);  
   const [visible, setVisible] = useState(false)
-  const [diasPilha, setDiasPilha] = useState('');
-  const [diasBlackout, setDiasBlackout] = useState('');
-  const [diasColheita, setDiasColheita] = useState('');
+  const [dias_pilha, setDiasPilha] = useState('');
+  const [dias_blackout, setDiasBlackout] = useState('');
+  const [dias_colheita, setDiasColheita] = useState('');
   const [hidratacao, setHidratacao] = useState('');
-  const [colocarPeso, setColocarPeso] = useState(false);
-  const [estoqueMinimo, setEstoqueMinimo] = useState('');
-  const [activeTab, setActiveTab] = useState('microverdes'); // Estado para controlar a tab ativa
+  const [colocar_peso, setColocarPeso] = useState(false);
+  const [estoque_minimo, setEstoqueMinimo] = useState('');
+  const [activeTab, setActiveTab] = useState('todos'); // Estado para controlar a tab ativa
   const [filteredInsumos, setFilteredInsumos] = useState([]); // Novo estado para insumos filtrados
+  const [insumoSelecionado, setInsumoSelecionado] = useState(null); // Novo estado para o insumo selecionado
 
   const handleSubmit = () => {
+
+    if (!insumoSelecionado || !insumoSelecionado.id) {
+      console.error('Insumo não selecionado ou ID ausente.');
+      return; // Impede a execução do restante da função
+  }
+  
     const especificacaoData = {
-      diasPilha,
-      diasBlackout,
-      diasColheita,
+      dias_pilha,
+      dias_blackout,
+      dias_colheita,
       hidratacao,
-      colocarPeso,
-      estoqueMinimo,
-      insumoId: insumoSelecionado.id, // Supondo que você tenha o ID do insumo selecionado
+      colocar_peso,
+      estoque_minimo,
+      insumo_id: insumoSelecionado.id, // Supondo que você tenha o ID do insumo selecionado
     };
 
     fetch('https://backend.cultivesmart.com.br/api/especificacao_insumos', {
@@ -84,6 +91,26 @@ const InsumosEspecificacao = () => {
 
   }, []);
 
+  useEffect(() => {
+    if (insumoSelecionado && insumoSelecionado.especificacoes && insumoSelecionado.especificacoes.length > 0) {
+        const especificacao = insumoSelecionado.especificacoes[0];
+        setDiasPilha(especificacao.dias_pilha);
+        setDiasBlackout(especificacao.dias_blackout);
+        setDiasColheita(especificacao.dias_colheita);
+        setHidratacao(especificacao.hidratacao);
+        setColocarPeso(especificacao.colocar_peso);
+        setEstoqueMinimo(especificacao.estoque_minimo);
+    } else {
+        setDiasPilha('');
+        setDiasBlackout('');
+        setDiasColheita('');
+        setHidratacao('');
+        setColocarPeso(false);
+        setEstoqueMinimo('');
+    }
+}, [insumoSelecionado]);
+
+
   const getFilteredInsumos = (tab) => {
     if (!insumos || !insumos.records) return [];
 
@@ -97,6 +124,18 @@ const InsumosEspecificacao = () => {
 
     return [];
   };
+
+  const handleOpenModal = (insumo) => {
+
+    if (insumo && insumo.id) {
+        setInsumoSelecionado(insumo);
+        setVisible(true);
+        console.log("Insumo selecionado:", insumo); // Para debug
+    } else {
+        console.error('Insumo inválido passado para handleOpenModal:', insumo);
+    }
+
+};
 
   return (
     <CTabs activeItemKey={activeTab} onActiveItemChange={(newKey) => setActiveTab(newKey)}>
@@ -115,16 +154,23 @@ const InsumosEspecificacao = () => {
                         <CCardBody>
                           <CCardTitle>{insumo.nome}</CCardTitle>
                           <CCardSubtitle>{insumo.variedade}</CCardSubtitle>
-                          <CCardText>
-                            {insumo.unidade_medida
-                            }
-                          </CCardText>
-                          <CBadge color="warning">Especificação já definida</CBadge>
+                          <CCardText>{insumo.unidade_medida}</CCardText>
+                          {insumo.categoria_id === 1 || insumo.categoria_id === 2 ? (
+                              insumo.especificacoes && insumo.especificacoes.length > 0 ? (
+                                  <CBadge color="warning">Especificação já definida</CBadge>
+                              ) : (
+                                  <CBadge color="danger">Especificação a definir</CBadge>
+                              )
+                          ) : null}
                         </CCardBody>
+                        {
+                            (insumo.categoria_id === 1 || insumo.categoria_id === 2) ?
                         <CCardFooter className="text-center">
-                          <CButton color="primary" onClick={() => setVisible(!visible)}>
-                            Visualizar
-                          </CButton>
+                          
+                            <CButton color="primary" onClick={() => handleOpenModal(insumo)}>
+                              {insumo.especificacoes && insumo.especificacoes.length > 0 ? "Visualizar Especificação" : "Cadastrar Especificação"}
+                            </CButton>
+                            
                           <CModal
                             alignment="center"
                             visible={visible}
@@ -145,7 +191,7 @@ const InsumosEspecificacao = () => {
                                       id="basic-url"
                                       type='number'
                                       aria-describedby="basic-addon3"
-                                      value={diasPilha}
+                                      value={dias_pilha}
                                       onChange={(e) => setDiasPilha(e.target.value)}
                                     />
                                   </CInputGroup>
@@ -157,7 +203,7 @@ const InsumosEspecificacao = () => {
                                       id="basic-url"
                                       type='number'
                                       aria-describedby="basic-addon3"
-                                      value={diasBlackout}
+                                      value={dias_blackout}
                                       onChange={(e) => setDiasBlackout(e.target.value)}
                                     />
                                   </CInputGroup>
@@ -169,7 +215,19 @@ const InsumosEspecificacao = () => {
                                       id="basic-url"
                                       type='number'
                                       aria-describedby="basic-addon3"
-                                      value={diasColheita}
+                                      value={dias_colheita}
+                                      onChange={(e) => setDiasColheita(e.target.value)}
+                                    />
+                                  </CInputGroup>
+                                </CCol>
+                                <CCol md={6}>
+                                  <CInputGroup className="mb-3">
+                                    <CInputGroupText id="basic-addon3">Quantidade (g) por bandeija plantada</CInputGroupText>
+                                    <CFormInput
+                                      id="basic-url"
+                                      type='number'
+                                      aria-describedby="basic-addon3"
+                                      value={dias_colheita}
                                       onChange={(e) => setDiasColheita(e.target.value)}
                                     />
                                   </CInputGroup>
@@ -192,7 +250,7 @@ const InsumosEspecificacao = () => {
                                   <CFormSwitch
                                     label="Colocar peso"
                                     id="formSwitchCheckChecked"
-                                    checked={colocarPeso}
+                                    checked={colocar_peso}
                                     onChange={(e) => setColocarPeso(e.target.checked)}
                                   />
 
@@ -206,7 +264,7 @@ const InsumosEspecificacao = () => {
                                       id="basic-url"
                                       type='number'
                                       aria-describedby="basic-addon3"
-                                      value={estoqueMinimo}
+                                      value={estoque_minimo}
                                       onChange={(e) => setEstoqueMinimo(e.target.value)}
                                     />
                                   </CInputGroup>
@@ -216,16 +274,20 @@ const InsumosEspecificacao = () => {
                             </CModalBody>
                             <CModalFooter>
                               <CButton color="secondary" onClick={() => setVisible(false)}>
-                                Cancelar
+                                  Cancelar
                               </CButton>
-                              <CButton color="primary" onClick={handleSubmit}>
-                                Salvar
-                              </CButton>
-                            </CModalFooter>
+                              {insumoSelecionado && <CButton color="primary" onClick={handleSubmit}>
+                                  Salvar
+                              </CButton>}
+                          </CModalFooter>
                           </CModal>
                           
                         </CCardFooter>
-                    </CCard>
+                        :
+                        <></>
+
+                      }
+                  </CCard>
                 </CCol>
               ))}
             </CRow>
@@ -243,111 +305,18 @@ const InsumosEspecificacao = () => {
                             {insumo.unidade_medida
                             }
                           </CCardText>
-                          <CBadge color="warning">Especificação já definida</CBadge>
+                          {insumo.categoria_id === 1 || insumo.categoria_id === 2 ? (
+                              insumo.especificacoes && insumo.especificacoes.length > 0 ? (
+                                  <CBadge color="warning">Especificação já definida</CBadge>
+                              ) : (
+                                  <CBadge color="danger">Especificação a definir</CBadge>
+                              )
+                          ) : null}
                         </CCardBody>
                         <CCardFooter className="text-center">
-                          <CButton color="primary" onClick={() => setVisible(!visible)}>
-                            Visualizar
+                          <CButton color="primary" onClick={() => handleOpenModal(insumo)}>
+                            {insumo.especificacoes && insumo.especificacoes.length > 0 ? "Visualizar Especificação" : "Cadastrar Especificação"}
                           </CButton>
-                          <CModal
-                            alignment="center"
-                            visible={visible}
-                            onClose={() => setVisible(false)}
-                            aria-labelledby="VerticallyCenteredExample"
-                          >
-                            <CModalHeader>
-                              <CModalTitle id="VerticallyCenteredExample">Especificação</CModalTitle>
-                            </CModalHeader>
-                            <CModalBody>
-                            <CCol md={12}>
-                            
-                              <h5>Colheita</h5>
-                              <CCol md={5}>
-                                  <CInputGroup className="mb-3">
-                                    <CInputGroupText id="basic-addon3">Dias em pilha</CInputGroupText>
-                                    <CFormInput
-                                      id="basic-url"
-                                      type='number'
-                                      aria-describedby="basic-addon3"
-                                      value={diasPilha}
-                                      onChange={(e) => setDiasPilha(e.target.value)}
-                                    />
-                                  </CInputGroup>
-                                </CCol>
-                                <CCol md={6}>
-                                  <CInputGroup className="mb-3">
-                                    <CInputGroupText id="basic-addon3">Dias em blackout</CInputGroupText>
-                                    <CFormInput
-                                      id="basic-url"
-                                      type='number'
-                                      aria-describedby="basic-addon3"
-                                      value={diasBlackout}
-                                      onChange={(e) => setDiasBlackout(e.target.value)}
-                                    />
-                                  </CInputGroup>
-                                </CCol>
-                                <CCol md={6}>
-                                  <CInputGroup className="mb-3">
-                                    <CInputGroupText id="basic-addon3">Dias até acolheita</CInputGroupText>
-                                    <CFormInput
-                                      id="basic-url"
-                                      type='number'
-                                      aria-describedby="basic-addon3"
-                                      value={diasColheita}
-                                      onChange={(e) => setDiasColheita(e.target.value)}
-                                    />
-                                  </CInputGroup>
-                                </CCol>
-                                <CCol md={8}>
-                                  <CInputGroup className="mb-3">
-                                    <CInputGroupText as="label" htmlFor="inputGroupSelect01">
-                                      Hidratação
-                                    </CInputGroupText>
-                                    <CFormSelect
-                                      id="inputGroupSelect01"
-                                      value={hidratacao}
-                                      onChange={(e) => setHidratacao(e.target.value)}
-                                    >
-                                      <option value="">Selecione...</option>
-                                      <option value="Irrigação">Irrigação</option>
-                                      <option value="Aspersão">Aspersão</option>
-                                    </CFormSelect>
-                                  </CInputGroup>
-                                  <CFormSwitch
-                                    label="Colocar peso"
-                                    id="formSwitchCheckChecked"
-                                    checked={colocarPeso}
-                                    onChange={(e) => setColocarPeso(e.target.checked)}
-                                  />
-
-                                </CCol>
-                                <hr />
-                                <h5>Alerta</h5>
-                                <CCol md={6}>
-                                  <CInputGroup className="mb-3">
-                                    <CInputGroupText id="basic-addon3">Estoque Mínimo</CInputGroupText>
-                                    <CFormInput
-                                      id="basic-url"
-                                      type='number'
-                                      aria-describedby="basic-addon3"
-                                      value={estoqueMinimo}
-                                      onChange={(e) => setEstoqueMinimo(e.target.value)}
-                                    />
-                                  </CInputGroup>
-                                </CCol>
-                              </CCol>
-
-                            </CModalBody>
-                            <CModalFooter>
-                              <CButton color="secondary" onClick={() => setVisible(false)}>
-                                Cancelar
-                              </CButton>
-                              <CButton color="primary" onClick={handleSubmit}>
-                                Salvar
-                              </CButton>
-                            </CModalFooter>
-                          </CModal>
-                          
                         </CCardFooter>
                     </CCard>
                   </CCol>
@@ -367,110 +336,18 @@ const InsumosEspecificacao = () => {
                             {insumo.unidade_medida
                             }
                           </CCardText>
-                          <CBadge color="warning">Especificação já definida</CBadge>
+                          {insumo.categoria_id === 1 || insumo.categoria_id === 2 ? (
+                              insumo.especificacoes && insumo.especificacoes.length > 0 ? (
+                                  <CBadge color="warning">Especificação já definida</CBadge>
+                              ) : (
+                                  <CBadge color="danger">Especificação a definir</CBadge>
+                              )
+                          ) : null}
                         </CCardBody>
                         <CCardFooter className="text-center">
-                          <CButton color="primary" onClick={() => setVisible(!visible)}>
+                          <CButton color="primary" onClick={() => handleOpenModal(insumo)}>
                             Visualizar
                           </CButton>
-                          <CModal
-                            alignment="center"
-                            visible={visible}
-                            onClose={() => setVisible(false)}
-                            aria-labelledby="VerticallyCenteredExample"
-                          >
-                            <CModalHeader>
-                              <CModalTitle id="VerticallyCenteredExample">Especificação</CModalTitle>
-                            </CModalHeader>
-                            <CModalBody>
-                            <CCol md={12}>
-                            
-                              <h5>Colheita</h5>
-                              <CCol md={5}>
-                                  <CInputGroup className="mb-3">
-                                    <CInputGroupText id="basic-addon3">Dias em pilha</CInputGroupText>
-                                    <CFormInput
-                                      id="basic-url"
-                                      type='number'
-                                      aria-describedby="basic-addon3"
-                                      value={diasPilha}
-                                      onChange={(e) => setDiasPilha(e.target.value)}
-                                    />
-                                  </CInputGroup>
-                                </CCol>
-                                <CCol md={6}>
-                                  <CInputGroup className="mb-3">
-                                    <CInputGroupText id="basic-addon3">Dias em blackout</CInputGroupText>
-                                    <CFormInput
-                                      id="basic-url"
-                                      type='number'
-                                      aria-describedby="basic-addon3"
-                                      value={diasBlackout}
-                                      onChange={(e) => setDiasBlackout(e.target.value)}
-                                    />
-                                  </CInputGroup>
-                                </CCol>
-                                <CCol md={6}>
-                                  <CInputGroup className="mb-3">
-                                    <CInputGroupText id="basic-addon3">Dias até acolheita</CInputGroupText>
-                                    <CFormInput
-                                      id="basic-url"
-                                      type='number'
-                                      aria-describedby="basic-addon3"
-                                      value={diasColheita}
-                                      onChange={(e) => setDiasColheita(e.target.value)}
-                                    />
-                                  </CInputGroup>
-                                </CCol>
-                                <CCol md={8}>
-                                  <CInputGroup className="mb-3">
-                                    <CInputGroupText as="label" htmlFor="inputGroupSelect01">
-                                      Hidratação
-                                    </CInputGroupText>
-                                    <CFormSelect
-                                      id="inputGroupSelect01"
-                                      value={hidratacao}
-                                      onChange={(e) => setHidratacao(e.target.value)}
-                                    >
-                                      <option value="">Selecione...</option>
-                                      <option value="Irrigação">Irrigação</option>
-                                      <option value="Aspersão">Aspersão</option>
-                                    </CFormSelect>
-                                  </CInputGroup>
-                                  <CFormSwitch
-                                    label="Colocar peso"
-                                    id="formSwitchCheckChecked"
-                                    checked={colocarPeso}
-                                    onChange={(e) => setColocarPeso(e.target.checked)}
-                                  />
-
-                                </CCol>
-                                <hr />
-                                <h5>Alerta</h5>
-                                <CCol md={6}>
-                                  <CInputGroup className="mb-3">
-                                    <CInputGroupText id="basic-addon3">Estoque Mínimo</CInputGroupText>
-                                    <CFormInput
-                                      id="basic-url"
-                                      type='number'
-                                      aria-describedby="basic-addon3"
-                                      value={estoqueMinimo}
-                                      onChange={(e) => setEstoqueMinimo(e.target.value)}
-                                    />
-                                  </CInputGroup>
-                                </CCol>
-                              </CCol>
-
-                            </CModalBody>
-                            <CModalFooter>
-                              <CButton color="secondary" onClick={() => setVisible(false)}>
-                                Cancelar
-                              </CButton>
-                              <CButton color="primary" onClick={handleSubmit}>
-                                Salvar
-                              </CButton>
-                            </CModalFooter>
-                          </CModal>
                           
                         </CCardFooter>
                     </CCard>

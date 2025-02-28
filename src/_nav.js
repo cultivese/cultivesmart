@@ -75,6 +75,12 @@ const _nav = [
     name: 'Visão Geral',
     to: '/estoque/visao_geral',
     icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+  },  
+  {
+    component: CNavItem,
+    name: 'Especificação',
+    to: '/insumos/especificacao',
+    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
@@ -92,12 +98,7 @@ const _nav = [
     to: '/insumos/listar',
     icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
   },
-  {
-    component: CNavItem,
-    name: 'Especificação',
-    to: '/insumos/especificacao',
-    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
-  },
+  
   {
     component: CNavItem,
     name: 'Cadastro',

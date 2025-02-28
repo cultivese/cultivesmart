@@ -131,7 +131,7 @@ const EstoqueVisaoGeral = () => {
                                         value={filters.categoria}
                                         onChange={handleFilterChange}>
                                         <option value="">Filtrar por Categoria</option>
-                                        {categorias.map((cat) => (
+                                        {categorias.records.map((cat) => (
                                             <option key={cat.id} value={cat.id}>
                                                 {cat.descricao}
                                             </option>
