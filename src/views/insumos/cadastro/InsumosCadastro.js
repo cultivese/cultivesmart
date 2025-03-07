@@ -58,7 +58,7 @@ const InsumosCadastro = () => {
     variedade: '',
     descricao: '',
     unidade_medida: '',
-    quantidade: 0,
+    quantidade: null,
     preco: 0,
     logo: null
   });
@@ -496,8 +496,6 @@ const handleBack = (e) => {
                           
                           <CCol md={6} xs={6}>
                             <CPopover content="Preço bruto do insumo" placement="right" trigger={['hover', 'focus']}>
-                              <CInputGroup className="mb-3">
-                                <CInputGroupText id="basic-addon1">R$</CInputGroupText>
                                 <CFormInput
                                   type="text"
                                   id="preco"
@@ -510,7 +508,6 @@ const handleBack = (e) => {
                                   required
                                   className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
                               />
-                              </CInputGroup>
                             </CPopover>
                           </CCol>
                         </CRow>
@@ -536,7 +533,7 @@ const handleBack = (e) => {
                       <p><strong>Variedade:</strong> {formData.variedade}</p>
                       <p><strong>Descrição:</strong> {formData.descricao}</p>
                       <p><strong>Quantidade:</strong> {formData.quantidade}</p>
-                      <p><strong>Preço:</strong> R$ {formData.preco}</p>
+                      <p><strong>Preço:</strong> {formatarPreco(formData.preco)}</p>
                     </div>
                   </CCardBody>
                 </CCard>
