@@ -330,9 +330,8 @@ const handleBack = (e) => {
                                         <CCardTitle>{insumo.nome}</CCardTitle>
                                         <CCardSubtitle>{insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)}</CCardSubtitle>
                                         <CCardText>
-                                          Quantidade de Sacos: 4 
+                                          3  und
                                         <div>
-                                        - abertos: 1 <br/>
                                         - fechados: 3
                                         </div>
                                         </CCardText>
