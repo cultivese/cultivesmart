@@ -10,10 +10,11 @@ const EncerrarLote = React.lazy(() => import('./views/producao/EncerrarLote'))
 // Estoque
 const EstoqueVisaoGeral = React.lazy(() => import('./views/estoque/visao_geral/EstoqueVisaoGeral'))
 const EstoqueRegistrar = React.lazy(() => import('./views/estoque/registrar/EstoqueRegistrar'))
+const InsumosEspecificacao = React.lazy(() => import('./views/estoque/especificacao/InsumosEspecificacao'))
 
 // Insumos
 const InsumosCadastro = React.lazy(() => import('./views/insumos/cadastro/InsumosCadastro'))
-const InsumosEspecificacao = React.lazy(() => import('./views/insumos/especificacao/InsumosEspecificacao'))
+
 const InsumosListar = React.lazy(() => import('./views/insumos/listar/InsumosListar'))
 
 // Fornecedores
