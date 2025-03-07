@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 import {
   CButton,
@@ -10,7 +10,6 @@ import {
   CModalBody,
   CModalHeader,
   CModalFooter,
-  CAccordionHeader,
   CContainer,
   CFormCheck,
   CCardImage,
@@ -30,15 +29,28 @@ const InsumosCadastro = () => {
   const [fornecedores, setFornecedores] = useState([]);
   const [categorias, setCategorias] = useState([]);  
   const [filtroCategoria, setFiltroCategoria] = useState('');
+  const [unidadesMedida , setUnidadesMedida ] = useState([]);
   const [filtroNome, setFiltroNome] = useState('');
   const [filtroFornecedor, setFiltroFornecedor] = useState('');
   const [showAdditionalFieldsModal, setShowAdditionalFieldsModal] = useState(false); // Estado para controlar o modal
-  const hiddenFileInput = useRef(null);
   const [insumoSelecionado, setInsumoSelecionado] = useState(null);
-  const handleSubstratoSelect = (event) => {
-    const selectedOptions = Array.from(event.target.selectedOptions, (option) => option.value);
-    setSelectedSubstratos(selectedOptions);
-  };
+  const [editingField, setEditingField] = useState(null);
+
+  const [editedInsumo, setEditedInsumo] = useState({
+    nome: '',
+    descricao: '',
+    unidade_medida: '',
+    quantidade: '',
+    desconto: '',
+    imposto: '',
+    preco: '',
+  });
+
+  const getUnidadeMedidaDescricao = (id) => {
+    const unidade = unidadesMedida && unidadesMedida.length > 0
+    && unidadesMedida.find((u) => u.id === parseInt(id));
+    return unidade ? unidade.sigla : '';
+};
 
   useEffect(() => {
     fetch('https://backend.cultivesmart.com.br/api/categorias')
@@ -119,6 +131,15 @@ const handleAdditionalFieldsChange = (event) => {
 
 const handleOpenAdditionalFieldsModal = (insumo) => {
   setInsumoSelecionado(insumo);
+  setEditedInsumo({
+      nome: insumo.nome,
+      descricao: insumo.descricao,
+      unidade_medida: insumo.unidade_medida,
+      quantidade: insumo.quantidade,
+      desconto: insumo.desconto,
+      imposto: insumo.imposto,
+      preco: insumo.preco,
+  });
   setShowAdditionalFieldsModal(true);
 };
 
@@ -144,6 +165,16 @@ const handleCategorySelect = (category) => {
     category: category  // Atualiza o valor da categoria no formData
   }));
 };
+
+const fetchedUnidadesMedida = useMemo(async () => {
+      try {
+          const response = await fetch('https://backend.cultivesmart.com.br/api/unidades-medida');
+          return await response.json();
+      } catch (error) {
+          console.error('Erro ao buscar unidades de medida:', error);
+          return null;
+      }
+   }, []);
 
 const filtrarInsumos = () => {
   return insumos && insumos.records
@@ -191,6 +222,13 @@ const handleBack = (e) => {
     }
   };
 
+  useEffect(() => {
+          const loadData = async () => {
+              setUnidadesMedida(await fetchedUnidadesMedida);
+          };
+          loadData();
+      },[fetchedUnidadesMedida]);
+
   return (
     <CContainer>
       
@@ -206,7 +244,8 @@ const handleBack = (e) => {
                   <DocsExample href="components/card/#background-and-color">
                     <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }} >
 
-                    {categorias && categorias.records && categorias.records.map((categoria) => {
+                    { unidadesMedida && unidadesMedida &&
+                      categorias && categorias.records && categorias.records.map((categoria) => {
                           return (
                             <CCol
                               key={categoria.id}
@@ -220,7 +259,7 @@ const handleBack = (e) => {
                           }}>
                                   
 
-                              <CCol lg={4} onClick={() => handleCategorySelect(categoria.id)}>
+                              <CCol lg={4} onClick={() => { setFiltroCategoria(categoria.id); console.log('filtroCategoria:', categoria.id);  console.log('filtroCategoria:', filtroCategoria);}}>
                                 <CCardImage width="fit" orientation="top" src={`data:image/png;base64,${categoria.logoPath}`} />
                               </CCol>
                               <CCol>
@@ -230,8 +269,8 @@ const handleBack = (e) => {
                                     id={`flexCheckChecked${categoria.id}`}
                                     label={categoria.descricao}
                                     value={categoria.id}
-                                    checked={filtroCategoria === categoria.id.toString()}
-                                    onChange={(e) => setFiltroCategoria(e.target.value)}
+                                    checked={filtroCategoria === categoria.id}
+                                    onChange={(e) => {setFiltroCategoria(e.target.value);  console.log('filtroCategoria:', categoria.id); console.log('filtroCategoria:', filtroCategoria);}}
                                 />
                               </CCol>
                             </CCol>
@@ -286,17 +325,20 @@ const handleBack = (e) => {
                                     <CCol xs={6} md={3} style={{marginTop:10, marginBottom:10}}>
                                       <CCardImage style={{ maxWidth: '150px' }} src={`data:image/png;base64,${insumo.logoPath}`} />
                                     </CCol>
-                                    <CCol xs={4} md={9}>
+                                    <CCol xs={4} md={6}>
                                       <CCardBody>
                                         <CCardTitle>{insumo.nome}</CCardTitle>
-                                        <CCardSubtitle>{insumo.unidade_medida}</CCardSubtitle>
+                                        <CCardSubtitle>{insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)}</CCardSubtitle>
                                         <CCardText>
                                           R$ {insumo.preco}
                                         </CCardText>
-                                        <CCardLink style={{ float: 'right' }} href="#" onClick={() =>
-                                            handleOpenAdditionalFieldsModal(insumo)
-                                        }>Ver mais detalhes</CCardLink>
+                                       
                                       </CCardBody>
+                                    </CCol>
+                                    <CCol xs={4} md={3}>
+                                    <CCardLink style={{ float: 'right' }} href="#" onClick={() =>
+                                            handleOpenAdditionalFieldsModal(insumo)
+                                        }>+ detalhes</CCardLink>
                                     </CCol>
                                   </CRow>
                                 </CCard>
@@ -319,19 +361,90 @@ const handleBack = (e) => {
         onClose={handleCloseAdditionalFieldsModal}
     >
         <CModalHeader closeButton>
-            <strong>Informações de medida do Insumo</strong>
+            <strong>Informações do cadastro do insumo</strong>
         </CModalHeader>
         <CModalBody>
           {insumoSelecionado && (
               <div>
-                  <p><strong>Nome:</strong> {insumoSelecionado.nome}</p>
-                  <p><strong>Descrição:</strong> {insumoSelecionado.descricao}</p>
-                  <p><strong>Unidade de Medida:</strong> {insumoSelecionado.unidade_medida}</p>
-                  <p><strong>Quantidade:</strong> {insumoSelecionado.quantidade}</p>
-                  <p><strong>Desconto:</strong>% {insumoSelecionado.desconto}</p>
-                  <p><strong>Imposto:</strong>% {insumoSelecionado.imposto}</p>
-                  <p><strong>Preço:</strong> R$ {insumoSelecionado.preco}</p>
-                  {/* Adicione outros campos que você deseja exibir */}
+                  <CFormInput
+                      label="Nome"
+                      value={editedInsumo.nome}
+                      readOnly={editingField !== 'nome'}
+                      onFocus={() => setEditingField('nome')}
+                      onChange={(e) =>
+                          setEditedInsumo({ ...editedInsumo, nome: e.target.value })
+                      }
+                  />
+                  <CFormInput
+                      label="Descrição"
+                      value={editedInsumo.descricao}
+                      readOnly={editingField !== 'descricao'}
+                      onFocus={() => setEditingField('descricao')}
+                      onChange={(e) =>
+                          setEditedInsumo({
+                              ...editedInsumo,
+                              descricao: e.target.value,
+                          })
+                      }
+                  />
+                  <CFormInput
+                      label="Unidade de Medida"
+                      value={editedInsumo.unidade_medida}
+                      readOnly={editingField !== 'unidade_medida'}
+                      onFocus={() => setEditingField('unidade_medida')}
+                      onChange={(e) =>
+                          setEditedInsumo({
+                              ...editedInsumo,
+                              unidade_medida: e.target.value,
+                          })
+                      }
+                  />
+                  <CFormInput
+                      label="Quantidade"
+                      value={editedInsumo.quantidade}
+                      readOnly={editingField !== 'quantidade'}
+                      onFocus={() => setEditingField('quantidade')}
+                      onChange={(e) =>
+                          setEditedInsumo({
+                              ...editedInsumo,
+                              quantidade: e.target.value,
+                          })
+                      }
+                  />
+                  <CFormInput
+                      label="Desconto"
+                      value={editedInsumo.desconto}
+                      readOnly={editingField !== 'desconto'}
+                      onFocus={() => setEditingField('desconto')}
+                      onChange={(e) =>
+                          setEditedInsumo({
+                              ...editedInsumo,
+                              desconto: e.target.value,
+                          })
+                      }
+                  />
+                  <CFormInput
+                      label="Imposto"
+                      value={editedInsumo.imposto}
+                      readOnly={editingField !== 'imposto'}
+                      onFocus={() => setEditingField('imposto')}
+                      onChange={(e) =>
+                          setEditedInsumo({
+                              ...editedInsumo,
+                              imposto: e.target.value,
+                          })
+                      }
+                  />
+                  <CFormInput
+                      label="Preço"
+                      value={editedInsumo.preco}
+                      onChange={(e) =>
+                          setEditedInsumo({
+                              ...editedInsumo,
+                              preco: e.target.value,
+                          })
+                      }
+                  />
               </div>
           )}
         </CModalBody>

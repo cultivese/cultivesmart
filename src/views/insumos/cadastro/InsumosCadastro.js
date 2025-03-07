@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import InputMask from 'react-input-mask';
 import {
   CButton,
   CCard,
@@ -11,6 +12,7 @@ import {
   CInputGroupText,
   CCardImage,
   CForm,
+  CPopover,
   CFormTextarea,
   CFormInput,
   CModal,
@@ -41,6 +43,7 @@ const InsumosCadastro = () => {
     quantidade_consumida: '',
   });
   const hiddenFileInput = useRef(null);
+  const [caracteresRestantes, setCaracteresRestantes] = useState(255); // Inicializa com o limite máximo
   const stepLabels = [
     { title: "Categoria", subtitle: "Escolha a categoria" },
     { title: "Fornecedor", subtitle: "Defina o fornecedor" },
@@ -103,14 +106,14 @@ const InsumosCadastro = () => {
       }
    }, []);
 
-  useEffect(() => {
-      const loadData = async () => {
-          setCategorias(await fetchedCategorias);
-          setFornecedores(await fetchedFornecedores);
-          setUnidadesMedida(await fetchedUnidadesMedida);
-      };
-      loadData();
-  },[fetchedCategorias, fetchedFornecedores, fetchedUnidadesMedida]);
+    useEffect(() => {
+        const loadData = async () => {
+            setCategorias(await fetchedCategorias);
+            setFornecedores(await fetchedFornecedores);
+            setUnidadesMedida(await fetchedUnidadesMedida);
+        };
+        loadData();
+    },[fetchedCategorias, fetchedFornecedores, fetchedUnidadesMedida]);
 
   const handleLogoChange = (event) => {
     const file = event.target.files[0];
@@ -125,6 +128,16 @@ const InsumosCadastro = () => {
 
   };
 
+  const formatarPreco = (valor) => {
+    if (!valor) return '';
+    const valorNumerico = valor.replace(/[^\d]/g, '');
+    const valorFormatado = (parseInt(valorNumerico) / 100).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+    });
+    return valorFormatado;
+};
+
   const handleImageClick = () => {
     hiddenFileInput.current.click();
   };
@@ -135,6 +148,10 @@ const InsumosCadastro = () => {
         ...prevState,
         [id]: type === 'checkbox' ? checked : value,
     }));
+
+    if (id === 'descricao') {
+      setCaracteresRestantes(255 - value.length); // Atualiza os caracteres restantes
+    }
 
     if (event.target.name === 'define_especificacao') { // Assuming this is the id of your radio button group
       setShowSpecificationFields(value === '1'); // Show if value is '1' (Sim)
@@ -358,7 +375,7 @@ const handleBack = (e) => {
             
           {activeStep === 2 && (
               <CRow>
-                <CCol xs={8} md={8}>
+                <CCol md={7} xs={8}>
                   <CCard className="mb-4" style={{cursor: 'pointer'}}>
                     <CCardHeader>
                       <strong>{stepLabels[2].title} - </strong>
@@ -366,7 +383,7 @@ const handleBack = (e) => {
                     </CCardHeader>
                     <CCardBody>
                       <CRow>
-                        <CCol md={3}>
+                        <CCol md={5} xs={3}>
                           <CImage fluid  orientation="left" src={formData.logoUrl || avatar8}
                             onClick={handleImageClick}
                             style={{ cursor: 'pointer', maxHeight: '13em', width: '100%', objectFit: 'cover',
@@ -379,9 +396,9 @@ const handleBack = (e) => {
                             accept="image/*"
                           />
                         </CCol>
-                        <CCol md={9}>
+                        <CCol md={7} xs={9}>
                           <CRow>
-                            <CCol md={7}>
+                            <CCol md={6} xs={7}>
                               <CFormInput
                                     type="text"
                                     id="nome"
@@ -393,7 +410,7 @@ const handleBack = (e) => {
                                   />
                             </CCol>
                           
-                            <CCol md={5}>
+                            <CCol md={6} xs={5}>
                               <CFormInput
                                     type="text"
                                     id="variedade"
@@ -418,7 +435,10 @@ const handleBack = (e) => {
                               style={{ minHeight: '130px' }} // Altura mínima
                               className={stepErrors[activeStep] && (!formData.descricao) ? 'is-invalid' : ''}
                               required
+                              maxLength={255}
                             ></CFormTextarea>
+                            <p>Máximo de caracteres: {caracteresRestantes}/255</p>
+
                           </CCol>
                         </CRow>
                       </CCol>
@@ -427,7 +447,7 @@ const handleBack = (e) => {
                   </CCard>
                 </CCol>
 
-                <CCol xs={4} md={4}>
+                <CCol md={5} xs={4}>
                   <CCard className="mb-4" style={{cursor: 'pointer'}}>
                       <CCardHeader>
                         <strong>Informações - </strong>
@@ -435,26 +455,14 @@ const handleBack = (e) => {
                       </CCardHeader>
                       <CCardBody>
                         <CRow>
-
-                          <CCol xs={6}>
-                            <CFormInput
-                                type="numeric"
-                                id="quantidade"
-                                floatingClassName="mb-3"
-                                floatingLabel="Quantidade"
-                                value={formData.quantidade}
-                                onChange={handleChange}
-                                required
-                                className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
-                              />
-                          </CCol>
-
-                          <CCol xs={6}>
+                          <CCol md={6} xs={6}>
+                           <CPopover content="Qual a unidade de medida do saco?" placement="right" trigger={['hover', 'focus']}>
                             <CFormSelect
                                   id="unidade_medida"
                                   floatingLabel="Unidade de Medida"
                                   aria-label="Floating label select example"
                                   value={formData.unidade_medida}
+                                  title=''
                                   onChange={(e) => {
                                     handleChange(e);
                                   }}
@@ -470,52 +478,88 @@ const handleBack = (e) => {
                                   }
                                 )}
                               </CFormSelect>
-                              {stepErrors[activeStep] && (!formData.unidade_medida) && <div className="invalid-feedback">Este campo é obrigatório.</div>}
-                          </CCol>
-                          
-                          <CCol xs={6}>
-                            <CInputGroup className="mb-3">
-                              <CFormInput
-                                type="numeric"
-                                id="imposto"
-                                floatingLabel="Imposto"
-                                value={formData.imposto}
-                                onChange={handleChange}
-                                required
-                                className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
-                              />
-                              <CInputGroupText id="basic-addon1">%</CInputGroupText>
-                            </CInputGroup>
+                              </CPopover>
                           </CCol>
 
-                          <CCol xs={6}>
-                            <CInputGroup className="mb-3">
-                              <CFormInput
+                          <CCol md={6} xs={6}>
+                          <CPopover content="Qual a quantidade do saco (peso)" placement="right" trigger={['hover', 'focus']}>
+                            <CFormInput
                                 type="numeric"
-                                id="desconto"
-                                floatingLabel="Desconto"
-                                value={formData.desconto}
+                                id="quantidade"
+                                floatingClassName="mb-3"
+                                floatingLabel="Quantidade"
+                                value={formData.quantidade}
                                 onChange={handleChange}
                                 required
                                 className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
                               />
-                              <CInputGroupText id="basic-addon1">%</CInputGroupText>
-                            </CInputGroup>
+                            </CPopover>
+                          </CCol>
+                          
+                          <CCol md={6} xs={6}>
+                            <CPopover content="Valor do imposto aplicado ao insumo" placement="right" trigger={['hover', 'focus']}>
+                              <CInputGroup className="mb-3">
+                                <InputMask
+                                  mask="999,99"
+                                  value={formData.imposto}
+                                  onChange={(e) => handleChange({ target: { id: 'imposto', value: e.target.value } })}
+                                  maskChar={null}
+                                >
+                                    {(inputProps) => (
+                                        <CFormInput
+                                            {...inputProps}
+                                            floatingLabel="Imposto"
+                                            required
+                                            className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
+                                        />
+                                    )}
+                                </InputMask>
+                                <CInputGroupText id="basic-addon1">%</CInputGroupText>
+                              </CInputGroup>
+                            </CPopover>
+                          </CCol>
+
+                          <CCol md={6} xs={6}>
+                            <CPopover content="Valor do desconto aplicado ao insumo" placement="right" trigger={['hover', 'focus']}>
+                              <CInputGroup className="mb-3">
+                                <InputMask
+                                    mask="999,99"
+                                    value={formData.desconto}
+                                    onChange={(e) => handleChange({ target: { id: 'desconto', value: e.target.value } })}
+                                    maskChar={null}
+                                >
+                                    {(inputProps) => (
+                                        <CFormInput
+                                            {...inputProps}
+                                            floatingLabel="Desconto"
+                                            required
+                                            className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
+                                        />
+                                    )}
+                                </InputMask>
+                                <CInputGroupText id="basic-addon1">%</CInputGroupText>
+                              </CInputGroup>
+                            </CPopover>
                           </CCol>
                          
-                          <CCol xs={6}>
-                            <CInputGroup className="mb-3">
-                              <CInputGroupText id="basic-addon1">R$</CInputGroupText>
+                          <CCol md={6} xs={6}>
+                            <CPopover content="Preço bruto do insumo" placement="right" trigger={['hover', 'focus']}>
+                              <CInputGroup className="mb-3">
+                                <CInputGroupText id="basic-addon1">R$</CInputGroupText>
                                 <CFormInput
-                                  type="numeric"
+                                  type="text"
                                   id="preco"
                                   floatingLabel="Preço"
-                                  value={formData.preco}
-                                  onChange={handleChange}
+                                  value={formatarPreco(formData.preco)}
+                                  onChange={(e) => {
+                                      const valorNumerico = e.target.value.replace(/[^\d]/g, ''); // Remove caracteres não numéricos
+                                      setFormData({ ...formData, preco: valorNumerico });
+                                  }}
                                   required
                                   className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
-                                />
-                            </CInputGroup>
+                              />
+                              </CInputGroup>
+                            </CPopover>
                           </CCol>
                         </CRow>
                       </CCardBody>
@@ -543,9 +587,6 @@ const handleBack = (e) => {
                       <p><strong>Desconto:</strong> {formData.desconto}%</p>
                       <p><strong>Imposto:</strong> {formData.imposto}%</p>
                       <p><strong>Preço:</strong> R$ {formData.preco}</p>
-                      {/* <p><strong>Unidade de Medida:</strong> {unidadesMedida.find(unidade => unidade.id === Number(formData.unidade_medida)).descricao}</p> */}
-                      {/* <p><strong>Quantidade:</strong> {formData.quantidade_inicial} {unidadesMedida.find(unidade => unidade.id === Number(formData.unidade_medida_conteudo)).sigla}</p> */}
-
                     </div>
                   </CCardBody>
                 </CCard>
@@ -570,49 +611,8 @@ const handleBack = (e) => {
           </CRow>
         
       </CForm>
-      {/* Modal para campos adicionais */}
-      <CModal alignment="center" visible={showAdditionalFieldsModal} onClose={handleCloseAdditionalFieldsModal}>
-        <CModalHeader closeButton>
-          <strong>Informações de medida do Insumo</strong>
-        </CModalHeader>
-        <CModalBody>
-          <CRow lg={4}>
-          <CFormInput
-            type="number"
-            id="quantidade_inicial"
-            floatingClassName="mb-3"
-            floatingLabel="Quantidade"
-            value={additionalFields.quantidade_inicial}
-            onChange={handleAdditionalFieldsChange}
-          />
-          <CFormSelect
-            id="unidade_medida_conteudo"
-            floatingLabel="Unidade de Medida"
-            value={additionalFields.unidade_medida_conteudo}
-            onChange={handleAdditionalFieldsChange}
-          >
-            {
-              unidadesMedida.map((unidadeMedida) => { return (
-                <option key={unidadeMedida.id} value={unidadeMedida.id}>{unidadeMedida.descricao}</option>
-              )
-              })
-            }
-            <option value="kg">Kilogramas</option>
-          </CFormSelect>
-          </CRow>
-        </CModalBody>
-        <CModalFooter>
-          <CButton color="secondary" onClick={handleCloseAdditionalFieldsModal}>
-            Fechar
-          </CButton>
-          <CButton color="primary" onClick={handleSaveAdditionalFields}>
-            Salvar
-          </CButton>
-        </CModalFooter>
-      </CModal>
+     
     </CContainer>
-
-    
   );
 };
 
