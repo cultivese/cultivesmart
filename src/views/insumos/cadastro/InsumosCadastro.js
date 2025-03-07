@@ -59,8 +59,6 @@ const InsumosCadastro = () => {
     descricao: '',
     unidade_medida: '',
     quantidade: 0,
-    imposto: 0,
-    desconto: 0,
     preco: 0,
     logo: null
   });
@@ -482,7 +480,7 @@ const handleBack = (e) => {
                           </CCol>
 
                           <CCol md={6} xs={6}>
-                          <CPopover content="Qual a quantidade do saco (peso)" placement="right" trigger={['hover', 'focus']}>
+                          <CPopover content="Qual a quantidade (Kg/g) do saco" placement="right" trigger={['hover', 'focus']}>
                             <CFormInput
                                 type="numeric"
                                 id="quantidade"
@@ -496,52 +494,6 @@ const handleBack = (e) => {
                             </CPopover>
                           </CCol>
                           
-                          <CCol md={6} xs={6}>
-                            <CPopover content="Valor do imposto aplicado ao insumo" placement="right" trigger={['hover', 'focus']}>
-                              <CInputGroup className="mb-3">
-                                <InputMask
-                                  mask="999,99"
-                                  value={formData.imposto}
-                                  onChange={(e) => handleChange({ target: { id: 'imposto', value: e.target.value } })}
-                                  maskChar={null}
-                                >
-                                    {(inputProps) => (
-                                        <CFormInput
-                                            {...inputProps}
-                                            floatingLabel="Imposto"
-                                            required
-                                            className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
-                                        />
-                                    )}
-                                </InputMask>
-                                <CInputGroupText id="basic-addon1">%</CInputGroupText>
-                              </CInputGroup>
-                            </CPopover>
-                          </CCol>
-
-                          <CCol md={6} xs={6}>
-                            <CPopover content="Valor do desconto aplicado ao insumo" placement="right" trigger={['hover', 'focus']}>
-                              <CInputGroup className="mb-3">
-                                <InputMask
-                                    mask="999,99"
-                                    value={formData.desconto}
-                                    onChange={(e) => handleChange({ target: { id: 'desconto', value: e.target.value } })}
-                                    maskChar={null}
-                                >
-                                    {(inputProps) => (
-                                        <CFormInput
-                                            {...inputProps}
-                                            floatingLabel="Desconto"
-                                            required
-                                            className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
-                                        />
-                                    )}
-                                </InputMask>
-                                <CInputGroupText id="basic-addon1">%</CInputGroupText>
-                              </CInputGroup>
-                            </CPopover>
-                          </CCol>
-                         
                           <CCol md={6} xs={6}>
                             <CPopover content="Preço bruto do insumo" placement="right" trigger={['hover', 'focus']}>
                               <CInputGroup className="mb-3">
@@ -584,8 +536,6 @@ const handleBack = (e) => {
                       <p><strong>Variedade:</strong> {formData.variedade}</p>
                       <p><strong>Descrição:</strong> {formData.descricao}</p>
                       <p><strong>Quantidade:</strong> {formData.quantidade}</p>
-                      <p><strong>Desconto:</strong> {formData.desconto}%</p>
-                      <p><strong>Imposto:</strong> {formData.imposto}%</p>
                       <p><strong>Preço:</strong> R$ {formData.preco}</p>
                     </div>
                   </CCardBody>

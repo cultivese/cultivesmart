@@ -363,14 +363,13 @@ const handleBack = (e) => {
         onClose={handleCloseAdditionalFieldsModal}
     >
         <CModalHeader closeButton>
-            <strong>Informações do cadastro do insumo</strong>
+            <strong>Registrar insumo ao estoque</strong>
         </CModalHeader>
         <CModalBody>
           {insumoSelecionado && (
               <div>
                   <CFormInput
-                      label="Nome"
-                      value={editedInsumo.nome}
+                      label="Nota Fiscal"
                       readOnly={editingField !== 'nome'}
                       onFocus={() => setEditingField('nome')}
                       onChange={(e) =>
@@ -378,73 +377,11 @@ const handleBack = (e) => {
                       }
                   />
                   <CFormInput
-                      label="Descrição"
-                      value={editedInsumo.descricao}
-                      readOnly={editingField !== 'descricao'}
-                      onFocus={() => setEditingField('descricao')}
-                      onChange={(e) =>
-                          setEditedInsumo({
-                              ...editedInsumo,
-                              descricao: e.target.value,
-                          })
-                      }
-                  />
-                  <CFormInput
-                      label="Unidade de Medida"
-                      value={editedInsumo.unidade_medida}
-                      readOnly={editingField !== 'unidade_medida'}
-                      onFocus={() => setEditingField('unidade_medida')}
-                      onChange={(e) =>
-                          setEditedInsumo({
-                              ...editedInsumo,
-                              unidade_medida: e.target.value,
-                          })
-                      }
-                  />
-                  <CFormInput
                       label="Quantidade"
-                      value={editedInsumo.quantidade}
-                      readOnly={editingField !== 'quantidade'}
-                      onFocus={() => setEditingField('quantidade')}
+                      readOnly={editingField !== 'nome'}
+                      onFocus={() => setEditingField('nome')}
                       onChange={(e) =>
-                          setEditedInsumo({
-                              ...editedInsumo,
-                              quantidade: e.target.value,
-                          })
-                      }
-                  />
-                  <CFormInput
-                      label="Desconto"
-                      value={editedInsumo.desconto}
-                      readOnly={editingField !== 'desconto'}
-                      onFocus={() => setEditingField('desconto')}
-                      onChange={(e) =>
-                          setEditedInsumo({
-                              ...editedInsumo,
-                              desconto: e.target.value,
-                          })
-                      }
-                  />
-                  <CFormInput
-                      label="Imposto"
-                      value={editedInsumo.imposto}
-                      readOnly={editingField !== 'imposto'}
-                      onFocus={() => setEditingField('imposto')}
-                      onChange={(e) =>
-                          setEditedInsumo({
-                              ...editedInsumo,
-                              imposto: e.target.value,
-                          })
-                      }
-                  />
-                  <CFormInput
-                      label="Preço"
-                      value={editedInsumo.preco}
-                      onChange={(e) =>
-                          setEditedInsumo({
-                              ...editedInsumo,
-                              preco: e.target.value,
-                          })
+                          setEditedInsumo({ ...editedInsumo, nome: e.target.value })
                       }
                   />
               </div>
