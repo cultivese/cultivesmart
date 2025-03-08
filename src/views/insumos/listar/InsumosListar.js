@@ -11,7 +11,7 @@ import {
   CModalHeader,
   CModalFooter,
   CContainer,
-  CCardFooter,
+  CFormTextarea,
   CDropdown,
   CDropdownToggle,
   CDropdownMenu,
@@ -25,6 +25,7 @@ import {
   CRow,
   CCardTitle,
   CCardText,
+  CCardSubtitle,
 } from '@coreui/react';
 
 import CIcon from '@coreui/icons-react'
@@ -338,71 +339,45 @@ const handleBack = (e) => {
                     </CRow>
                   </DocsExample>
 
-                  <CButton color="warning" className="rounded-0">Registrar Insumo</CButton>
                   <DocsExample href="components/card/#background-and-color">
-                    <CRow xs={{gutterY:5}} className="justify-content-around">
-                      <CCol xs={8}>
+                    <CRow xs={{ gutterY: 3}} className="justify-content-around mb-4">
                         {
                           filtrarInsumos().map((insumo) => {
                             return (
-                              <>
-                                <CCol xs={12}>
-                                      <CCard style={{width: '65%'}}>
-                                        <CRow>
-                                          <CCol xs={6} md={3} style={{marginTop:10, marginBottom:10}}>
-                                            <CCardImage style={{ maxWidth: '100px' }} src={`data:image/png;base64,${insumo.logoPath}`} />
-                                          </CCol>
-                                          <CCol xs={6} md={6}>
-                                            <CCardBody>
-                                              <CCardTitle>{insumo.nome}</CCardTitle>
-                                              <CCardText>
-                                                {formatarPreco(insumo.preco)}
-                                              </CCardText>
-                                              <CCardText>
-                                                <small className="text-body-secondary">{insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)} por saco</small>
-                                              </CCardText>
-                                            </CCardBody>
-                                          </CCol>
-                                          <CCol xs={4} md={3} >
-                                              <CDropdown alignment="end">
-                                                <CDropdownToggle color="transparent" caret={false} className="p-0">
-                                                  <CIcon icon={cilOptions} />
-                                                </CDropdownToggle>
-                                                <CDropdownMenu>
-                                                  <CDropdownItem
-                                                      onClick={() => handleOpenAdditionalFieldsModal(insumo)}>
-                                                  Ver detalhes</CDropdownItem>
-                                                </CDropdownMenu>
-                                              </CDropdown>
-                                          </CCol>
-                                        </CRow>
-                                      </CCard>
-                                </CCol>
-                                
-                              </>
+                                <CCard style={{width: '30%'}}>
+                                  <CRow>
+                                    <CCol xs={3} md={4} style={{marginTop:20}}>
+                                      <CCardImage src={`data:image/png;base64,${insumo.logoPath}`} />
+                                    </CCol>
+                                    <CCol xs={7} md={7}>
+                                      <CCardBody>
+                                        <CCardTitle>{insumo.nome}</CCardTitle>
+                                        <CCardSubtitle>{insumo.variedade}</CCardSubtitle>
+                                        <CCardText>
+                                          {formatarPreco(insumo.preco)}
+                                        </CCardText>
+                                        <CCardText>
+                                          <small className="text-body-secondary">{insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)} por und.</small>
+                                        </CCardText>
+                                      </CCardBody>
+                                    </CCol>
+                                    <CCol xs={1} md={1} >
+                                        <CDropdown alignment="end">
+                                          <CDropdownToggle color="transparent" caret={false} className="p-0">
+                                            <CIcon icon={cilOptions} />
+                                          </CDropdownToggle>
+                                          <CDropdownMenu>
+                                            <CDropdownItem
+                                                onClick={() => handleOpenAdditionalFieldsModal(insumo)}>
+                                            Ver detalhes</CDropdownItem>
+                                          </CDropdownMenu>
+                                        </CDropdown>
+                                    </CCol>
+                                  </CRow>
+                                </CCard>
                             )
                           })
                         }
-                     </CCol>
-                     <CCol
-                          xs={4}
-                          style={{
-                            position: 'sticky',
-                            top: '20px', // Ajuste este valor conforme necessário
-                            height: 'fit-content', // Garante que a coluna não se estenda indefinidamente
-                          }}
-                        >
-                          {/* Conteúdo da coluna flutuante */}
-                          <CCard>
-                            <CCardBody>
-                              <CCardTitle>Orçamento</CCardTitle>
-                              <CCardText>
-                                Insumos selecioandos
-                              </CCardText>                              
-                            </CCardBody>
-                          </CCard>
-                        </CCol>
-
                     </CRow>
                   </DocsExample>
                 </CCardBody>
@@ -432,18 +407,20 @@ const handleBack = (e) => {
                           setEditedInsumo({ ...editedInsumo, nome: e.target.value })
                       }
                   />
-                  <CFormInput
-                      label="Descrição"
-                      value={editedInsumo.descricao}
-                      readOnly={editingField !== 'descricao'}
-                      onFocus={() => setEditingField('descricao')}
-                      onChange={(e) =>
-                          setEditedInsumo({
-                              ...editedInsumo,
-                              descricao: e.target.value,
-                          })
-                      }
-                  />
+
+                  <CFormTextarea
+                    label="Descrição"
+                    value={editedInsumo.descricao}
+                    style={{ minHeight: '150px' }} // Altura mínima
+                    onChange={(e) =>
+                      setEditedInsumo({
+                          ...editedInsumo,
+                          descricao: e.target.value,
+                      })
+                    }
+                    maxLength={255}
+                  ></CFormTextarea>
+                  
                   <CFormInput
                       label="Unidade de Medida"
                       value={editedInsumo.unidade_medida}
@@ -468,30 +445,7 @@ const handleBack = (e) => {
                           })
                       }
                   />
-                  <CFormInput
-                      label="Desconto"
-                      value={editedInsumo.desconto}
-                      readOnly={editingField !== 'desconto'}
-                      onFocus={() => setEditingField('desconto')}
-                      onChange={(e) =>
-                          setEditedInsumo({
-                              ...editedInsumo,
-                              desconto: e.target.value,
-                          })
-                      }
-                  />
-                  <CFormInput
-                      label="Imposto"
-                      value={editedInsumo.imposto}
-                      readOnly={editingField !== 'imposto'}
-                      onFocus={() => setEditingField('imposto')}
-                      onChange={(e) =>
-                          setEditedInsumo({
-                              ...editedInsumo,
-                              imposto: e.target.value,
-                          })
-                      }
-                  />
+                 
                   <CFormInput
                       label="Preço"
                       value={editedInsumo.preco}

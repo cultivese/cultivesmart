@@ -315,39 +315,60 @@ const handleBack = (e) => {
                       </CCol>
                     </CRow>
                   </DocsExample>
-
+                  <div style={{marginTop: 1.5 + 'em', display: 'flex', justifyContent: 'flex-end'}}>
+                    <CButton color="warning" className="rounded-0">Registrar Insumo</CButton>
+                  </div>
                   <DocsExample href="components/card/#background-and-color">
-                    <CRow xs={{ gutterY: 5 }} className="justify-content-around">
-                    {filtrarInsumos().map((insumo) => {
-                        return (
-                                <CCard style={{width: '45%'}}>
-                                  <CRow>
-                                    <CCol xs={6} md={3} style={{marginTop:10, marginBottom:10}}>
-                                      <CCardImage style={{ maxWidth: '150px' }} src={`data:image/png;base64,${insumo.logoPath}`} />
-                                    </CCol>
-                                    <CCol xs={4} md={6}>
-                                      <CCardBody>
-                                        <CCardTitle>{insumo.nome}</CCardTitle>
-                                        <CCardSubtitle>{insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)}</CCardSubtitle>
-                                        <CCardText>
-                                          3  und
-                                        <div>
-                                        - fechados: 3
-                                        </div>
-                                        </CCardText>
-                                      </CCardBody>
-                                    </CCol>
-                                    <CCol xs={4} md={3}>
-                                    <CCardLink style={{ float: 'right' }} href="#" onClick={() =>
-                                            handleOpenAdditionalFieldsModal(insumo)
-                                        }>+ adicionar</CCardLink>
-                                    </CCol>
-                                  </CRow>
-                                </CCard>
-                        )
-                      })
-                    }
-                     
+                    <CRow xs={{ gutterY: 5 }} className="align-items-center justify-content-center mb-4">
+                      <CCol xs={8}>
+                        {filtrarInsumos().map((insumo) => {
+                          return (
+                                  <CCard style={{width: '45%'}}>
+                                    <CRow>
+                                      <CCol xs={6} md={3} style={{marginTop:10, marginBottom:10}}>
+                                        <CCardImage style={{ maxWidth: '150px' }} src={`data:image/png;base64,${insumo.logoPath}`} />
+                                      </CCol>
+                                      <CCol xs={4} md={6}>
+                                        <CCardBody>
+                                          <CCardTitle>{insumo.nome}</CCardTitle>
+                                          <CCardSubtitle>{insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)}</CCardSubtitle>
+                                          <CCardText>
+                                            3  und
+                                          <div>
+                                          - fechados: 3
+                                          </div>
+                                          </CCardText>
+                                        </CCardBody>
+                                      </CCol>
+                                      <CCol xs={4} md={3}>
+                                      <CCardLink style={{ float: 'right' }} href="#" onClick={() =>
+                                              handleOpenAdditionalFieldsModal(insumo)
+                                          }>+ adicionar</CCardLink>
+                                      </CCol>
+                                    </CRow>
+                                  </CCard>
+                            )
+                          })
+                        }
+                      </CCol>
+                      <CCol
+                                                xs={4}
+                                                style={{
+                                                  position: 'sticky',
+                                                  top: '20px', // Ajuste este valor conforme necessário
+                                                  height: 'fit-content', // Garante que a coluna não se estenda indefinidamente
+                                                }}
+                                              >
+                                                {/* Conteúdo da coluna flutuante */}
+                                                <CCard>
+                                                  <CCardBody>
+                                                    <CCardTitle>Orçamento</CCardTitle>
+                                                    <CCardText>
+                                                      Insumos selecioandos
+                                                    </CCardText>                              
+                                                  </CCardBody>
+                                                </CCard>
+                      </CCol>
                     </CRow>
                   </DocsExample>
                 </CCardBody>

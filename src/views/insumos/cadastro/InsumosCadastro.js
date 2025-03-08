@@ -261,8 +261,14 @@ const handleBack = (e) => {
     try {
       const formDataToSend = new FormData(); // Use FormData para enviar arquivos
         
+      // Converter o preço para decimal antes de enviar
+      const precoDecimal = parseFloat(formData.preco) / 100;
+      formDataToSend.append('preco', precoDecimal.toFixed(2)); // Garante duas casas decimais
+
       for (const key in formData) {
-        formDataToSend.append(key, formData[key]); // Append all data to FormData
+        if (key !== 'preco') { // Evita adicionar o preço bruto novamente
+          formDataToSend.append(key, formData[key]);
+        }
       }
       
       const response = await fetch('https://backend.cultivesmart.com.br/api/insumos', {
