@@ -11,6 +11,11 @@ import {
   CModalHeader,
   CModalFooter,
   CContainer,
+  CCardFooter,
+  CDropdown,
+  CDropdownToggle,
+  CDropdownMenu,
+  CDropdownItem,
   CFormCheck,
   CCardImage,
   CCardLink,
@@ -20,8 +25,15 @@ import {
   CRow,
   CCardTitle,
   CCardText,
-  CCardSubtitle,
 } from '@coreui/react';
+
+import CIcon from '@coreui/icons-react'
+
+
+import {
+  cilOptions
+} from '@coreui/icons'
+
 import { DocsExample } from 'src/components'
 const InsumosCadastro = () => {
   const [insumos, setInsumos] = useState([]);  
@@ -45,6 +57,16 @@ const InsumosCadastro = () => {
     imposto: '',
     preco: '',
   });
+
+  const formatarPreco = (valor) => {
+    if (!valor) return '';
+    const valorNumerico = valor.replace(/[^\d]/g, '');
+    const valorFormatado = (parseInt(valorNumerico) / 100).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+    });
+    return valorFormatado;
+};
 
   const getUnidadeMedidaDescricao = (id) => {
     const unidade = unidadesMedida && unidadesMedida.length > 0
@@ -316,36 +338,71 @@ const handleBack = (e) => {
                     </CRow>
                   </DocsExample>
 
+                  <CButton color="warning" className="rounded-0">Registrar Insumo</CButton>
                   <DocsExample href="components/card/#background-and-color">
-                    <CRow xs={{ gutterY: 5 }} className="justify-content-around">
-                    {filtrarInsumos().map((insumo) => {
-                        return (
-                                <CCard style={{width: '45%'}}>
-                                  <CRow>
-                                    <CCol xs={6} md={3} style={{marginTop:10, marginBottom:10}}>
-                                      <CCardImage style={{ maxWidth: '150px' }} src={`data:image/png;base64,${insumo.logoPath}`} />
-                                    </CCol>
-                                    <CCol xs={4} md={6}>
-                                      <CCardBody>
-                                        <CCardTitle>{insumo.nome}</CCardTitle>
-                                        <CCardSubtitle>{insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)}</CCardSubtitle>
-                                        <CCardText>
-                                          R$ {insumo.preco}
-                                        </CCardText>
-                                       
-                                      </CCardBody>
-                                    </CCol>
-                                    <CCol xs={4} md={3}>
-                                    <CCardLink style={{ float: 'right' }} href="#" onClick={() =>
-                                            handleOpenAdditionalFieldsModal(insumo)
-                                        }>+ detalhes</CCardLink>
-                                    </CCol>
-                                  </CRow>
-                                </CCard>
-                        )
-                      })
-                    }
-                     
+                    <CRow xs={{gutterY:5}} className="justify-content-around">
+                      <CCol xs={8}>
+                        {
+                          filtrarInsumos().map((insumo) => {
+                            return (
+                              <>
+                                <CCol xs={12}>
+                                      <CCard style={{width: '65%'}}>
+                                        <CRow>
+                                          <CCol xs={6} md={3} style={{marginTop:10, marginBottom:10}}>
+                                            <CCardImage style={{ maxWidth: '100px' }} src={`data:image/png;base64,${insumo.logoPath}`} />
+                                          </CCol>
+                                          <CCol xs={6} md={6}>
+                                            <CCardBody>
+                                              <CCardTitle>{insumo.nome}</CCardTitle>
+                                              <CCardText>
+                                                {formatarPreco(insumo.preco)}
+                                              </CCardText>
+                                              <CCardText>
+                                                <small className="text-body-secondary">{insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)} por saco</small>
+                                              </CCardText>
+                                            </CCardBody>
+                                          </CCol>
+                                          <CCol xs={4} md={3} >
+                                              <CDropdown alignment="end">
+                                                <CDropdownToggle color="transparent" caret={false} className="p-0">
+                                                  <CIcon icon={cilOptions} />
+                                                </CDropdownToggle>
+                                                <CDropdownMenu>
+                                                  <CDropdownItem
+                                                      onClick={() => handleOpenAdditionalFieldsModal(insumo)}>
+                                                  Ver detalhes</CDropdownItem>
+                                                </CDropdownMenu>
+                                              </CDropdown>
+                                          </CCol>
+                                        </CRow>
+                                      </CCard>
+                                </CCol>
+                                
+                              </>
+                            )
+                          })
+                        }
+                     </CCol>
+                     <CCol
+                          xs={4}
+                          style={{
+                            position: 'sticky',
+                            top: '20px', // Ajuste este valor conforme necessário
+                            height: 'fit-content', // Garante que a coluna não se estenda indefinidamente
+                          }}
+                        >
+                          {/* Conteúdo da coluna flutuante */}
+                          <CCard>
+                            <CCardBody>
+                              <CCardTitle>Orçamento</CCardTitle>
+                              <CCardText>
+                                Insumos selecioandos
+                              </CCardText>                              
+                            </CCardBody>
+                          </CCard>
+                        </CCol>
+
                     </CRow>
                   </DocsExample>
                 </CCardBody>

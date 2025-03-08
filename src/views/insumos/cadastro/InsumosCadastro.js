@@ -183,10 +183,9 @@ const handleChange1 = (event) => {
     } else if (activeStep === 1 && !formData.fornecedor_id) {
         hasErrors = true;
         newStepErrors[activeStep] = true;
-    } else if (activeStep === 2 &&
-      selectedCategory === "1" && (
-          !formData.nome.trim() || !formData.variedade.trim() || !formData.descricao.trim() ||
-          !formData.unidade_medida)
+    } else if (activeStep === 2 && (
+          !formData.logo || !formData.nome.trim() || !formData.variedade.trim() || !formData.descricao.trim() ||
+          !formData.unidade_medida || !formData.quantidade || !formData.preco)
    ) {
         hasErrors = true;
         newStepErrors[activeStep] = true;
@@ -382,16 +381,20 @@ const handleBack = (e) => {
                     <CCardBody>
                       <CRow>
                         <CCol md={5} xs={3}>
-                          <CImage fluid  orientation="left" src={formData.logoUrl || avatar8}
-                            onClick={handleImageClick}
-                            style={{ cursor: 'pointer', maxHeight: '13em', width: '100%', objectFit: 'cover',
-                              height: '100%' }} />
+                            <CImage fluid  orientation="left" src={formData.logoUrl || avatar8}
+                              onClick={handleImageClick}
+                              style={{ cursor: 'pointer', maxHeight: '13em', width: '100%', objectFit: 'cover',
+                                height: '100%',
+                                border: stepErrors[activeStep] && !formData.logo ? '2px solid red' : 'none' // Adiciona borda vermelha se houver erro e logo não selecionado
+                              }}
+                                />
                             <input
                             type="file"
                             ref={hiddenFileInput}
                             onChange={handleLogoChange}
                             style={{ display: 'none' }}
                             accept="image/*"
+                            
                           />
                         </CCol>
                         <CCol md={7} xs={9}>
@@ -489,7 +492,7 @@ const handleBack = (e) => {
                                 value={formData.quantidade}
                                 onChange={handleChange}
                                 required
-                                className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
+                                className={stepErrors[activeStep] && (!formData.quantidade) ? 'is-invalid' : ''}
                               />
                             </CPopover>
                           </CCol>
@@ -506,7 +509,7 @@ const handleBack = (e) => {
                                       setFormData({ ...formData, preco: valorNumerico });
                                   }}
                                   required
-                                  className={stepErrors[activeStep] && (!formData.variedade) ? 'is-invalid' : ''}
+                                  className={stepErrors[activeStep] && (!formData.preco) ? 'is-invalid' : ''}
                               />
                             </CPopover>
                           </CCol>
