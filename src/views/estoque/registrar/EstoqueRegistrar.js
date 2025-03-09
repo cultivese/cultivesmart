@@ -35,6 +35,7 @@ const EstoqueRegistrar = () => {
   const [showAdditionalFieldsModal, setShowAdditionalFieldsModal] = useState(false); // Estado para controlar o modal
   const [insumoSelecionado, setInsumoSelecionado] = useState(null);
   const [editingField, setEditingField] = useState(null);
+  const [insumosSelecionados, setInsumosSelecionados] = useState([]);
 
   const [editedInsumo, setEditedInsumo] = useState({
     nome: '',
@@ -204,6 +205,20 @@ const handleBack = (e) => {
   });
 };
 
+const toggleInsumoSelecionado = (insumo) => {
+  if (insumosSelecionados.some((i) => i.id === insumo.id)) {
+    setInsumosSelecionados(insumosSelecionados.filter((i) => i.id !== insumo.id));
+  } else {
+    setInsumosSelecionados([...insumosSelecionados, insumo]);
+  }
+};
+
+const calcularTotal = () => {
+  return insumosSelecionados.reduce((total, insumo) => {
+    return total + parseFloat(insumo.preco || 0);
+  }, 0);
+};
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
@@ -322,8 +337,13 @@ const handleBack = (e) => {
                     <CRow xs={{ gutterY: 5 }} className="align-items-center justify-content-center mb-4">
                       <CCol xs={8}>
                         {filtrarInsumos().map((insumo) => {
+                        const isSelecionado = insumosSelecionados.some((i) => i.id === insumo.id);
+
                           return (
-                                  <CCard style={{width: '45%'}}>
+                                  <CCard
+                                  key={insumo.id}
+                                  style={{ width: '45%', cursor: 'pointer', backgroundColor: isSelecionado ? '#e0f7fa' : 'white' }}
+                                  onClick={() => toggleInsumoSelecionado(insumo)}>
                                     <CRow>
                                       <CCol xs={6} md={3} style={{marginTop:10, marginBottom:10}}>
                                         <CCardImage style={{ maxWidth: '150px' }} src={`data:image/png;base64,${insumo.logoPath}`} />
@@ -364,8 +384,16 @@ const handleBack = (e) => {
                                                   <CCardBody>
                                                     <CCardTitle>Orçamento</CCardTitle>
                                                     <CCardText>
-                                                      Insumos selecioandos
-                                                    </CCardText>                              
+                                                      Insumos selecionados:
+                                                      <ul>
+                                                        {insumosSelecionados.map((insumo) => (
+                                                          <li key={insumo.id}>
+                                                            {insumo.nome} - {insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)} - {insumo.preco}
+                                                          </li>
+                                                        ))}
+                                                      </ul>
+                                                      <strong>Total:</strong> {calcularTotal()}
+                                                    </CCardText>                             
                                                   </CCardBody>
                                                 </CCard>
                       </CCol>
