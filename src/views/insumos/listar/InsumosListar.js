@@ -48,9 +48,13 @@ const InsumosCadastro = () => {
   const [showAdditionalFieldsModal, setShowAdditionalFieldsModal] = useState(false); // Estado para controlar o modal
   const [insumoSelecionado, setInsumoSelecionado] = useState(null);
   const [editingField, setEditingField] = useState(null);
+  const [modalMode, setModalMode] = useState('visualizar'); // Novo estado para controlar o modo do modal
 
   const [editedInsumo, setEditedInsumo] = useState({
     nome: '',
+    fornecedor_id: null,
+    categoria_id: null,
+    variedade: '',
     descricao: '',
     unidade_medida: '',
     quantidade: '',
@@ -152,10 +156,13 @@ const handleAdditionalFieldsChange = (event) => {
   }));
 };
 
-const handleOpenAdditionalFieldsModal = (insumo) => {
+const handleOpenAdditionalFieldsModal = (insumo, mode) => {
   setInsumoSelecionado(insumo);
   setEditedInsumo({
       nome: insumo.nome,
+      categoria_id: insumo.categoria_id,
+      fornecedor_id: insumo.fornecedor_id,
+      variedade: insumo.variedade,
       descricao: insumo.descricao,
       unidade_medida: insumo.unidade_medida,
       quantidade: insumo.quantidade,
@@ -163,7 +170,35 @@ const handleOpenAdditionalFieldsModal = (insumo) => {
       imposto: insumo.imposto,
       preco: insumo.preco,
   });
+  setModalMode(mode); // Define o modo do modal
   setShowAdditionalFieldsModal(true);
+};
+
+const handleDeleteInsumoById = (id) => {
+  fetch(`https://backend.cultivesmart.com.br/api/insumos/${id}`, {
+    method: 'DELETE', // Adicione o método DELETE aqui
+  })
+    .then(response => {
+      if (response.ok) {
+        // A exclusão foi bem-sucedida
+        console.log(`Insumo com ID ${id} excluído com sucesso.`);
+        //removerInsumo(id);
+        fetch('https://backend.cultivesmart.com.br/api/insumos')
+          .then(response => response.json())
+          .then(data => {
+            setInsumos(data);
+          })
+          .catch(error => console.error('Erro ao buscar insumos:', error));
+      } else {
+        // A exclusão falhou
+        console.error(`Erro ao excluir insumo com ID ${id}:`, response.status);
+      }
+    })
+    .catch(error => console.error('Erro ao excluir insumo:', error));
+};
+
+const removerInsumo = (idParaRemover) => {
+  setInsumos(insumos.filter(insumo => insumo.id !== idParaRemover));
 };
 
 const handleCloseAdditionalFieldsModal = () => {
@@ -171,13 +206,50 @@ const handleCloseAdditionalFieldsModal = () => {
 };
 
 const handleSaveAdditionalFields = () => {
-  // Atualiza o formData com os valores do modal
-  setFormData(prevState => ({
-    ...prevState,
-    quantidade_inicial: additionalFields.quantidade_inicial,
-    unidade_medida_conteudo: additionalFields.unidade_medida_conteudo,
-    quantidade_consumida: additionalFields.quantidade_consumida,
-  }));
+
+  if (!insumoSelecionado) {
+    console.error('Nenhum insumo selecionado para atualizar.');
+    return;
+  }
+
+  // // Atualiza o formData com os valores do modal
+  // setFormData(prevState => ({
+  //   ...prevState,
+  //   quantidade_inicial: additionalFields.quantidade_inicial,
+  //   unidade_medida_conteudo: additionalFields.unidade_medida_conteudo,
+  //   quantidade_consumida: additionalFields.quantidade_consumida,
+  // }));
+
+  const { id } = insumoSelecionado;
+
+  fetch(`https://backend.cultivesmart.com.br/api/insumos/${id}`, {
+    method: 'PUT', // Adicione o método DELETE aqui
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(editedInsumo),
+  })
+  .then(response => {
+    if (response.ok) {
+      console.log(`Insumo com ID ${id} atualizado com sucesso.`);
+
+      // Atualiza o estado insumos com os dados atualizados
+      setInsumos(prevInsumos => {
+        const updatedInsumos = prevInsumos.records.map(insumo => {
+          if (insumo.id === id) {
+            return { ...insumo, ...editedInsumo }; // Atualiza o insumo com os dados editados
+          }
+          return insumo;
+        });
+        return { ...prevInsumos, records: updatedInsumos };
+      });
+    } else {
+      console.error(`Erro ao atualizar o insumo com ID ${id}:`, response.status);
+    }
+  })
+  .catch(error => console.error('Erro ao atualizar insumo:', error));
+
+
   setShowAdditionalFieldsModal(false); // Fecha o modal
 };
 
@@ -368,8 +440,14 @@ const handleBack = (e) => {
                                           </CDropdownToggle>
                                           <CDropdownMenu>
                                             <CDropdownItem
-                                                onClick={() => handleOpenAdditionalFieldsModal(insumo)}>
-                                            Ver detalhes</CDropdownItem>
+                                                onClick={() => handleOpenAdditionalFieldsModal(insumo, 'visualizar')}>
+                                            Visualizar</CDropdownItem>
+                                            <CDropdownItem
+                                                onClick={() => handleOpenAdditionalFieldsModal(insumo, 'editar')}>
+                                            Atualizar Dados</CDropdownItem>
+                                            <CDropdownItem
+                                                onClick={() => handleDeleteInsumoById(insumo.id)}>
+                                            Excluir</CDropdownItem>
                                           </CDropdownMenu>
                                         </CDropdown>
                                     </CCol>
@@ -393,79 +471,96 @@ const handleBack = (e) => {
         onClose={handleCloseAdditionalFieldsModal}
     >
         <CModalHeader closeButton>
-            <strong>Informações do cadastro do insumo</strong>
+          <strong>{modalMode === 'visualizar' ? 'Informações do cadastro do insumo' : 'Editar cadastro do insumo'}</strong>
         </CModalHeader>
         <CModalBody>
           {insumoSelecionado && (
-              <div>
+              <CRow>
+                <CCol xs={6} md={6}>
                   <CFormInput
-                      label="Nome"
-                      value={editedInsumo.nome}
-                      readOnly={editingField !== 'nome'}
-                      onFocus={() => setEditingField('nome')}
-                      onChange={(e) =>
-                          setEditedInsumo({ ...editedInsumo, nome: e.target.value })
-                      }
-                  />
-
-                  <CFormTextarea
-                    label="Descrição"
-                    value={editedInsumo.descricao}
-                    style={{ minHeight: '150px' }} // Altura mínima
+                    label="Nome"
+                    value={editedInsumo.nome}
+                    disabled={modalMode === 'visualizar'}
+                    onFocus={() => setEditingField('nome')}
                     onChange={(e) =>
-                      setEditedInsumo({
-                          ...editedInsumo,
-                          descricao: e.target.value,
-                      })
-                    }
-                    maxLength={255}
-                  ></CFormTextarea>
-                  
+                      setEditedInsumo({ ...editedInsumo, nome: e.target.value })
+                  }/>
+                </CCol>
+                <CCol xs={6} md={6}>
                   <CFormInput
+                    label="Variedade"
+                    value={editedInsumo.variedade}
+                    disabled={modalMode === 'visualizar'}
+                    onFocus={() => setEditingField('variedade')}
+                    onChange={(e) =>
+                      setEditedInsumo({ ...editedInsumo, variedade: e.target.value })
+                  }/>
+                </CCol>
+                <CCol xs={12} md={12}>
+                  <CFormTextarea label="Descrição"
+                    value={editedInsumo.descricao}
+                    style={{ minHeight: '200px' }}
+                    maxLength={255}
+                    disabled={modalMode === 'visualizar'}
+                    onFocus={() => setEditingField('descricao')}
+                    onChange={(e) =>
+                      setEditedInsumo({ ...editedInsumo, descricao: e.target.value })
+                  }
+                    ></CFormTextarea>
+                </CCol>
+                <CCol xs={5} md={5}>
+                  <CFormSelect
                       label="Unidade de Medida"
+                      id="unidade_medida"
+                      aria-label="Floating label select example"
                       value={editedInsumo.unidade_medida}
-                      readOnly={editingField !== 'unidade_medida'}
+                      title=''
+                      disabled={modalMode === 'visualizar'}
                       onFocus={() => setEditingField('unidade_medida')}
                       onChange={(e) =>
-                          setEditedInsumo({
-                              ...editedInsumo,
-                              unidade_medida: e.target.value,
-                          })
+                        setEditedInsumo({ ...editedInsumo, unidade_medida: e.target.value })
                       }
-                  />
+                    >
+                      {
+                        unidadesMedida && unidadesMedida.map((unidadeMedida) => {
+                          return (
+                            <option key={unidadeMedida.id} value={unidadeMedida.id}>{unidadeMedida.descricao}</option>
+                          )
+                      }
+                    )}
+                  </CFormSelect>
+                </CCol>
+                <CCol xs={3} md={3}>
+                  <CFormInput label="Quantidade"
+                  value={editedInsumo.quantidade} disabled={modalMode === 'visualizar'}
+                  onFocus={() => setEditingField('quantidade')}
+                  onChange={(e) =>
+                    setEditedInsumo({ ...editedInsumo, quantidade: e.target.value })
+                  }
+                />
+                 </CCol>
+                 <CCol xs={4} md={4}>
                   <CFormInput
-                      label="Quantidade"
-                      value={editedInsumo.quantidade}
-                      readOnly={editingField !== 'quantidade'}
-                      onFocus={() => setEditingField('quantidade')}
-                      onChange={(e) =>
-                          setEditedInsumo({
-                              ...editedInsumo,
-                              quantidade: e.target.value,
-                          })
-                      }
-                  />
-                 
-                  <CFormInput
-                      label="Preço"
-                      value={editedInsumo.preco}
-                      onChange={(e) =>
-                          setEditedInsumo({
-                              ...editedInsumo,
-                              preco: e.target.value,
-                          })
-                      }
-                  />
-              </div>
+                    label="Preço"
+                    value={editedInsumo.preco}
+                    onFocus={() => setEditingField('preco')}
+                    onChange={(e) =>
+                      setEditedInsumo({ ...editedInsumo, preco: e.target.value })
+                    }
+                    disabled={modalMode === 'visualizar'}/>
+                </CCol>
+              </CRow>
           )}
         </CModalBody>
         <CModalFooter>
             <CButton color="secondary" onClick={handleCloseAdditionalFieldsModal}>
                 Fechar
             </CButton>
+            {modalMode === 'editar' && ( // Botão de salvar visível apenas no modo de edição
             <CButton color="primary" onClick={handleSaveAdditionalFields}>
-                Salvar
+              Salvar
             </CButton>
+          )}
         </CModalFooter>
     </CModal>
      
