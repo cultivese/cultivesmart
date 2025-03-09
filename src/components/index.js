@@ -8,6 +8,8 @@ import DocsComponents from './DocsComponents'
 import DocsIcons from './DocsIcons'
 import DocsLink from './DocsLink'
 import DocsExample from './DocsExample'
+import EstoqueArea from './EstoqueArea'
+import OrcamentoArea from './OrcamentoArea'
 
 export {
   AppBreadcrumb,
@@ -20,4 +22,6 @@ export {
   DocsIcons,
   DocsLink,
   DocsExample,
+  EstoqueArea,
+  OrcamentoArea,
 }

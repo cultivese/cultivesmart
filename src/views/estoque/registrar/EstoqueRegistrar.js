@@ -1,5 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
-
+import CIcon from '@coreui/icons-react'
+import {
+  cilOptions
+} from '@coreui/icons'
 import {
   CButton,
   CCard,
@@ -9,6 +12,10 @@ import {
   CModal,
   CModalBody,
   CModalHeader,
+  CDropdown,
+  CDropdownMenu,
+  CDropdownToggle,
+  CDropdownItem,
   CModalFooter,
   CContainer,
   CFormCheck,
@@ -22,8 +29,10 @@ import {
   CCardText,
   CCardSubtitle,
 } from '@coreui/react';
-import { DocsExample } from 'src/components'
+import { DocsExample, EstoqueArea } from 'src/components'
+import { OrcamentoArea } from '../../../components';
 const EstoqueRegistrar = () => {
+  const [estoque, setEstoque] = useState([]);  
   const [insumos, setInsumos] = useState([]);  
   const [activeStep, setActiveStep] = useState(0);
   const [fornecedores, setFornecedores] = useState([]);
@@ -33,6 +42,7 @@ const EstoqueRegistrar = () => {
   const [filtroNome, setFiltroNome] = useState('');
   const [filtroFornecedor, setFiltroFornecedor] = useState('');
   const [showAdditionalFieldsModal, setShowAdditionalFieldsModal] = useState(false); // Estado para controlar o modal
+  const [showIncluirInsumoModal, setShowIncluirInsumoModal] = useState(false); // Estado para controlar o modal
   const [insumoSelecionado, setInsumoSelecionado] = useState(null);
   const [editingField, setEditingField] = useState(null);
   const [insumosSelecionados, setInsumosSelecionados] = useState([]);
@@ -46,6 +56,29 @@ const EstoqueRegistrar = () => {
     imposto: '',
     preco: '',
   });
+
+  const formatarPreco = (valor) => {
+    if (!valor) return '';
+    const valorNumerico = valor.replace(/[^\d]/g, '');
+    const valorFormatado = (parseInt(valorNumerico) / 100).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+    });
+    return valorFormatado;
+};
+
+  const consultarInsumos = () => {
+    fetch('https://backend.cultivesmart.com.br/api/insumos')
+    .then(response => response.json())
+    .then(data => {
+      setInsumos(data);
+    })
+    .catch(error => console.error('Erro ao buscar insumos:', error));
+  };
+
+  
+
+
 
   const getUnidadeMedidaDescricao = (id) => {
     const unidade = unidadesMedida && unidadesMedida.length > 0
@@ -64,12 +97,12 @@ const EstoqueRegistrar = () => {
 
 
    useEffect(() => {
-      fetch('https://backend.cultivesmart.com.br/api/insumos')
+      fetch('https://backend.cultivesmart.com.br/api/estoque')
       .then(response => response.json())
       .then(data => {
         setInsumos(data);
       })
-      .catch(error => console.error('Erro ao buscar insumos:', error));
+      .catch(error => console.error('Erro ao buscar o estoque:', error));
   
     }, []);
 
@@ -130,6 +163,11 @@ const handleAdditionalFieldsChange = (event) => {
   }));
 };
 
+const handleOpenIncluirInsumoModal = () => {
+  consultarInsumos()
+  setShowIncluirInsumoModal(true);
+}
+
 const handleOpenAdditionalFieldsModal = (insumo) => {
   setInsumoSelecionado(insumo);
   setEditedInsumo({
@@ -146,6 +184,10 @@ const handleOpenAdditionalFieldsModal = (insumo) => {
 
 const handleCloseAdditionalFieldsModal = () => {
   setShowAdditionalFieldsModal(false);
+};
+
+const handleCloseIncluirInsumoModal = () => {
+  setShowIncluirInsumoModal(false);
 };
 
 const handleSaveAdditionalFields = () => {
@@ -178,7 +220,7 @@ const fetchedUnidadesMedida = useMemo(async () => {
    }, []);
 
 const filtrarInsumos = () => {
-  return insumos && insumos.records
+  return estoque && estoque.records
       ? insumos.records.filter((insumo) => {
             const nomeMatch =
                 !filtroNome ||
@@ -331,77 +373,90 @@ const calcularTotal = () => {
                     </CRow>
                   </DocsExample>
                   <div style={{marginTop: 1.5 + 'em', display: 'flex', justifyContent: 'flex-end'}}>
-                    <CButton color="warning" className="rounded-0">Registrar Insumo</CButton>
+                    <CButton
+                      color="warning"
+                      className="rounded-0"
+                      onClick={() =>
+                        handleOpenIncluirInsumoModal()
+                      }
+                    >Incluir Insumo</CButton>
                   </div>
-                  <DocsExample href="components/card/#background-and-color">
-                    <CRow xs={{ gutterY: 5 }} className="align-items-center justify-content-center mb-4">
-                      <CCol xs={8}>
-                        {filtrarInsumos().map((insumo) => {
-                        const isSelecionado = insumosSelecionados.some((i) => i.id === insumo.id);
+                  
+                  <CRow>
+                    <EstoqueArea href="components/card/#background-and-color">
+                      <CRow xs={{ gutterY: 5 }} className="align-items-center justify-content-center mb-4">
+                        <CCol xs={8}>
+                          {filtrarInsumos().map((insumo) => {
+                          const isSelecionado = insumosSelecionados.some((i) => i.id === insumo.id);
 
-                          return (
-                                  <CCard
-                                  key={insumo.id}
-                                  style={{ width: '45%', cursor: 'pointer', backgroundColor: isSelecionado ? '#e0f7fa' : 'white' }}
-                                  onClick={() => toggleInsumoSelecionado(insumo)}>
-                                    <CRow>
-                                      <CCol xs={6} md={3} style={{marginTop:10, marginBottom:10}}>
-                                        <CCardImage style={{ maxWidth: '150px' }} src={`data:image/png;base64,${insumo.logoPath}`} />
-                                      </CCol>
-                                      <CCol xs={4} md={6}>
-                                        <CCardBody>
-                                          <CCardTitle>{insumo.nome}</CCardTitle>
-                                          <CCardSubtitle>{insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)}</CCardSubtitle>
-                                          <CCardText>
-                                            3  und
-                                          <div>
-                                          - fechados: 3
-                                          </div>
-                                          </CCardText>
-                                        </CCardBody>
-                                      </CCol>
-                                      <CCol xs={4} md={3}>
-                                      <CCardLink style={{ float: 'right' }} href="#" onClick={() =>
-                                              handleOpenAdditionalFieldsModal(insumo)
-                                          }>+ adicionar</CCardLink>
-                                      </CCol>
-                                    </CRow>
-                                  </CCard>
-                            )
-                          })
-                        }
-                      </CCol>
+                            return (
+                                    <CCard
+                                    key={insumo.id}
+                                    style={{ width: '45%', cursor: 'pointer', backgroundColor: isSelecionado ? '#e0f7fa' : 'white' }}
+                                    onClick={() => toggleInsumoSelecionado(insumo)}>
+                                      <CRow>
+                                        <CCol xs={6} md={3} style={{marginTop:10, marginBottom:10}}>
+                                          <CCardImage style={{ maxWidth: '150px' }} src={`data:image/png;base64,${insumo.logoPath}`} />
+                                        </CCol>
+                                        <CCol xs={4} md={6}>
+                                          <CCardBody>
+                                            <CCardTitle>{insumo.nome}</CCardTitle>
+                                            <CCardSubtitle>{insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)}</CCardSubtitle>
+                                            <CCardText>
+                                              3  und
+                                            <div>
+                                            - fechados: 3
+                                            </div>
+                                            </CCardText>
+                                          </CCardBody>
+                                        </CCol>
+                                        <CCol xs={4} md={3}>
+                                        <CCardLink style={{ float: 'right' }} href="#" onClick={() =>
+                                                handleOpenAdditionalFieldsModal(insumo)
+                                            }>+ adicionar</CCardLink>
+                                        </CCol>
+                                      </CRow>
+                                    </CCard>
+                              )
+                            })
+                          }
+                        </CCol>
+                        
+                      </CRow>
+                    </EstoqueArea>
+
+                    <OrcamentoArea href="components/card/#background-and-color">
                       <CCol
-                                                xs={4}
-                                                style={{
-                                                  position: 'sticky',
-                                                  top: '20px', // Ajuste este valor conforme necessário
-                                                  height: 'fit-content', // Garante que a coluna não se estenda indefinidamente
-                                                }}
-                                              >
-                                                {/* Conteúdo da coluna flutuante */}
-                                                <CCard>
-                                                  <CCardBody>
-                                                    <CCardTitle>Orçamento</CCardTitle>
-                                                    <CCardText>
-                                                      Insumos selecionados:
-                                                      <ul>
-                                                        {insumosSelecionados.map((insumo) => (
-                                                          <li key={insumo.id}>
-                                                            {insumo.nome} - {insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)} - {insumo.preco}
-                                                          </li>
-                                                        ))}
-                                                      </ul>
-                                                      <strong>Total:</strong> {calcularTotal()}
-                                                    </CCardText>                             
-                                                  </CCardBody>
-                                                </CCard>
-                      </CCol>
-                    </CRow>
-                  </DocsExample>
-                </CCardBody>
-              </CCard>
-            </CCol>
+                        xs={4}
+                        style={{
+                          position: 'sticky',
+                          top: '20px', // Ajuste este valor conforme necessário
+                          height: 'fit-content', // Garante que a coluna não se estenda indefinidamente
+                        }}
+                      >
+                      {/* Conteúdo da coluna flutuante */}
+                      <CCard>
+                        <CCardBody>
+                          <CCardTitle>Orçamento</CCardTitle>
+                          <CCardText>
+                            Insumos selecionados:
+                            <ul>
+                              {insumosSelecionados.map((insumo) => (
+                                <li key={insumo.id}>
+                                  {insumo.nome} - {insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)} - {insumo.preco}
+                                </li>
+                              ))}
+                            </ul>
+                            <strong>Total:</strong> {calcularTotal()}
+                          </CCardText>                             
+                        </CCardBody>
+                      </CCard>
+                    </CCol>
+                  </OrcamentoArea>
+                </CRow>
+              </CCardBody>
+            </CCard>
+          </CCol>
             
         
       </CForm>
@@ -444,7 +499,74 @@ const calcularTotal = () => {
                 Salvar
             </CButton>
         </CModalFooter>
-    </CModal>
+      </CModal> 
+
+      <CModal
+        alignment="center"
+        size="xl"
+        visible={showIncluirInsumoModal}
+        onClose={handleCloseIncluirInsumoModal}
+    >
+        <CModalHeader closeButton>
+            <strong>Incluir insumo ao estoque</strong>
+        </CModalHeader>
+        <CModalBody>
+          {
+            insumos && insumos.records && insumos.records.length > 0 &&  insumos.records.map((insumo) => {
+              return (
+                <CCard key={insumo.id} style={{width: '30%'}}>
+                    <CRow>
+                      <CCol xs={3} md={4} style={{marginTop:20}}>
+                        <CCardImage src={`data:image/png;base64,${insumo.logoPath}`} />
+                      </CCol>
+                      <CCol xs={7} md={7}>
+                        <CCardBody>
+                          <CCardTitle>{insumo.nome}</CCardTitle>
+                          <CCardSubtitle>{insumo.variedade}</CCardSubtitle>
+                          <CCardText>
+                            {formatarPreco(insumo.preco)}
+                          </CCardText>
+                          <CCardText>
+                            <small className="text-body-secondary">{insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)} por und.</small>
+                          </CCardText>
+                        </CCardBody>
+                      </CCol>
+                      <CCol xs={1} md={1} >
+                          <CDropdown alignment="end">
+                            <CDropdownToggle color="transparent" caret={false} className="p-0">
+                              <CIcon icon={cilOptions} />
+                            </CDropdownToggle>
+                            <CDropdownMenu>
+                              <CDropdownItem
+                                  onClick={() => handleOpenAdditionalFieldsModal(insumo, 'visualizar')}>
+                              Visualizar</CDropdownItem>
+                              <CDropdownItem
+                                  onClick={() => handleOpenAdditionalFieldsModal(insumo, 'editar')}>
+                              Atualizar Dados</CDropdownItem>
+                              <CDropdownItem
+                                  onClick={() => handleDeleteInsumoById(insumo.id)}>
+                              Excluir</CDropdownItem>
+                            </CDropdownMenu>
+                          </CDropdown>
+                      </CCol>
+                    </CRow>
+                  </CCard>
+                )
+              })
+            }
+
+          
+          
+        </CModalBody>
+        <CModalFooter>
+            <CButton color="secondary" onClick={handleCloseAdditionalFieldsModal}>
+                Fechar
+            </CButton>
+            <CButton color="success" onClick={handleSaveAdditionalFields}>
+                Confirmar
+            </CButton>
+        </CModalFooter>
+      </CModal> 
      
     </CContainer>
 
