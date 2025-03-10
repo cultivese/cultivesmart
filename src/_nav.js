@@ -82,10 +82,22 @@ const _nav = [
     to: '/insumos/especificacao',
     icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
   },
+  // {
+  //   component: CNavItem,
+  //   name: 'Registrar',
+  //   to: '/estoque/registrar',
+  //   icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+  // },
   {
     component: CNavItem,
-    name: 'Registrar',
-    to: '/estoque/registrar',
+    name: 'Listar',
+    to: '/estoque/listar',
+    icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Gerar Orçamento',
+    to: '/estoque/gerar_orcamento',
     icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
   },
   {

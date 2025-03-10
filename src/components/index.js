@@ -10,6 +10,7 @@ import DocsLink from './DocsLink'
 import DocsExample from './DocsExample'
 import EstoqueArea from './EstoqueArea'
 import OrcamentoArea from './OrcamentoArea'
+import FiltroCategoriaInsumo from './FiltroCategoriaInsumo'
 
 export {
   AppBreadcrumb,
@@ -24,4 +25,5 @@ export {
   DocsExample,
   EstoqueArea,
   OrcamentoArea,
+  FiltroCategoriaInsumo,
 }
