@@ -82,24 +82,30 @@ const _nav = [
     to: '/insumos/especificacao',
     icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
   },
-  // {
-  //   component: CNavItem,
-  //   name: 'Registrar',
-  //   to: '/estoque/registrar',
-  //   icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
-  // },
   {
     component: CNavItem,
-    name: 'Listar',
-    to: '/estoque/listar',
-    icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Gerar Orçamento',
+    name: 'Simular Pedido',
     to: '/estoque/gerar_orcamento',
     icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
   },
+  {
+    component: CNavItem,
+    name: 'Histórico de Pedidos',
+    to: '/estoque/historico_pedidos',
+    icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Listar',
+  //   to: '/estoque/listar',
+  //   icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+  // },
+  // {
+  //   component: CNavItem,
+  //   name: 'Simular Pedido',
+  //   to: '/estoque/registrar',
+  //   icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+  // },
   {
     component: CNavTitle,
     name: 'Insumos',

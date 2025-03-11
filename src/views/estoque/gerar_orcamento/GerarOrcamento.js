@@ -1,12 +1,17 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import CIcon from '@coreui/icons-react'
 import {
-  cilOptions
+  cilOptions,
+  cilChartPie,
+  cilArrowRight
 } from '@coreui/icons'
 import {
   CButton,
   CCard,
   CCardBody,
+  CWidgetStatsF,  
+  CLink,          
   CCardHeader,
   CCol,
   CModal,
@@ -29,22 +34,33 @@ import {
   CCardText,
   CCardSubtitle,
 } from '@coreui/react';
-import { EstoqueArea, OrcamentoArea  } from 'src/components'
+import { DocsExample, EstoqueArea } from 'src/components'
+import { OrcamentoArea } from '../../../components';
 const GerarOrcamento = () => {
   const [estoque, setEstoque] = useState([]);  
   const [insumos, setInsumos] = useState([]);  
+  const [activeStep, setActiveStep] = useState(0);
+  const [fornecedores, setFornecedores] = useState([]);
+  const [categorias, setCategorias] = useState([]);  
+  const [filtroCategoria, setFiltroCategoria] = useState('');
   const [unidadesMedida , setUnidadesMedida ] = useState([]);
   const [filtroNome, setFiltroNome] = useState('');
   const [filtroFornecedor, setFiltroFornecedor] = useState('');
-  const [filtroCategoria, setFiltroCategoria] = useState('');
   const [showAdditionalFieldsModal, setShowAdditionalFieldsModal] = useState(false); // Estado para controlar o modal
   const [showIncluirInsumoModal, setShowIncluirInsumoModal] = useState(false); // Estado para controlar o modal
   const [insumoSelecionado, setInsumoSelecionado] = useState(null);
   const [editingField, setEditingField] = useState(null);
   const [insumosSelecionados, setInsumosSelecionados] = useState([]);
-  const [selectedInsumosModal, setSelectedInsumosModal] = useState([]);
-  const [checkedInsumos, setCheckedInsumos] = useState([]);
 
+  const [editedInsumo, setEditedInsumo] = useState({
+    nome: '',
+    descricao: '',
+    unidade_medida: '',
+    quantidade: '',
+    desconto: '',
+    imposto: '',
+    preco: '',
+  });
 
   const formatarPreco = (valor) => {
     if (!valor) return '';
@@ -66,6 +82,9 @@ const GerarOrcamento = () => {
   };
 
   
+
+
+
   const getUnidadeMedidaDescricao = (id) => {
     const unidade = unidadesMedida && unidadesMedida.length > 0
     && unidadesMedida.find((u) => u.id === parseInt(id));
@@ -99,45 +118,93 @@ const GerarOrcamento = () => {
         setFornecedores(data);
       })
       .catch(error => console.error('Erro ao buscar fornecedores:', error));
-    }, []);
-    
-    const limparFiltros = () => {
-      setFiltroNome('');
-      setFiltroFornecedor('');
-      setFiltroCategoria(''); // Limpa o filtro de categoria
-    };
-    
-    const handleOpenIncluirInsumoModal = () => {
-      consultarInsumos()
-      setShowIncluirInsumoModal(true);
+  }, []);
+
+
+  const limparFiltros = () => {
+    setFiltroNome('');
+    setFiltroFornecedor('');
+    setFiltroCategoria(''); // Limpa o filtro de categoria
+};
+
+
+  const handleNext = (e) => {
+    e.preventDefault();
+
+    let hasErrors = false;
+    const newStepErrors = [...stepErrors];
+
+    // Validation logic for each step
+    if (activeStep === 0 && !filtroCategoria) {
+        hasErrors = true;
+    } else if (activeStep === 1 && !formData.fornecedor_id) {
+        hasErrors = true;
+        newStepErrors[activeStep] = true;
+    } else if (activeStep === 2 &&
+      filtroCategoria === "1" && (
+          !formData.nome.trim() || !formData.variedade.trim() || !formData.descricao.trim() ||
+          !formData.unidade_medida)
+   ) {
+        hasErrors = true;
+        newStepErrors[activeStep] = true;
+    } else if (activeStep === 2 &&
+      filtroCategoria === 2 && (!formData.descricao ||  !formData.unidade_medida || !formData.estoque_minimo)
+    ) {
+        hasErrors = true;
+        newStepErrors[activeStep] = true;
     }
+    setStepErrors(newStepErrors);
 
-    const handleOpenAdditionalFieldsModal = (insumo) => {
-      setInsumoSelecionado(insumo);
-      setShowAdditionalFieldsModal(true);
-    };
+    if (!hasErrors) {
+        setActiveStep(prevStep => prevStep + 1);
+    }
+};
 
-    const handleCloseAdditionalFieldsModal = () => {
-      setShowAdditionalFieldsModal(false);
-    };
-    
-    const handleCloseIncluirInsumoModal = () => {
-      setShowIncluirInsumoModal(false);
-      setCheckedInsumos([]);
-    };
+const handleAdditionalFieldsChange = (event) => {
+  const { id, value } = event.target;
+  setAdditionalFields(prevState => ({
+    ...prevState,
+    [id]: value,
+  }));
+};
 
-    const handleSaveAdditionalFields = () => {
-      const novosInsumosSelecionados = insumos.records
-        .filter((insumo) => checkedInsumos.includes(insumo.id))
-        .filter(
-          (insumo) => !insumosSelecionados.some((i) => i.id === insumo.id)
-        ); // Filtra para não adicionar duplicados
-    
-      setInsumosSelecionados([...insumosSelecionados, ...novosInsumosSelecionados]);
-      setShowIncluirInsumoModal(false);
-      setCheckedInsumos([]); // Limpa os checkboxes
-    };
-    
+const handleOpenIncluirInsumoModal = () => {
+  consultarInsumos()
+  setShowIncluirInsumoModal(true);
+}
+
+const handleOpenAdditionalFieldsModal = (insumo) => {
+  setInsumoSelecionado(insumo);
+  setEditedInsumo({
+      nome: insumo.nome,
+      descricao: insumo.descricao,
+      unidade_medida: insumo.unidade_medida,
+      quantidade: insumo.quantidade,
+      desconto: insumo.desconto,
+      imposto: insumo.imposto,
+      preco: insumo.preco,
+  });
+  setShowAdditionalFieldsModal(true);
+};
+
+const handleCloseAdditionalFieldsModal = () => {
+  setShowAdditionalFieldsModal(false);
+};
+
+const handleCloseIncluirInsumoModal = () => {
+  setShowIncluirInsumoModal(false);
+};
+
+const handleSaveAdditionalFields = () => {
+  // Atualiza o formData com os valores do modal
+  setFormData(prevState => ({
+    ...prevState,
+    quantidade_inicial: additionalFields.quantidade_inicial,
+    unidade_medida_conteudo: additionalFields.unidade_medida_conteudo,
+    quantidade_consumida: additionalFields.quantidade_consumida,
+  }));
+  setShowAdditionalFieldsModal(false); // Fecha o modal
+};
 
 const handleCategorySelect = (category) => {
   setFiltroCategoria(category);  // Atualiza o estado da categoria selecionada
@@ -226,17 +293,155 @@ const calcularTotal = () => {
 
   return (
     <CContainer>
-      
+      <CRow>
+      <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="danger"
+            icon={<CIcon icon={cilChartPie} height={24} />}
+            padding={false}
+            title="Pedidos pendentes"
+            value="2"
+            footer={
+              <CLink
+                className="font-weight-bold font-xs text-body-secondary"
+                href="https://coreui.io/"
+                rel="noopener norefferer"
+                target="_blank"
+              >
+                Visualizar
+                <CIcon icon={cilArrowRight} className="float-end" width={16} />
+              </CLink>
+            }
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="warning"
+            icon={<CIcon icon={cilChartPie} height={24} />}
+            padding={false}
+            title="Insumos sem nota"
+            value="10"
+            footer={
+              <CLink
+                className="font-weight-bold font-xs text-body-secondary"
+                href="https://coreui.io/"
+                rel="noopener norefferer"
+                target="_blank"
+              >
+                Visualizar
+                <CIcon icon={cilArrowRight} className="float-end" width={16} />
+              </CLink>
+            }
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="warning"
+            icon={<CIcon icon={cilChartPie} height={24} />}
+            padding={false}
+            title="Insumos sem impostos"
+            value="5"
+            footer={
+              <CLink
+                className="font-weight-bold font-xs text-body-secondary"
+                href="https://coreui.io/"
+                rel="noopener norefferer"
+                target="_blank"
+              >
+                Visualizar
+                <CIcon icon={cilArrowRight} className="float-end" width={16} />
+              </CLink>
+            }
+          />
+        </CCol>
+      </CRow>
       <CForm onSubmit={handleSubmit} className="row g-3">
           
             <CCol xs={12}>
               <CCard className="mb-4">
                 <CCardHeader>
-                  <strong>Estoque - </strong>
-                  <small>Gerar orçamento</small>
+                  <strong>Insumos - </strong>
+                  <small>Simular Pedido</small>
                 </CCardHeader>
                 <CCardBody>
-                  <div style={{marginTop: 1.5 + 'em', marginBottom: 1.5 + 'em', display: 'flex', justifyContent: 'flex-end'}}>
+                  <DocsExample href="components/card/#background-and-color">
+                    <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }} >
+
+                    { unidadesMedida && unidadesMedida &&
+                      categorias && categorias.records && categorias.records.map((categoria) => {
+                          return (
+                            <CCol
+                              key={categoria.id}
+                              color={ filtroCategoria === categoria.id ? 'success' : 'light'}
+                              style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              textAlign: 'center',
+                              
+                          }}>
+                                  
+
+                              <CCol lg={4} onClick={() => { setFiltroCategoria(categoria.id); console.log('filtroCategoria:', categoria.id);  console.log('filtroCategoria:', filtroCategoria);}}>
+                                <CCardImage width="fit" orientation="top" src={`data:image/png;base64,${categoria.logoPath}`} />
+                              </CCol>
+                              <CCol>
+                                <CFormCheck
+                                    type='radio'
+                                    name="categoria"
+                                    id={`flexCheckChecked${categoria.id}`}
+                                    label={categoria.descricao}
+                                    value={categoria.id}
+                                    checked={filtroCategoria === categoria.id}
+                                    onChange={(e) => {setFiltroCategoria(e.target.value);  console.log('filtroCategoria:', categoria.id); console.log('filtroCategoria:', filtroCategoria);}}
+                                />
+                              </CCol>
+                            </CCol>
+                          );
+                        })}
+                    </CRow>
+
+                    <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }} >
+                      <CCol>
+                        <CFormInput
+                            type="text"
+                            size="lg"
+                            placeholder="Nome..."
+                            aria-label="lg input example"
+                            value={filtroNome}
+                            onChange={(e) => setFiltroNome(e.target.value)}
+                        />
+                      </CCol>
+                      <CCol>
+                        <CFormSelect
+                            size="lg"
+                            aria-label="Large select example"
+                            value={filtroFornecedor}
+                            onChange={(e) => setFiltroFornecedor(e.target.value)}
+                        >
+                          <option>Escolha o fornecedor...</option>
+                          {fornecedores &&
+                              fornecedores.records &&
+                              fornecedores.records.length > 0 &&
+                              fornecedores.records.map((fornecedor) => {
+                                return (
+                                  <option key={fornecedor.id} value={fornecedor.id}>
+                                    {fornecedor.nome}
+                                  </option>
+                                )
+                            })
+                          }
+                        </CFormSelect>
+                      </CCol>
+                      <CCol>
+                        <CButton color="secondary" onClick={limparFiltros}>Limpar filtros</CButton>
+                      </CCol>
+                    </CRow>
+                  </DocsExample>
+                  <div style={{marginTop: 1.5 + 'em', display: 'flex', justifyContent: 'flex-end'}}>
                     <CButton
                       color="warning"
                       className="rounded-0"
@@ -316,7 +521,7 @@ const calcularTotal = () => {
                         </CCardBody>
                       </CCard>
                     </CCol>
-                    </OrcamentoArea>
+                  </OrcamentoArea>
 
                   <div style={{marginTop: 1.5 + 'em', display: 'flex', justifyContent: 'flex-end'}}>
                     <CButton
@@ -325,7 +530,7 @@ const calcularTotal = () => {
                       onClick={() =>
                         handleOpenIncluirInsumoModal()
                       }
-                    >Gerar</CButton>
+                    >Salvar</CButton>
                   </div>
                 </CRow>
               </CCardBody>
@@ -385,11 +590,12 @@ const calcularTotal = () => {
             <strong>Incluir insumo ao estoque</strong>
         </CModalHeader>
         <CModalBody>
-          <CRow className="align-items-center justify-content-center">
+          <CRow xs={{ gutterY: 5 }} className="align-items-center justify-content-center mb-4">
+          <CCol xs={8}>
           {
             insumos && insumos.records && insumos.records.length > 0 &&  insumos.records.map((insumo) => {
               return (
-                <CCard key={insumo.id} className="m-2"  style={{ width: '30%' }}>
+                <CCard key={insumo.id} style={{width: '30%'}}>
                     <CRow>
                       <CCol xs={3} md={4} style={{marginTop:20}}>
                         <CCardImage src={`data:image/png;base64,${insumo.logoPath}`} />
@@ -407,23 +613,29 @@ const calcularTotal = () => {
                         </CCardBody>
                       </CCol>
                       <CCol xs={1} md={1} >
-                      <CFormCheck
-                        id={`checkbox-${insumo.id}`}
-                        checked={checkedInsumos.includes(insumo.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setCheckedInsumos([...checkedInsumos, insumo.id]);
-                          } else {
-                            setCheckedInsumos(checkedInsumos.filter((id) => id !== insumo.id));
-                          }
-                        }}
-                      />
+                          <CDropdown alignment="end">
+                            <CDropdownToggle color="transparent" caret={false} className="p-0">
+                              <CIcon icon={cilOptions} />
+                            </CDropdownToggle>
+                            <CDropdownMenu>
+                              <CDropdownItem
+                                  onClick={() => handleOpenAdditionalFieldsModal(insumo, 'visualizar')}>
+                              Visualizar</CDropdownItem>
+                              <CDropdownItem
+                                  onClick={() => handleOpenAdditionalFieldsModal(insumo, 'editar')}>
+                              Atualizar Dados</CDropdownItem>
+                              <CDropdownItem
+                                  onClick={() => handleDeleteInsumoById(insumo.id)}>
+                              Excluir</CDropdownItem>
+                            </CDropdownMenu>
+                          </CDropdown>
                       </CCol>
                     </CRow>
                   </CCard>
                 )
               })
             }
+            </CCol>
           </CRow>
           
         </CModalBody>
