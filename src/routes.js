@@ -9,10 +9,10 @@ const EncerrarLote = React.lazy(() => import('./views/producao/EncerrarLote'))
 
 // Estoque
 const EstoqueVisaoGeral = React.lazy(() => import('./views/estoque/visao_geral/EstoqueVisaoGeral'))
-const EstoqueRegistrar = React.lazy(() => import('./views/estoque/registrar/EstoqueRegistrar'))
+//const EstoqueRegistrar = React.lazy(() => import('./views/estoque/registrar/EstoqueRegistrar'))
 const ListarEstoque = React.lazy(() => import('./views/estoque/listar/ListarEstoque'))
-const GerarOrcamento = React.lazy(() => import('./views/estoque/gerar_orcamento/GerarOrcamento'))
-const HistoricoPedidos = React.lazy(() => import('./views/estoque/historico_pedidos/HistoricoPedidos'))
+const SimularPedido = React.lazy(() => import('./views/estoque/simular_pedido/SimularPedido'))
+const GerenciadorPedidos = React.lazy(() => import('./views/estoque/gerenciador_pedidos/GerenciadorPedidos'))
 
 
 const InsumosEspecificacao = React.lazy(() => import('./views/estoque/especificacao/InsumosEspecificacao'))
@@ -44,10 +44,10 @@ const routes = [
   // Estoque
   { path: '/estoque', name: 'Estoque', element: Cards, exact: true },
   { path: '/estoque/visao_geral', name: 'Visão Geral', element: EstoqueVisaoGeral },
-  { path: '/estoque/registrar', name: 'Registrar', element: EstoqueRegistrar },
+  //{ path: '/estoque/registrar', name: 'Registrar', element: EstoqueRegistrar },
   { path: '/estoque/listar', name: 'Registrar', element: ListarEstoque },
-  { path: '/estoque/gerar_orcamento', name: 'Gerar Orçamento', element: GerarOrcamento },
-  { path: '/estoque/historico_pedidos', name: 'Histórico de Pedidos', element: HistoricoPedidos },
+  { path: '/estoque/simular_pedido', name: 'Simular Pedido', element: SimularPedido },
+  { path: '/estoque/gerenciador_pedidos', name: 'Gerenciador de Pedidos', element: GerenciadorPedidos },
   
 
   // Insumos

@@ -36,7 +36,7 @@ import {
 } from '@coreui/react';
 import { DocsExample, EstoqueArea } from 'src/components'
 import { OrcamentoArea } from '../../../components';
-const GerarOrcamento = () => {
+const SimularPedido = () => {
   const [estoque, setEstoque] = useState([]);  
   const [insumos, setInsumos] = useState([]);  
   const [activeStep, setActiveStep] = useState(0);
@@ -305,9 +305,8 @@ const calcularTotal = () => {
             footer={
               <CLink
                 className="font-weight-bold font-xs text-body-secondary"
-                href="https://coreui.io/"
+                href="/estoque/gerenciador_pedidos?filtro=pendente"
                 rel="noopener norefferer"
-                target="_blank"
               >
                 Visualizar
                 <CIcon icon={cilArrowRight} className="float-end" width={16} />
@@ -655,4 +654,4 @@ const calcularTotal = () => {
   );
 };
 
-export default GerarOrcamento;
+export default SimularPedido;
