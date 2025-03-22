@@ -10,7 +10,7 @@ const OrcamentoArea = (props) => {
   const _href = `https://coreui.io/react/docs/${href}`;
 
   return (
-      <CCol xs={4} md={4}>
+      <CCol xs={4} md={6}>
         <div className="example">
           <CTabContent className={`rounded-bottom ${tabContentClassName ? tabContentClassName : ''}`}>
             <CTabPane className="p-3 preview" visible>

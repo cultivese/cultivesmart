@@ -84,13 +84,13 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: 'Simular Pedido',
-    to: '/estoque/simular_pedido',
+    name: 'Simular Cotação',
+    to: '/estoque/simular_cotacao',
     icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
-    name: 'Gerenciador de Pedidos',
+    name: 'Gerenciador de Cotações',
     to: '/estoque/gerenciador_pedidos',
     icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
   },

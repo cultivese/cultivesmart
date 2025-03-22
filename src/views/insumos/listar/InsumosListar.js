@@ -336,7 +336,6 @@ const handleBack = (e) => {
                   <small>Consulta de Insumos</small>
                 </CCardHeader>
                 <CCardBody>
-                FiltroCategoriaInsumo
                   <DocsExample href="components/card/#background-and-color">
                     <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }} >
 
@@ -413,11 +412,11 @@ const handleBack = (e) => {
                   </DocsExample>
 
                   <DocsExample href="components/card/#background-and-color">
-                    <CRow xs={{ gutterY: 3}} className="justify-content-around mb-4">
+                    <CRow xs={{ gutterY: 3}} className="justify-content-between">
                         {
                           filtrarInsumos().map((insumo) => {
                             return (
-                                <CCard style={{width: '30%'}}>
+                                <CCard style={{width: '32%'}}>
                                   <CRow>
                                     <CCol xs={3} md={4} style={{marginTop:20}}>
                                       <CCardImage src={`data:image/png;base64,${insumo.logoPath}`} />
@@ -430,7 +429,7 @@ const handleBack = (e) => {
                                           {formatarPreco(insumo.preco)}
                                         </CCardText>
                                         <CCardText>
-                                          <small className="text-body-secondary">{insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)} por und.</small>
+                                          <small className="text-body-secondary">{insumo.quantidade}{getUnidadeMedidaDescricao(insumo.unidade_medida)} por und.</small>
                                         </CCardText>
                                       </CCardBody>
                                     </CCol>

@@ -201,7 +201,15 @@ const GerenciadorPedidos = () => {
                   <h4>{item.name}</h4>
                   <p className="text-body-secondary">Solicitado por: {item.criado_por}</p>
                   <p className="text-body-secondary">Criado em: {item.data_criacao}</p>
-                  
+                  <p className="text-body-secondary">Nota Fiscal: 
+                    <CCol xs={4}>
+                      <CFormInput
+                        type="text"
+                        id="exampleFormControlInput1"
+                        aria-describedby="exampleFormControlInputHelpInline"
+                      />
+                    </CCol>
+                  </p>
                   <p className="text-body-secondary">Insumos: {item.registered}</p>
 
                   <CForm className="row g-3">

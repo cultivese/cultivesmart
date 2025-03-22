@@ -5,16 +5,29 @@ import {
   cilArrowRight,
   cilCaretTop,
   cilCaretBottom,
-  cilCart
+  cilCart,
+  cilPrint,
+  cilSave,
+  cilDollar,
+  cilWarning
 } from '@coreui/icons'
 import {
+  CAlert,
+  CAlertHeading,
   CButton,
   CCard,
   CCardBody,
   CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
   CWidgetStatsF,  
   CLink,          
   CCardHeader,
+  CListGroupItem,
+  CListGroup,
   CCol,
   CBadge,
   CContainer,
@@ -28,19 +41,19 @@ import {
   CCardText,
   CCardSubtitle,
   CCardFooter,
+  CModalBody,
+  CModalHeader,
+  CModalTitle,
+  CModal,
+  CModalFooter
 } from '@coreui/react';
 import { DocsExample, EstoqueArea } from 'src/components'
 import { OrcamentoArea } from '../../../components';
 const SimularCotacao = () => {
-  const [estoque, setEstoque] = useState([]);  
+  
   const [insumos, setInsumos] = useState([]);  
   const [insumosCotacao, setInsumosCotacao] = useState([]);
-
-  const insumosComQuantidade = insumos && insumos.records && insumos.records.map((insumo) => ({
-    ...insumo,
-    quantidade_estoque: insumo.quantidade_estoque || 1, // Inicializa com 0 se não existir
-  }));
-  
+  const [visible, setVisible] = useState(false)
 
   const [activeStep, setActiveStep] = useState(0);
   const [fornecedores, setFornecedores] = useState([]);
@@ -68,11 +81,13 @@ const SimularCotacao = () => {
   });
 
   const adicionarInsumoCotacao = (insumo) => {
-    console.log(insumo);
     setInsumosCotacao((prevInsumosCotacao) => {
+      const precoString = typeof insumo.preco === 'string' ? insumo.preco : '0';
+      const precoNumerico = parseFloat(precoString.replace(/[^\d]/g, '') / 100) || 0;
       const novoInsumo = {
         ...insumo,
-        quantidade_estoque: 1, // Ou qualquer valor inicial que você desejar
+        preco: precoNumerico,
+        quantidade_estoque: 1,
       };
       const novoInsumosCotacao = [...prevInsumosCotacao, novoInsumo];
       return novoInsumosCotacao;
@@ -80,13 +95,13 @@ const SimularCotacao = () => {
   };
 
   const formatarPreco = (valor) => {
-    if (!valor) return '';
-    const valorNumerico = valor.replace(/[^\d]/g, '');
-    const valorFormatado = (parseInt(valorNumerico) / 100).toLocaleString('pt-BR', {
+    if (typeof valor === 'number') {
+      return valor.toLocaleString('pt-BR', {
         style: 'currency',
         currency: 'BRL',
-    });
-    return valorFormatado;
+      });
+    }
+    return 'R$ 0,00'; // Valor padrão se não for um número
 };
 
   const consultarInsumos = () => {
@@ -138,15 +153,8 @@ const SimularCotacao = () => {
     setFiltroCategoria(''); // Limpa o filtro de categoria
 };
 
-
-
-
-const handleCategorySelect = (category) => {
-  setFiltroCategoria(category);  // Atualiza o estado da categoria selecionada
-  setFormData(prevState => ({
-    ...prevState,
-    category: category  // Atualiza o valor da categoria no formData
-  }));
+const handleConfirmarOrcamento = () => {
+  setVisible(true);
 };
 
 const fetchedUnidadesMedida = useMemo(async () => {
@@ -196,10 +204,25 @@ const toggleInsumoSelecionadoModal = (insumo) => {
 };
 
 const calcularTotal = () => {
-  return insumosSelecionados.reduce((total, insumo) => {
-    return total + parseFloat(insumo.preco || 0);
+  return insumosCotacao.reduce((total, insumo) => {
+
+    return total + insumo.preco * (insumo.quantidade_estoque || 0);
   }, 0);
 };
+
+const items = useMemo(() => {
+  return insumosCotacao.map(insumo => {
+    const precoTotal = insumo.preco * (insumo.quantidade_estoque || 0);
+
+    return {
+      nome: insumo.nome,
+      quantidade_estoque: insumo.quantidade_estoque,
+      preco: formatarPreco(insumo.preco),
+      preco_total: formatarPreco(precoTotal),
+      _cellProps: { nome: { scope: 'row' } },
+    };
+  });
+}, [insumosCotacao]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -259,7 +282,7 @@ const calcularTotal = () => {
           _props: { scope: 'col' },
         },
         {
-          key: 'quantidade',
+          key: 'quantidade_estoque',
           label: 'Qtd.',
           _props: { scope: 'col' },
         },
@@ -274,29 +297,7 @@ const calcularTotal = () => {
           _props: { scope: 'col' },
         }
       ]
-      const items = [
-        {
-          insumo: 'Beterraba',
-          quantidade: 1,
-          preco_unitario: 'R$ 10,00',
-          preco_total: 'R$ 10,00',
-          _cellProps: { insumo: { scope: 'row' } },
-        },
-        {
-          insumo: 'Beterraba',
-          quantidade: 2,
-          preco_unitario: 'R$ 50,00',
-          preco_total: 'R$ 100,00',
-          _cellProps: { insumo: { scope: 'row' } },
-        },
-        {
-          insumo: 'Beterraba',
-          quantidade: 3,
-          preco_unitario: 'R$ 60,00',
-          preco_total: 'R$ 180,00',
-          _cellProps: { insumo: { scope: 'row' } },
-        },
-      ]
+      
 
   return (
     <CContainer>
@@ -447,7 +448,7 @@ const calcularTotal = () => {
                       </CCol>
                     </CRow>
                   </DocsExample>
-                  
+                  <div style={{marginTop: '1rem', marginBottom:'1rem' }}></div>
                   <CRow>
                     <EstoqueArea href="components/card/#background-and-color">
                       <CRow xs={{ gutterY: 3 }} className="align-items-center justify-content-between mb-4">
@@ -582,15 +583,9 @@ const calcularTotal = () => {
                           <CCardText>
                             Insumos selecionados:
 
-                            <CTable columns={columns} items={insumosSelecionados} />
-                            {/* <ul>
-                              {insumosSelecionados.map((insumo) => (
-                                <li key={insumo.id}>
-                                  {insumo.nome} - {insumo.quantidade} {getUnidadeMedidaDescricao(insumo.unidade_medida)} - {insumo.preco}
-                                </li>
-                              ))}
-                            </ul> */}
-                            <strong>Total:</strong> {calcularTotal()}
+                            <CTable columns={columns} items={items} />
+
+                            <strong>Total:</strong> {formatarPreco(calcularTotal())}
                           </CCardText>                             
                         </CCardBody>
                       </CCard>
@@ -602,7 +597,7 @@ const calcularTotal = () => {
                       color="success"
                       className="rounded-0"
                       onClick={() =>
-                        handleOpenIncluirInsumoModal()
+                        handleConfirmarOrcamento()
                       }
                     >Salvar</CButton>
                   </div>
@@ -610,6 +605,179 @@ const calcularTotal = () => {
               </CCardBody>
             </CCard>
           </CCol>
+
+          <CModal
+            alignment="center"
+            size="xl"
+            visible={visible}
+            onClose={() => setVisible(false)}
+            aria-labelledby="VerticallyCenteredExample"
+          >
+            <CModalHeader>
+              <CModalTitle id="VerticallyCenteredExample">Simular Cotação</CModalTitle>
+            </CModalHeader>
+            <CModalBody>            
+              <CCard>
+                <CCardHeader>
+                  Orçamento <strong>#90-98792</strong>
+                  <CButton className="me-1 float-end" size="sm" color="secondary" onClick={print}>
+                    <CIcon icon={cilPrint} /> Imprimir
+                  </CButton>
+                  <CButton className="me-1 float-end" size="sm" color="info">
+                    <CIcon icon={cilSave} /> Salvar
+                  </CButton>
+                </CCardHeader>
+                <CCardBody>
+                  <CRow className="mb-4">
+                    <CCol sm={4}>
+                      <h6 className="mb-3">Fornecedor:</h6>
+                      <div>
+                        <strong>ISLA.</strong>
+                      </div>
+                      <div>Avenida .....</div>
+                      <div>São Paulo, SP 95014</div>
+                      <div>Email: isla@isla.com.br</div>
+                      <div>Telefone: 11 98801 2356</div>
+                    </CCol>
+                    <CCol sm={4}>
+                     
+                    </CCol>
+                    <CCol sm={4}>
+                      <h6 className="mb-3">Detalhes:</h6>
+                      <div>
+                        Orçamento <strong>#90-98792</strong>
+                      </div>
+                      <div>22/03/2025</div>
+                      <div>Aracaju-SE</div>
+                      <div>Cultive-se</div>
+                      <div>
+                        <strong>Telefone: 79 99999 7777</strong>
+                      </div>
+                    </CCol>
+                  </CRow>
+                  <CTable striped>
+                    <CTableHead>
+                      <CTableRow>
+                        <CTableHeaderCell className="text-center">#</CTableHeaderCell>
+                        <CTableHeaderCell>Insumo</CTableHeaderCell>
+                        <CTableHeaderCell>Variedade</CTableHeaderCell>
+                        <CTableHeaderCell className="text-center">Quantidade</CTableHeaderCell>
+                        <CTableHeaderCell className="text-end">Custo Unitário</CTableHeaderCell>
+                        <CTableHeaderCell className="text-end">Total</CTableHeaderCell>
+                      </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+
+                      {
+                        insumosCotacao.map((insumo) => {
+                        return <CTableRow>
+                        <CTableDataCell className="text-center">{insumo.id}</CTableDataCell>
+                        <CTableDataCell className="text-start">{insumo.nome}</CTableDataCell>
+                        <CTableDataCell className="text-start">{insumo.variedade}</CTableDataCell>
+                        <CTableDataCell className="text-center">{insumo.quantidade_estoque}</CTableDataCell>
+                        <CTableDataCell className="text-end">{insumo.preco}</CTableDataCell>
+                        <CTableDataCell className="text-end">$999,00</CTableDataCell>
+                        </CTableRow>
+                        })
+
+                      }
+{/*                       
+                      <CTableRow>
+                        <CTableDataCell className="text-center">2</CTableDataCell>
+                        <CTableDataCell className="text-start">Custom Services</CTableDataCell>
+                        <CTableDataCell className="text-start">
+                          Installation and Customization (per hour)
+                        </CTableDataCell>
+                        <CTableDataCell className="text-center">20</CTableDataCell>
+                        <CTableDataCell className="text-end">$150,00</CTableDataCell>
+                        <CTableDataCell className="text-end">$3.000,00</CTableDataCell>
+                      </CTableRow>
+                      <CTableRow>
+                        <CTableDataCell className="text-center">3</CTableDataCell>
+                        <CTableDataCell className="text-start">Hosting</CTableDataCell>
+                        <CTableDataCell className="text-start">1 year subscription</CTableDataCell>
+                        <CTableDataCell className="text-center">1</CTableDataCell>
+                        <CTableDataCell className="text-end">$499,00</CTableDataCell>
+                        <CTableDataCell className="text-end">$499,00</CTableDataCell>
+                      </CTableRow>
+                      <CTableRow>
+                        <CTableDataCell className="text-center">4</CTableDataCell>
+                        <CTableDataCell className="text-start">Platinum Support</CTableDataCell>
+                        <CTableDataCell className="text-start">1 year subscription 24/7</CTableDataCell>
+                        <CTableDataCell className="text-center">1</CTableDataCell>
+                        <CTableDataCell className="text-end">$3.999,00</CTableDataCell>
+                        <CTableDataCell className="text-end">$3.999,00</CTableDataCell>
+                      </CTableRow> */}
+                    </CTableBody>
+                  </CTable>
+                  <CRow>
+                    <CCol lg={4} sm={5}>
+
+                    <CAlert color="warning">
+                      <CRow className="align-items-center">
+                        <CCol xs={2}>
+                          <CIcon icon={cilWarning} className="flex-shrink-0 me-2" width={24} height={24} />
+                        </CCol>
+                        <CCol xs={10}>
+                          <CAlertHeading as="h4">Aviso!</CAlertHeading>
+                        </CCol>
+                      </CRow>
+
+                      <p>
+                        Antes de aprovar a cotação e prosseguir com o pedido junto ao fornecedor,
+                        é fundamental que você verifique os seguintes pontos de cada insumo do orçamento:.
+                      </p>
+                      <hr />
+                      <p className="mb-0">
+                        <ul>
+                          <li>Custo unitário</li>
+                          <li>Imposto</li>
+                          <li>Descontoo</li>
+                        </ul>
+                      </p>
+                    </CAlert>
+      
+                    </CCol>
+                    <CCol lg={4} sm={5} className="ms-auto">
+                      <CTable>
+                        <CTableBody>
+                          <CTableRow>
+                            <CTableDataCell className="text-start">
+                              <strong>Subtotal</strong>
+                            </CTableDataCell>
+                            <CTableDataCell className="text-end">$8.497,00</CTableDataCell>
+                          </CTableRow>
+                          <CTableRow>
+                            <CTableDataCell className="text-start">
+                              <strong>Discount (20%)</strong>
+                            </CTableDataCell>
+                            <CTableDataCell className="text-end">$1,699,40</CTableDataCell>
+                          </CTableRow>
+                          <CTableRow>
+                            <CTableDataCell className="text-start">
+                              <strong>VAT (10%)</strong>
+                            </CTableDataCell>
+                            <CTableDataCell className="text-end">$679,76</CTableDataCell>
+                          </CTableRow>
+                          <CTableRow>
+                            <CTableDataCell className="text-start">
+                              <strong>Total</strong>
+                            </CTableDataCell>
+                            <CTableDataCell className="text-end">
+                              <strong>$7.477,36</strong>
+                            </CTableDataCell>
+                          </CTableRow>
+                        </CTableBody>
+                      </CTable>
+                    </CCol>
+                  </CRow>
+                </CCardBody>
+              </CCard>
+            </CModalBody>
+            <CModalFooter>
+              
+          </CModalFooter>
+        </CModal>
             
         
       </CForm>

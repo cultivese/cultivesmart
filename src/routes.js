@@ -11,7 +11,7 @@ const EncerrarLote = React.lazy(() => import('./views/producao/EncerrarLote'))
 const EstoqueVisaoGeral = React.lazy(() => import('./views/estoque/visao_geral/EstoqueVisaoGeral'))
 //const EstoqueRegistrar = React.lazy(() => import('./views/estoque/registrar/EstoqueRegistrar'))
 const ListarEstoque = React.lazy(() => import('./views/estoque/listar/ListarEstoque'))
-const SimularPedido = React.lazy(() => import('./views/estoque/simular_pedido/SimularPedido'))
+const SimularCotacao = React.lazy(() => import('./views/estoque/simular_cotacao/SimularCotacao'))
 const GerenciadorPedidos = React.lazy(() => import('./views/estoque/gerenciador_pedidos/GerenciadorPedidos'))
 
 
@@ -46,7 +46,7 @@ const routes = [
   { path: '/estoque/visao_geral', name: 'Visão Geral', element: EstoqueVisaoGeral },
   //{ path: '/estoque/registrar', name: 'Registrar', element: EstoqueRegistrar },
   { path: '/estoque/listar', name: 'Registrar', element: ListarEstoque },
-  { path: '/estoque/simular_pedido', name: 'Simular Pedido', element: SimularPedido },
+  { path: '/estoque/simular_cotacao', name: 'Simular Cotação', element: SimularCotacao },
   { path: '/estoque/gerenciador_pedidos', name: 'Gerenciador de Pedidos', element: GerenciadorPedidos },
   
 
