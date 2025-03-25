@@ -49,6 +49,8 @@ import {
 } from '@coreui/react';
 import { DocsExample, EstoqueArea } from 'src/components'
 import { OrcamentoArea } from '../../../components';
+import CryptoJS from 'crypto-js'; // Importe a biblioteca crypto-js
+
 const SimularCotacao = () => {
   
   const [insumos, setInsumos] = useState([]);  
@@ -101,7 +103,20 @@ const SimularCotacao = () => {
         currency: 'BRL',
       });
     }
-    return 'R$ 0,00'; // Valor padrão se não for um número
+
+    if (typeof valor === 'string') {
+      // Tenta converter a string para um número
+      const numero = parseFloat(valor.replace(',', '.')); // Substitui vírgula por ponto
+  
+      if (!isNaN(numero)) {
+        return numero.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        });
+      }
+    }
+    
+    return 'R$ 0,01'; // Valor padrão se não for um número
 };
 
   const consultarInsumos = () => {
@@ -156,6 +171,82 @@ const SimularCotacao = () => {
 const handleConfirmarOrcamento = () => {
   setVisible(true);
 };
+
+const handlerSalvarCotacao = () => {
+
+  const dataAtual = new Date();
+  const codigoCotacao = gerarCodigoOrcamento(insumosCotacao, dataAtual);
+  const fornecedorId = insumosCotacao.length > 0 ? insumosCotacao[0].fornecedor_id : null;
+  const subtotal = calcularTotal();
+  const imposto = 0; // Substitua pelo valor correto do imposto, se disponível
+  const desconto = 0; // Substitua pelo valor correto do desconto, se disponível
+  const total = subtotal + imposto - desconto;
+
+  const insumosFormatados = insumosCotacao.map(insumo => ({
+      insumo_id: insumo.id,
+      quantidade: insumo.quantidade_estoque,
+      preco_unitario: insumo.preco,
+  }));
+
+  const bodyJson = JSON.stringify({
+      codigo_cotacao: codigoCotacao,
+      fornecedor_id: fornecedorId,
+      subtotal: subtotal,
+      imposto: imposto,
+      desconto: desconto,
+      total: total,
+      insumos: insumosFormatados,
+  });
+
+  console.log(bodyJson);
+
+  fetch('https://backend.cultivesmart.com.br/api/cotacao', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: bodyJson,
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Erro ao salvar cotação');
+    }
+    return response.json();
+})
+.then(data => {
+    console.log('Cotação salva com sucesso:', data);
+    // Adicione aqui a lógica para lidar com a resposta do backend
+})
+.catch(error => {
+    console.error('Erro ao salvar cotação:', error);
+    // Adicione aqui a lógica para lidar com erros
+});
+}
+
+const gerarHashUnicoParaLista = () => {
+  const insumosString = JSON.stringify(insumosCotacao);
+  const hash = CryptoJS.SHA256(insumosString); // Use CryptoJS.SHA256
+  const hashHex = hash.toString(CryptoJS.enc.Hex);
+  return hashHex.substring(0, 5); // Hash com 5 caracteres
+};
+
+const formatarDataParaYYYYMMDD = (data) => {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const dia = String(data.getDate()).padStart(2, '0');
+  return `${ano}${mes}${dia}`; // Remove os traços
+};
+
+const gerarCodigoOrcamento = (insumos, data) => {
+  if (!insumos || insumos.length === 0) {
+    return null; // Retorna null se a lista de insumos estiver vazia ou for nula
+  }
+
+  const hashInsumos = gerarHashUnicoParaLista();
+  const dataFormatada = formatarDataParaYYYYMMDD(data);
+
+  return `${insumos[0].fornecedor_id}${dataFormatada}${hashInsumos}`;
+}
 
 const fetchedUnidadesMedida = useMemo(async () => {
       try {
@@ -594,12 +685,13 @@ const items = useMemo(() => {
 
                   <div style={{marginTop: 1.5 + 'em', display: 'flex', justifyContent: 'flex-end'}}>
                     <CButton
-                      color="success"
+                      color={insumosCotacao.length <= 0 ? "default" : "success"}
                       className="rounded-0"
+                      disabled = {insumosCotacao.length <= 0}
                       onClick={() =>
                         handleConfirmarOrcamento()
                       }
-                    >Salvar</CButton>
+                    >Gerar Cotação</CButton>
                   </div>
                 </CRow>
               </CCardBody>
@@ -619,11 +711,11 @@ const items = useMemo(() => {
             <CModalBody>            
               <CCard>
                 <CCardHeader>
-                  Orçamento <strong>#90-98792</strong>
+                  Orçamento <strong>#{gerarCodigoOrcamento(insumosCotacao, new Date())}</strong>
                   <CButton className="me-1 float-end" size="sm" color="secondary" onClick={print}>
                     <CIcon icon={cilPrint} /> Imprimir
                   </CButton>
-                  <CButton className="me-1 float-end" size="sm" color="info">
+                  <CButton className="me-1 float-end" size="sm" color="info" onClick={handlerSalvarCotacao}>
                     <CIcon icon={cilSave} /> Salvar
                   </CButton>
                 </CCardHeader>
@@ -673,45 +765,17 @@ const items = useMemo(() => {
                         return <CTableRow>
                         <CTableDataCell className="text-center">{insumo.id}</CTableDataCell>
                         <CTableDataCell className="text-start">{insumo.nome}</CTableDataCell>
-                        <CTableDataCell className="text-start">{insumo.variedade}</CTableDataCell>
+                        <CTableDataCell className="text-start">{insumo.variedade} <small>{insumo.quantidade}{getUnidadeMedidaDescricao(insumo.unidade_medida)}</small></CTableDataCell>
                         <CTableDataCell className="text-center">{insumo.quantidade_estoque}</CTableDataCell>
-                        <CTableDataCell className="text-end">{insumo.preco}</CTableDataCell>
-                        <CTableDataCell className="text-end">$999,00</CTableDataCell>
+                        <CTableDataCell className="text-end">{formatarPreco(insumo.preco)}</CTableDataCell>
+                        <CTableDataCell className="text-end">{formatarPreco(insumo.quantidade_estoque * insumo.preco)}</CTableDataCell>
                         </CTableRow>
                         })
-
                       }
-{/*                       
-                      <CTableRow>
-                        <CTableDataCell className="text-center">2</CTableDataCell>
-                        <CTableDataCell className="text-start">Custom Services</CTableDataCell>
-                        <CTableDataCell className="text-start">
-                          Installation and Customization (per hour)
-                        </CTableDataCell>
-                        <CTableDataCell className="text-center">20</CTableDataCell>
-                        <CTableDataCell className="text-end">$150,00</CTableDataCell>
-                        <CTableDataCell className="text-end">$3.000,00</CTableDataCell>
-                      </CTableRow>
-                      <CTableRow>
-                        <CTableDataCell className="text-center">3</CTableDataCell>
-                        <CTableDataCell className="text-start">Hosting</CTableDataCell>
-                        <CTableDataCell className="text-start">1 year subscription</CTableDataCell>
-                        <CTableDataCell className="text-center">1</CTableDataCell>
-                        <CTableDataCell className="text-end">$499,00</CTableDataCell>
-                        <CTableDataCell className="text-end">$499,00</CTableDataCell>
-                      </CTableRow>
-                      <CTableRow>
-                        <CTableDataCell className="text-center">4</CTableDataCell>
-                        <CTableDataCell className="text-start">Platinum Support</CTableDataCell>
-                        <CTableDataCell className="text-start">1 year subscription 24/7</CTableDataCell>
-                        <CTableDataCell className="text-center">1</CTableDataCell>
-                        <CTableDataCell className="text-end">$3.999,00</CTableDataCell>
-                        <CTableDataCell className="text-end">$3.999,00</CTableDataCell>
-                      </CTableRow> */}
                     </CTableBody>
                   </CTable>
                   <CRow>
-                    <CCol lg={4} sm={5}>
+                    <CCol lg={6} sm={5}>
 
                     <CAlert color="warning">
                       <CRow className="align-items-center">
@@ -745,17 +809,17 @@ const items = useMemo(() => {
                             <CTableDataCell className="text-start">
                               <strong>Subtotal</strong>
                             </CTableDataCell>
-                            <CTableDataCell className="text-end">$8.497,00</CTableDataCell>
+                            <CTableDataCell className="text-end">{formatarPreco(calcularTotal())}</CTableDataCell>
                           </CTableRow>
                           <CTableRow>
                             <CTableDataCell className="text-start">
-                              <strong>Discount (20%)</strong>
+                              <strong>Imposto</strong>
                             </CTableDataCell>
                             <CTableDataCell className="text-end">$1,699,40</CTableDataCell>
                           </CTableRow>
                           <CTableRow>
                             <CTableDataCell className="text-start">
-                              <strong>VAT (10%)</strong>
+                              <strong>Desconto</strong>
                             </CTableDataCell>
                             <CTableDataCell className="text-end">$679,76</CTableDataCell>
                           </CTableRow>
