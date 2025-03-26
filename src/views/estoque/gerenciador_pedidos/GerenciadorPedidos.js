@@ -211,13 +211,13 @@ const GerenciadorPedidos = () => {
                     <CTable>
                       <CTableHead>
                         <CTableRow>
-                          <CTableHeaderCell scope="col">#</CTableHeaderCell>
-                          <CTableHeaderCell scope="col">Insumo</CTableHeaderCell>
-                          <CTableHeaderCell scope="col">Variedade</CTableHeaderCell>
-                          <CTableHeaderCell scope="col">Quantidade</CTableHeaderCell>
-                          <CTableHeaderCell scope="col">Preço</CTableHeaderCell>
-                          <CTableHeaderCell scope="col">Imposto</CTableHeaderCell>
-                          <CTableHeaderCell scope="col">Desconto</CTableHeaderCell>
+                          <CTableHeaderCell scope="col" style={{width:'5%'}}>#</CTableHeaderCell>
+                          <CTableHeaderCell scope="col" style={{width:'10%'}}>Insumo</CTableHeaderCell>
+                          <CTableHeaderCell scope="col" style={{width:'30%'}}>Variedade</CTableHeaderCell>
+                          <CTableHeaderCell scope="col" style={{width:'5%'}}>Quantidade</CTableHeaderCell>
+                          <CTableHeaderCell scope="col" style={{width:'10%'}}>Preço</CTableHeaderCell>
+                          <CTableHeaderCell scope="col" style={{width:'10%'}}>Imposto</CTableHeaderCell>
+                          <CTableHeaderCell scope="col" style={{width:'10%'}}>Desconto</CTableHeaderCell>
                         </CTableRow>
                       </CTableHead>
                       <CTableBody>
@@ -227,25 +227,37 @@ const GerenciadorPedidos = () => {
                               <CTableHeaderCell scope="row">1</CTableHeaderCell>
                               <CTableDataCell>{insumo.nome}</CTableDataCell>
                               <CTableDataCell>{insumo.variedade} - {insumo.quantidade}g</CTableDataCell>
-                              <CTableDataCell>{insumo.pivot.quantidade}</CTableDataCell>
-                              <CTableDataCell>{insumo.preco}</CTableDataCell>
                               <CTableDataCell>
-                                <CCol xs={4}>
                                   <CFormInput
-                                    type="text"
+                                    type="number"
+                                    value={insumo.pivot.quantidade}
                                     id="exampleFormControlInput1"
                                     aria-describedby="exampleFormControlInputHelpInline"
                                   />
-                                </CCol>
                               </CTableDataCell>
                               <CTableDataCell>
-                                <CCol xs={4}>
                                   <CFormInput
                                     type="text"
+                                    value={insumo.preco}
                                     id="exampleFormControlInput1"
                                     aria-describedby="exampleFormControlInputHelpInline"
                                   />
-                                </CCol>
+                                </CTableDataCell>
+                              <CTableDataCell>
+                                  <CFormInput
+                                    type="text"
+                                    value={insumo.pivot.imposto}
+                                    id="exampleFormControlInput1"
+                                    aria-describedby="exampleFormControlInputHelpInline"
+                                  />
+                              </CTableDataCell>
+                              <CTableDataCell>
+                                  <CFormInput
+                                    type="text"
+                                    value={insumo.pivot.desconto}
+                                    id="exampleFormControlInput1"
+                                    aria-describedby="exampleFormControlInputHelpInline"
+                                  />
                               </CTableDataCell>
                             </CTableRow>
                           ))
