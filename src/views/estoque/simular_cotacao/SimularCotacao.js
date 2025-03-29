@@ -176,7 +176,7 @@ const handlerSalvarCotacao = () => {
   console.log(bodyJson);
 
   setIsProcessing(true)  
-  fetch('http://localhost:49706/api/cotacao', {
+  fetch('https://backend.cultivesmart.com.br/api/cotacao', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
