@@ -161,6 +161,8 @@ const handlerSalvarCotacao = () => {
       insumo_id: insumo.id,
       quantidade: insumo.quantidade_estoque,
       preco_unitario: insumo.preco,
+      imposto: insumo.imposto,
+      desconto: insumo.desconto,
   }));
 
   const bodyJson = JSON.stringify({
