@@ -7,10 +7,8 @@ import { cilCode, cilMediaPlay } from '@coreui/icons';
 const OrcamentoArea = (props) => {
   const { children, href, tabContentClassName } = props;
 
-  const _href = `https://coreui.io/react/docs/${href}`;
-
   return (
-      <CCol xs={4} md={6}>
+      <CCol xs={4} md={7}>
         <div className="example">
           <CTabContent className={`rounded-bottom ${tabContentClassName ? tabContentClassName : ''}`}>
             <CTabPane className="p-3 preview" visible>

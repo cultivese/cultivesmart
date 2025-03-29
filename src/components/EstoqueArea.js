@@ -10,7 +10,7 @@ const EstoqueArea = (props) => {
   const _href = `https://coreui.io/react/docs/${href}`;
 
   return (
-      <CCol xs={12} md={6}> {/* Especifica 8 colunas em telas médias e maiores */}
+      <CCol xs={12} md={5}> {/* Especifica 8 colunas em telas médias e maiores */}
         <div className="example">
           <CTabContent className={`rounded-bottom ${tabContentClassName ? tabContentClassName : ''}`}>
             <CTabPane className="p-3 preview" visible>

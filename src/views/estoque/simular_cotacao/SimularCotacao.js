@@ -1,14 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import CIcon from '@coreui/icons-react';
 import {
-  cilChartPie,
-  cilArrowRight,
   cilCaretTop,
   cilCaretBottom,
   cilCart,
   cilPrint,
   cilSave,
-  cilDollar,
   cilWarning
 } from '@coreui/icons'
 import {
@@ -16,6 +13,7 @@ import {
   CAlertHeading,
   CButton,
   CCard,
+  CSpinner,
   CCardBody,
   CTable,
   CTableHead,
@@ -23,11 +21,7 @@ import {
   CTableHeaderCell,
   CTableBody,
   CTableDataCell,
-  CWidgetStatsF,  
-  CLink,          
   CCardHeader,
-  CListGroupItem,
-  CListGroup,
   CCol,
   CBadge,
   CContainer,
@@ -40,7 +34,6 @@ import {
   CCardTitle,
   CCardText,
   CCardSubtitle,
-  CCardFooter,
   CModalBody,
   CModalHeader,
   CModalTitle,
@@ -56,7 +49,8 @@ const SimularCotacao = () => {
   const [insumos, setInsumos] = useState([]);  
   const [insumosCotacao, setInsumosCotacao] = useState([]);
   const [visible, setVisible] = useState(false)
-
+  const [isProcessing, setIsProcessing] = useState(false)
+  
   const [activeStep, setActiveStep] = useState(0);
   const [fornecedores, setFornecedores] = useState([]);
   const [categorias, setCategorias] = useState([]);  
@@ -65,17 +59,7 @@ const SimularCotacao = () => {
   const [filtroNome, setFiltroNome] = useState('');
   const [filtroFornecedor, setFiltroFornecedor] = useState('');
   const [insumosSelecionadosModal, setInsumosSelecionadosModal] = useState([]);
-  const [insumosSelecionados, setInsumosSelecionados] = useState([]);
 
-  const [editedInsumo, setEditedInsumo] = useState({
-    nome: '',
-    descricao: '',
-    unidade_medida: '',
-    quantidade: '',
-    desconto: '',
-    imposto: '',
-    preco: '',
-  });
 
   const [formData, setFormData] = useState({
     insumo_id: null,
@@ -118,15 +102,6 @@ const SimularCotacao = () => {
     
     return 'R$ 0,01'; // Valor padrão se não for um número
 };
-
-  const consultarInsumos = () => {
-    fetch('https://backend.cultivesmart.com.br/api/insumos')
-    .then(response => response.json())
-    .then(data => {
-      setInsumos(data);
-    })
-    .catch(error => console.error('Erro ao buscar insumos:', error));
-  };
 
   const getUnidadeMedidaDescricao = (id) => {
     const unidade = unidadesMedida && unidadesMedida.length > 0
@@ -200,7 +175,8 @@ const handlerSalvarCotacao = () => {
 
   console.log(bodyJson);
 
-  fetch('https://backend.cultivesmart.com.br/api/cotacao', {
+  setIsProcessing(true)  
+  fetch('http://localhost:49706/api/cotacao', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
@@ -215,11 +191,14 @@ const handlerSalvarCotacao = () => {
 })
 .then(data => {
     console.log('Cotação salva com sucesso:', data);
-    // Adicione aqui a lógica para lidar com a resposta do backend
+    setIsProcessing(false)
+    setVisible(false);
+    window.location.href = '/estoque/gerenciador_pedidos'; 
 })
 .catch(error => {
     console.error('Erro ao salvar cotação:', error);
-    // Adicione aqui a lógica para lidar com erros
+    setIsProcessing(false)
+    setVisible(false);
 });
 }
 
@@ -302,18 +281,27 @@ const calcularTotal = () => {
 };
 
 const items = useMemo(() => {
-  return insumosCotacao.map(insumo => {
-    const precoTotal = insumo.preco * (insumo.quantidade_estoque || 0);
+  // Criar o objeto de pesquisa para fornecedores fora do map()
+  const fornecedoresLookup = fornecedores.records && fornecedores.records.reduce((acc, fornecedor) => {
+      acc[fornecedor.id] = fornecedor;
+      return acc;
+  }, {});
 
-    return {
-      nome: insumo.nome,
-      quantidade_estoque: insumo.quantidade_estoque,
-      preco: formatarPreco(insumo.preco),
-      preco_total: formatarPreco(precoTotal),
-      _cellProps: { nome: { scope: 'row' } },
-    };
+  return insumosCotacao.map(insumo => {
+      const precoTotal = insumo.preco * (insumo.quantidade_estoque || 0);
+      const fornecedor = fornecedoresLookup[insumo.fornecedor_id]; // Acessar o fornecedor pelo id
+
+      return {
+          fornecedor: fornecedor ? fornecedor.nome : 'Fornecedor não encontrado', // Usar o nome do fornecedor ou uma mensagem de erro
+          nome: insumo.nome,
+          variedade: insumo.variedade,
+          quantidade_estoque: insumo.quantidade_estoque,
+          preco: formatarPreco(insumo.preco),
+          preco_total: formatarPreco(precoTotal),
+          _cellProps: { nome: { scope: 'row' } },
+      };
   });
-}, [insumosCotacao]);
+}, [insumosCotacao, fornecedores]);// Adicionar 'fornecedores' como dependência
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -368,94 +356,43 @@ const items = useMemo(() => {
 
       const columns = [
         {
+          key: 'fornecedor',
+          label: 'Fornecedor',
+        },
+        {
           key: 'nome',
           label: 'Insumo',
-          _props: { scope: 'col' },
+        },
+        {
+          key: 'variedade',
+          label: 'Variedade',
         },
         {
           key: 'quantidade_estoque',
           label: 'Qtd.',
-          _props: { scope: 'col' },
         },
         {
           key: 'preco',
           label: 'Valor Unit.',
-          _props: { scope: 'col' },
         },
         {
           key: 'preco_total',
           label: 'Valor Total',
-          _props: { scope: 'col' },
         }
       ]
       
 
+    const fornecedor = useMemo(() => {
+      if (insumosCotacao.length > 0 && fornecedores.records) {
+          const fornecedor = fornecedores.records.find(f => f.id === insumosCotacao[0].fornecedor_id);
+          return fornecedor ? fornecedor : 'Fornecedor não encontrado';
+      }
+      return 'asdas';
+  }, [insumosCotacao, fornecedores]);
+  
   return (
     <CContainer>
-      <CRow>
-      <CCol xs={4}>
-          <CWidgetStatsF
-            className="mb-3"
-            color="danger"
-            icon={<CIcon icon={cilChartPie} height={24} />}
-            padding={false}
-            title="Pedidos pendentes"
-            value="2"
-            footer={
-              <CLink
-                className="font-weight-bold font-xs text-body-secondary"
-                href="/estoque/gerenciador_pedidos?filtro=pendente"
-                rel="noopener norefferer"
-              >
-                Visualizar
-                <CIcon icon={cilArrowRight} className="float-end" width={16} />
-              </CLink>
-            }
-          />
-        </CCol>
-        <CCol xs={4}>
-          <CWidgetStatsF
-            className="mb-3"
-            color="warning"
-            icon={<CIcon icon={cilChartPie} height={24} />}
-            padding={false}
-            title="Insumos sem nota"
-            value="10"
-            footer={
-              <CLink
-                className="font-weight-bold font-xs text-body-secondary"
-                href="https://coreui.io/"
-                rel="noopener norefferer"
-                target="_blank"
-              >
-                Visualizar
-                <CIcon icon={cilArrowRight} className="float-end" width={16} />
-              </CLink>
-            }
-          />
-        </CCol>
-        <CCol xs={4}>
-          <CWidgetStatsF
-            className="mb-3"
-            color="warning"
-            icon={<CIcon icon={cilChartPie} height={24} />}
-            padding={false}
-            title="Insumos sem impostos"
-            value="5"
-            footer={
-              <CLink
-                className="font-weight-bold font-xs text-body-secondary"
-                href="https://coreui.io/"
-                rel="noopener norefferer"
-                target="_blank"
-              >
-                Visualizar
-                <CIcon icon={cilArrowRight} className="float-end" width={16} />
-              </CLink>
-            }
-          />
-        </CCol>
-      </CRow>
+     
       <CForm onSubmit={handleSubmit} className="row g-3">
           
             <CCol xs={12}>
@@ -548,37 +485,38 @@ const items = useMemo(() => {
                             return (
                                     <CCard
                                     key={insumo.id}
-                                    style={{width:'18rem'}}
+                                    style={{width:'90%'}}
                                     >
-                                      <CCol>
-                                       
-                                        <CRow xs={12} md={12} className="justify-content-center">
-                                            <CCardImage
-                                              style={{ 
-                                                maxWidth: '10rem',
-                                                marginTop: '1rem',
-                                                marginBottom: '1rem',
-                                              }} src={`data:image/png;base64,${insumo.logoPath}`} />
-                                        </CRow>
-
-                                        <CRow>
-                                          <CCardTitle>{insumo.nome}</CCardTitle>
-                                        </CRow>
+                                       <CRow>
+                                        <CCol xs={3} md={4} style={{display:'flex', alignContent:'center'}}>
+                                        <CCardImage
                                         
-                                        <CRow style={{marginBottom:'0.5rem'}}>
-                                          <CCol xs={8} md={8}>
+                                              style={{ 
+                                                height: '130px',
+                                                width: '100px',
+                                                objectFit: 'fill',
+                                                display: 'flex',
+                                                margin: '0 auto',
+                                              }} src={`data:image/png;base64,${insumo.logoPath}`} />
+                                        </CCol>
+                                        <CCol xs={9} md={8}>
+                                          <CCardBody>
+                                            <CCardTitle>{insumo.nome}</CCardTitle>
                                             <CCardSubtitle>{insumo.variedade}</CCardSubtitle>
                                             
-                                            <CCardText>
-                                              <small className="text-body-secondary">{insumo.quantidade}{getUnidadeMedidaDescricao(insumo.unidade_medida)} por und.</small>
-                                            </CCardText>
+                                            <CRow style={{marginBottom:'0.5rem'}}>
+                                              <CCol xs={8} md={8}>
+                                                <CCardText>
+                                                  <small className="text-body-secondary">{insumo.quantidade}{getUnidadeMedidaDescricao(insumo.unidade_medida)} por und.</small>
+                                                </CCardText>
+                                                <CCardText style={{color:'green', fontWeight:'bold'}}>
+                                                  {formatarPreco(insumo.preco)}
+                                                </CCardText>
+                                              </CCol>
 
-                                            <CCardText style={{color:'green', fontWeight:'bold'}}>
-                                              {formatarPreco(insumo.preco)}
-                                            </CCardText>
-                                          </CCol>
+                                            
 
-                                          {insumosCotacao.some(item => item.id === insumo.id) ? (
+                                            {insumosCotacao.some(item => item.id === insumo.id) ? (
                                             <CCol
                                               xs={4}
                                               md={4}
@@ -643,13 +581,15 @@ const items = useMemo(() => {
                                               <CIcon icon={cilCart} /> Adicionar</CBadge>
                                               </div>
 
-                                            </CCol>
-                                              
+                                            </CCol>                                              
                                             
                                             )}
-                                          
-                                        </CRow>
-                                      </CCol>
+                                            </CRow>
+
+                                          </CCardBody>
+                                        </CCol>
+                                      </CRow>
+                                      
                                   </CCard>
                               )
                             })
@@ -674,7 +614,7 @@ const items = useMemo(() => {
                           <CCardText>
                             Insumos selecionados:
 
-                            <CTable columns={columns} items={items} />
+                            <CTable columns={columns} items={items} style={{padding:0}} />
 
                             <strong>Total:</strong> {formatarPreco(calcularTotal())}
                           </CCardText>                             
@@ -716,6 +656,7 @@ const items = useMemo(() => {
                     <CIcon icon={cilPrint} /> Imprimir
                   </CButton>
                   <CButton className="me-1 float-end" size="sm" color="info" onClick={handlerSalvarCotacao}>
+                    { isProcessing ? <CSpinner as="span" className="me-2" size="sm" aria-hidden="true" /> : null  }
                     <CIcon icon={cilSave} /> Salvar
                   </CButton>
                 </CCardHeader>
@@ -724,24 +665,21 @@ const items = useMemo(() => {
                     <CCol sm={4}>
                       <h6 className="mb-3">Fornecedor:</h6>
                       <div>
-                        <strong>ISLA.</strong>
+                        <strong>{fornecedor.nome}</strong>
                       </div>
-                      <div>Avenida .....</div>
-                      <div>São Paulo, SP 95014</div>
-                      <div>Email: isla@isla.com.br</div>
-                      <div>Telefone: 11 98801 2356</div>
+                      <div>{fornecedor.endereco}</div>
+                      <div>{fornecedor.cidade}, {fornecedor.estado} {fornecedor.numero}</div>
+                      <div>Email: {fornecedor.email}</div>
+                      <div>Telefone: {fornecedor.telefone}</div>
                     </CCol>
                     <CCol sm={4}>
                      
                     </CCol>
                     <CCol sm={4}>
                       <h6 className="mb-3">Detalhes:</h6>
-                      <div>
-                        Orçamento <strong>#90-98792</strong>
-                      </div>
-                      <div>22/03/2025</div>
-                      <div>Aracaju-SE</div>
                       <div>Cultive-se</div>
+                      <div>{new Date().toLocaleDateString('pt-BR')}</div>
+                      <div>Aracaju-SE</div>
                       <div>
                         <strong>Telefone: 79 99999 7777</strong>
                       </div>
@@ -815,20 +753,20 @@ const items = useMemo(() => {
                             <CTableDataCell className="text-start">
                               <strong>Imposto</strong>
                             </CTableDataCell>
-                            <CTableDataCell className="text-end">$1,699,40</CTableDataCell>
+                            <CTableDataCell className="text-end">R$ 0,00</CTableDataCell>
                           </CTableRow>
                           <CTableRow>
                             <CTableDataCell className="text-start">
                               <strong>Desconto</strong>
                             </CTableDataCell>
-                            <CTableDataCell className="text-end">$679,76</CTableDataCell>
+                            <CTableDataCell className="text-end">R$ 0,00</CTableDataCell>
                           </CTableRow>
                           <CTableRow>
                             <CTableDataCell className="text-start">
                               <strong>Total</strong>
                             </CTableDataCell>
                             <CTableDataCell className="text-end">
-                              <strong>$7.477,36</strong>
+                              <strong>{formatarPreco(calcularTotal())}</strong>
                             </CTableDataCell>
                           </CTableRow>
                         </CTableBody>
