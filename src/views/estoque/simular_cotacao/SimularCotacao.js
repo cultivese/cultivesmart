@@ -70,10 +70,19 @@ const SimularCotacao = () => {
     setInsumosCotacao((prevInsumosCotacao) => {
       const precoString = typeof insumo.preco === 'string' ? insumo.preco : '0';
       const precoNumerico = parseFloat(precoString.replace(/[^\d]/g, '') / 100) || 0;
+
+      const impostoString = typeof insumo.imposto === 'string' ? insumo.imposto : '0';
+      const impostoNumerico = parseFloat(impostoString.replace(/[^\d]/g, '') / 100) || 0;
+
+      const descontoString = typeof insumo.desconto === 'string' ? insumo.desconto : '0';
+      const descontoNumerico = parseFloat(descontoString.replace(/[^\d]/g, '') / 100) || 0;
+
       const novoInsumo = {
         ...insumo,
         preco: precoNumerico,
         quantidade_estoque: 1,
+        imposto: impostoNumerico,
+        desconto: descontoNumerico
       };
       const novoInsumosCotacao = [...prevInsumosCotacao, novoInsumo];
       return novoInsumosCotacao;
@@ -177,7 +186,7 @@ const handlerSalvarCotacao = () => {
 
   console.log(bodyJson);
 
-  setIsProcessing(true)  
+  setIsProcessing(true);
   fetch('https://backend.cultivesmart.com.br/api/cotacao', {
     method: 'POST',
     headers: {
