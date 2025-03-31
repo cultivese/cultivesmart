@@ -188,6 +188,8 @@ const GerenciadorPedidos = () => {
       console.error("Erro ao atualizar cotação:", err);
       setIsProcessing(false);
     }
+
+    window.location.reload();
   }
 
   const fetchInsumoQuantidade = async (insumoId) => {
