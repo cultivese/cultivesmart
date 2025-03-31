@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { CAvatar, CBadge, CButton, CCollapse, CSmartTable } from '@coreui/react-pro'
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
-  
+CSpinner,
 CFormInput,
 CForm,
 CTable,
@@ -45,6 +45,7 @@ const GerenciadorPedidos = () => {
   const [insumoValues, setInsumoValues] = useState({});
   const [notaFiscalValues, setNotaFiscalValues] = useState({}); // Novo estado para nota_fiscal
   const [insumoQuantidades, setInsumoQuantidades] = useState({}); // Estado para armazenar as quantidades dos insumos
+  const [isProcessing, setIsProcessing] = useState(false)
 
   const columns = [
     { key: 'codigo_cotacao', _style: { width: '15%' }, label: 'Código Cotação' },
@@ -154,11 +155,13 @@ const GerenciadorPedidos = () => {
       return {
         ...insumo,
         quantidade: insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-quantidade`] || insumo.quantidade,
-        preco: insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] || insumo.preco_unitario,
+        preco_unitario: insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] || insumo.preco_unitario,
         imposto: insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`] || insumo.imposto,
         desconto: insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] || insumo.desconto,
       };
     });
+
+    setIsProcessing(true);
 
     try {
       const response = await fetch(`https://backend.cultivesmart.com.br/api/cotacao/${item.codigo_cotacao}`, {
@@ -179,12 +182,11 @@ const GerenciadorPedidos = () => {
       const data = await response.json();
       console.log("Cotação atualizada com sucesso:", data);
   
-      // Atualize o estado local (items) com os novos dados, se necessário
-      // Por exemplo, você pode buscar os dados atualizados da API novamente
+      setIsProcessing(false);
   
     } catch (err) {
       console.error("Erro ao atualizar cotação:", err);
-      // Trate o erro adequadamente (exibir mensagem de erro, etc.)
+      setIsProcessing(false);
     }
   }
 
@@ -314,8 +316,8 @@ const GerenciadorPedidos = () => {
                               <CTableDataCell>
                                 <CFormInput
                                   type="text"
-                                  value={insumoValues[`${item.codigo_cotacao}-${insumo.id}-preco`] || insumo.preco_unitario}
-                                  onChange={(e) => setInsumoValues({ ...insumoValues, [`${item.codigo_cotacao}-${insumo.id}-preco`]: e.target.value })}
+                                  value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] || insumo.preco_unitario}
+                                  onChange={(e) => setInsumoValues({ ...insumoValues, [`${item.codigo_cotacao}-${insumo.insumo_id}-preco`]: e.target.value })}
                                   id="exampleFormControlInput1"
                                   aria-describedby="exampleFormControlInputHelpInline"
                                   disabled={item.status.id !== 1}
@@ -324,8 +326,8 @@ const GerenciadorPedidos = () => {
                               <CTableDataCell>
                                 <CFormInput
                                   type="text"
-                                  value={insumoValues[`${item.codigo_cotacao}-${insumo.id}-imposto`] || insumo.imposto}
-                                  onChange={(e) => setInsumoValues({ ...insumoValues, [`${item.codigo_cotacao}-${insumo.id}-imposto`]: e.target.value })}
+                                  value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`] || insumo.imposto}
+                                  onChange={(e) => setInsumoValues({ ...insumoValues, [`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`]: e.target.value })}
                                   id="exampleFormControlInput1"
                                   aria-describedby="exampleFormControlInputHelpInline"
                                   disabled={item.status.id !== 1}
@@ -334,8 +336,8 @@ const GerenciadorPedidos = () => {
                               <CTableDataCell>
                                 <CFormInput
                                   type="text"
-                                  value={insumoValues[`${item.codigo_cotacao}-${insumo.id}-desconto`] || insumo.desconto}
-                                  onChange={(e) => setInsumoValues({ ...insumoValues, [`${item.codigo_cotacao}-${insumo.id}-desconto`]: e.target.value })}
+                                  value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] || insumo.desconto}
+                                  onChange={(e) => setInsumoValues({ ...insumoValues, [`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`]: e.target.value })}
                                   id="exampleFormControlInput1"
                                   aria-describedby="exampleFormControlInputHelpInline"
                                   disabled={item.status.id !== 1}
@@ -351,6 +353,7 @@ const GerenciadorPedidos = () => {
                   {item.status.id === 1 && (
                     <div>
                       <CButton size="sm" color="info" onClick={() => handleAprovar(item)}>
+                        { isProcessing ? <CSpinner as="span" className="me-2" size="sm" aria-hidden="true" /> : null  }
                         Aprovar
                       </CButton>
                       <CButton size="sm" color="danger" className="ms-1">
