@@ -161,9 +161,11 @@ const GerenciadorPedidos = () => {
       };
     });
 
-    setIsProcessing(true);
+    
 
     try {
+      setIsProcessing(true);
+
       const response = await fetch(`https://backend.cultivesmart.com.br/api/cotacao/${item.codigo_cotacao}`, {
         method: 'PATCH',
         headers: {
