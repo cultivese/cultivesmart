@@ -1,267 +1,538 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+
 import {
-    CCard,
-    CCardBody,
-    CCardHeader,
-    CCol,
-    CRow,
-    CBadge,
-    CForm,
-    CFormInput,
-    CFormSelect,
-    CButton,
-    CCardTitle,
-    CInputGroup,
-    CRating,
-    CCardText,
-    CCardImage,
-    CModal,
-    CModalHeader,
-    CModalBody,
-    CModalFooter,
-  } from '@coreui/react-pro'
-import product_default from './../../../assets/images/microverdes/product_default.png';
+  CButton,
+  CCard,
+  CCardBody,
+  CCardHeader,
+  CCol,
+  CModal,
+  CModalBody,
+  CModalHeader,
+  CModalFooter,
+  CContainer,
+  CFormTextarea,
+  CDropdown,
+  CDropdownToggle,
+  CDropdownMenu,
+  CDropdownItem,
+  CFormCheck,
+  CCardImage,
+  CForm,
+  CFormInput,
+  CFormSelect,
+  CRow,
+  CCardTitle,
+  CCardText,
+  CCardSubtitle,
+} from '@coreui/react';
 
+import CIcon from '@coreui/icons-react'
+
+
+import {
+  cilOptions
+} from '@coreui/icons'
+
+import { DocsExample } from 'src/components'
 const EstoqueVisaoGeral = () => {
-    const [filters, setFilters] = useState({
-        categoria: '',
+  const [estoquesInsumos, setEstoqueInsumos] = useState([]);  
+  const [activeStep, setActiveStep] = useState(0);
+  const [fornecedores, setFornecedores] = useState([]);
+  const [categorias, setCategorias] = useState([]);  
+  const [filtroCategoria, setFiltroCategoria] = useState('');
+  const [unidadesMedida , setUnidadesMedida ] = useState([]);
+  const [filtroNome, setFiltroNome] = useState('');
+  const [filtroFornecedor, setFiltroFornecedor] = useState('');
+  const [showAdditionalFieldsModal, setShowAdditionalFieldsModal] = useState(false); // Estado para controlar o modal
+  const [insumoSelecionado, setInsumoSelecionado] = useState(null);
+  const [editingField, setEditingField] = useState(null);
+  const [modalMode, setModalMode] = useState('visualizar'); // Novo estado para controlar o modo do modal
+
+  const [editedInsumo, setEditedInsumo] = useState({
+    nome: '',
+    fornecedor_id: null,
+    categoria_id: null,
+    variedade: '',
+    descricao: '',
+    unidade_medida: '',
+    quantidade: '',
+    desconto: '',
+    imposto: '',
+    preco: '',
+  });
+
+  const formatarPreco = (valor) => {
+    if (!valor) return '';
+    const valorNumerico = valor.replace(/[^\d]/g, '');
+    const valorFormatado = (parseInt(valorNumerico) / 100).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
     });
-    const [estoqueData, setEstoqueData] = useState([]);
-    const [fornecedores, setFornecedores] = useState([]);
-    const [categorias, setCategorias] = useState([]);
-    const [filteredData, setFilteredData] = useState([]);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [modalType, setModalType] = useState(''); // 'registrar' ou 'saida'
-    const [modalData, setModalData] = useState(null);
+    return valorFormatado;
+};
 
-    useEffect(() => {
-        const fetchCategorias = async () => {
-            try {
-                const response = await fetch('https://backend.cultivesmart.com.br/api/categorias');
-                const data = await response.json();
-                setCategorias(data);
-            } catch (error) {
-                console.error('Erro ao buscar categorias:', error);
-            }
-        };
+  const getUnidadeMedidaDescricao = (id) => {
+    const unidade = unidadesMedida && unidadesMedida.length > 0
+    && unidadesMedida.find((u) => u.id === parseInt(id));
+    return unidade ? unidade.sigla : '';
+};
 
-        const fetchFornecedores = async () => {
-          try {
-              const response = await fetch('https://backend.cultivesmart.com.br/api/fornecedores');
-              const data = await response.json();
-              setFornecedores(data);
-          } catch (error) {
-              console.error('Erro ao buscar fornecedores:', error);
-          }
-      };
+  useEffect(() => {
+    fetch('https://backend.cultivesmart.com.br/api/categorias')
+      .then(response => response.json())
+      .then(data => {
+        setCategorias(data);
+      })
+      .catch(error => console.error('Erro ao buscar categorias:', error));
+  }, []);
 
-        const fetchEstoque = async () => {
-            try {
-                const response = await fetch('https://backend.cultivesmart.com.br/api/estoque');
-                const data = await response.json();
-                setEstoqueData(data);
-                setFilteredData(data);
-            } catch (error) {
-                console.error('Erro ao buscar dados do estoque:', error);
-            }
-        };
 
-        fetchCategorias();
-        fetchFornecedores();
-        fetchEstoque();
+   useEffect(() => {
+      fetch('https://backend.cultivesmart.com.br/api/estoque')
+      .then(response => response.json())
+      .then(data => {
+        setEstoqueInsumos(data);
+      })
+      .catch(error => console.error('Erro ao buscar insumos:', error));
+  
     }, []);
 
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilters((prev) => ({ ...prev, [name]: value }));
-    };
+  useEffect(() => {
+    fetch('https://backend.cultivesmart.com.br/api/fornecedores')
+      .then(response => response.json())
+      .then(data => {
+        setFornecedores(data);
+      })
+      .catch(error => console.error('Erro ao buscar fornecedores:', error));
+  }, []);
 
-    const handleModalClose = () => {
-        setModalVisible(false);
-        setModalData(null);
-    };
 
-    const handleRegistrarEstoque = () => {
-        // Lógica para registrar entrada no estoque (usando modalData)
-        setModalVisible(false);
-        alert(`Entrada registrada para o item: ${modalData.produto}`);
-    };
+  const limparFiltros = () => {
+    setFiltroNome('');
+    setFiltroFornecedor('');
+    setFiltroCategoria(''); // Limpa o filtro de categoria
+};
 
-    const handleSaidaEstoque = () => {
-        // Lógica para registrar saída do estoque (usando modalData)
-        setModalVisible(false);
-        alert(`Saída registrada para o item: ${modalData.produto}`);
-    };
 
-    useEffect(() => {
-        const filtered = estoqueData.filter((item) => {
-            const categoriaMatch = filters.categoria ? item.category_id === parseInt(filters.categoria) : true;
-            return categoriaMatch;
+  const handleNext = (e) => {
+    e.preventDefault();
+
+    let hasErrors = false;
+    const newStepErrors = [...stepErrors];
+
+    // Validation logic for each step
+    if (activeStep === 0 && !filtroCategoria) {
+        hasErrors = true;
+    } else if (activeStep === 1 && !formData.fornecedor_id) {
+        hasErrors = true;
+        newStepErrors[activeStep] = true;
+    } else if (activeStep === 2 &&
+      filtroCategoria === "1" && (
+          !formData.nome.trim() || !formData.variedade.trim() || !formData.descricao.trim() ||
+          !formData.unidade_medida)
+   ) {
+        hasErrors = true;
+        newStepErrors[activeStep] = true;
+    } else if (activeStep === 2 &&
+      filtroCategoria === 2 && (!formData.descricao ||  !formData.unidade_medida || !formData.estoque_minimo)
+    ) {
+        hasErrors = true;
+        newStepErrors[activeStep] = true;
+    }
+    setStepErrors(newStepErrors);
+
+    if (!hasErrors) {
+        setActiveStep(prevStep => prevStep + 1);
+    }
+};
+
+const handleAdditionalFieldsChange = (event) => {
+  const { id, value } = event.target;
+  setAdditionalFields(prevState => ({
+    ...prevState,
+    [id]: value,
+  }));
+};
+
+const handleOpenAdditionalFieldsModal = (insumo, mode) => {
+  setInsumoSelecionado(insumo);
+  setEditedInsumo({
+      nome: insumo.nome,
+      categoria_id: insumo.categoria_id,
+      fornecedor_id: insumo.fornecedor_id,
+      variedade: insumo.variedade,
+      descricao: insumo.descricao,
+      unidade_medida: insumo.unidade_medida,
+      quantidade: insumo.quantidade,
+      desconto: insumo.desconto,
+      imposto: insumo.imposto,
+      preco: insumo.preco,
+  });
+  setModalMode(mode); // Define o modo do modal
+  setShowAdditionalFieldsModal(true);
+};
+
+
+const handleCloseAdditionalFieldsModal = () => {
+  setShowAdditionalFieldsModal(false);
+};
+
+const handleSaveAdditionalFields = () => {
+
+  if (!insumoSelecionado) {
+    console.error('Nenhum insumo selecionado para atualizar.');
+    return;
+  }
+
+  const { id } = insumoSelecionado;
+
+  fetch(`https://backend.cultivesmart.com.br/api/insumos/${id}`, {
+    method: 'PUT', // Adicione o método DELETE aqui
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(editedInsumo),
+  })
+  .then(response => {
+    if (response.ok) {
+      console.log(`Insumo com ID ${id} atualizado com sucesso.`);
+
+      // Atualiza o estado insumos com os dados atualizados
+      setEstoqueInsumos(prevInsumos => {
+        const updatedInsumos = prevInsumos.records.map(insumo => {
+          if (insumo.id === id) {
+            return { ...insumo, ...editedInsumo }; // Atualiza o insumo com os dados editados
+          }
+          return insumo;
         });
-        setFilteredData(filtered);
-    }, [filters, estoqueData]);
+        return { ...prevInsumos, records: updatedInsumos };
+      });
+    } else {
+      console.error(`Erro ao atualizar o insumo com ID ${id}:`, response.status);
+    }
+  })
+  .catch(error => console.error('Erro ao atualizar insumo:', error));
 
-    const getStatusBadge = (status) => {
-        switch (status) {
-            case 'Disponível':
-                return 'success';
-            case 'Baixo Estoque':
-                return 'warning';
-            case 'Indisponível':
-                return 'danger';
-            default:
-                return 'secondary';
-        }
-    };
 
-    return (
-        <CRow>
+  setShowAdditionalFieldsModal(false); // Fecha o modal
+};
+
+const handleCategorySelect = (category) => {
+  setFiltroCategoria(category);  // Atualiza o estado da categoria selecionada
+  setFormData(prevState => ({
+    ...prevState,
+    category: category  // Atualiza o valor da categoria no formData
+  }));
+};
+
+const fetchedUnidadesMedida = useMemo(async () => {
+      try {
+          const response = await fetch('https://backend.cultivesmart.com.br/api/unidades-medida');
+          return await response.json();
+      } catch (error) {
+          console.error('Erro ao buscar unidades de medida:', error);
+          return null;
+      }
+   }, []);
+
+const filtrarInsumos = () => {
+  return estoquesInsumos && estoquesInsumos
+      ? estoquesInsumos.filter((insumo) => {
+            const nomeMatch =
+                !filtroNome ||
+                insumo.nome.toLowerCase().includes(filtroNome.toLowerCase());
+            const fornecedorMatch =
+                !filtroFornecedor ||
+                insumo.fornecedor_id === parseInt(filtroFornecedor);
+                const categoriaMatch =
+                !filtroCategoria ||
+                insumo.categoria_id === parseInt(filtroCategoria);
+            return nomeMatch && fornecedorMatch && categoriaMatch;
+        })
+      : [];
+};
+
+const handleBack = (e) => {
+  e.preventDefault();
+  setActiveStep((prev) => Math.max(prev - 1, 0));
+  
+  setStepErrors(prevErrors => {
+      const newErrors = [...prevErrors];
+      newErrors[activeStep] = false; 
+      return newErrors;
+  });
+};
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      
+      const response = await fetch('https://backend.cultivesmart.com.br/api/insumos', {
+        method: 'GET',
+      });
+
+      if (response.ok) {
+        setActiveStep(0);
+      } else {
+        alert('Erro ao cadastrar insumo!');
+      }
+    } catch (error) {
+      console.error('Erro ao enviar dados:', error);
+    }
+  };
+
+  useEffect(() => {
+          const loadData = async () => {
+              setUnidadesMedida(await fetchedUnidadesMedida);
+          };
+          loadData();
+      },[fetchedUnidadesMedida]);
+
+  return (
+    <CContainer>
+      
+      <CForm onSubmit={handleSubmit} className="row g-3">
+          
             <CCol xs={12}>
-                <CCard className="mb-4">
-                    <CCardHeader>
-                        <strong>Estoque Atual</strong> <small>Gestão de Estoque</small>
-                    </CCardHeader>
+              <CCard className="mb-4">
+                <CCardHeader>
+                  <strong>Insumos - </strong>
+                  <small>Consulta de Insumos</small>
+                </CCardHeader>
+                <CCardBody>
+                  <DocsExample href="components/card/#background-and-color">
+                    <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }} >
 
-                    <CCardBody>					
-                        <CForm className="mb-4">
-                            <CRow className="g-3">
-                                <CCol md={2}>
-                                    <CFormSelect
-                                        name="categoria"
-                                        value={filters.categoria}
-                                        onChange={handleFilterChange}>
-                                        <option value="">Filtrar por Categoria</option>
-                                        {categorias.records.map((cat) => (
-                                            <option key={cat.id} value={cat.id}>
-                                                {cat.descricao}
-                                            </option>
-                                        ))}
-                                    </CFormSelect>
-                                </CCol>
-                                <CCol md={3}>
-                                    <CFormSelect
-                                        name="fornecedor"
-                                        value={filters.fornecedor}
-                                        onChange={handleFilterChange}
-                                    >
-                                        <option value="">Filtrar por Fornecedor</option>
-                                        {fornecedores.records && fornecedores.records.length > 0 ?
-                                            fornecedores.records.map((cat) => (
-                                                <option key={cat.id} value={cat.id}>
-                                                    {cat.nome}
-                                                </option>
-                                            )) : (<option>Nenhum fornecedor encontrado</option>)}
-                                    </CFormSelect>
-                                </CCol>
-                                <CCol md={4}>
-                                    <CFormInput
-                                        type="text"
-                                        placeholder="Buscar por Produto"
-                                        name="produto"
-                                        value={filters.produto}
-                                        onChange={handleFilterChange}
-                                    />
-                                </CCol>
-                                <CCol md={2}>
-                                    <CFormSelect
-                                        name="status"
-                                        value={filters.status}
-                                        onChange={handleFilterChange}
-                                    >
-                                        <option value="">Filtrar por Status</option>
-                                        <option value="Disponível">Disponível</option>
-                                        <option value="Baixo Estoque">Baixo Estoque</option>
-                                        <option value="Indisponível">Indisponível</option>
-                                    </CFormSelect>
-                                </CCol>
-                                <CCol md={1}>
-                                    <CButton type="button" color="primary">
-                                        Filtrar
-                                    </CButton>
-                                </CCol>
-                            </CRow>
-                        </CForm>
-            
-                        <CRow className="mb-4">
-                            {filteredData.map((item) => (
-                                <CCol md={12} key={item.id}>
-                                    <CCard  className="mb-3" >
-                                        <CRow>
-                                            <CCol xs={2} md={2}>
-                                                <CCardImage src={product_default} height={150}/>
-                                            </CCol>
-                                            <CCol xs={6} md={6}>
-                                                <CCardBody>
-                                                    <CCol xs={6} md={6}>
-                                                        
-                                                    </CCol>
-                                                    <CCardTitle>{item.nome}</CCardTitle>
-                                                    <CCardText>
-                                                        <CRow>
-                                                            <p>{item.descricao}</p>
-                                                        </CRow>
-                                                        <CRow>
-                                                            <div><CBadge color="warning">Estoque mínimo</CBadge></div>
-                                                            {/* <CBadge color={getStatusBadge(item.status)}>{item.status}</CBadge>  */}
-                                                        </CRow>
-                                                    </CCardText>
-                                                    <CInputGroup >
-                                                        <CCol xs={3} md={3}>
-                                                            <CFormInput
-                                                            placeholder="1"
-                                                            aria-label="Recipient's username with two button addons"
-                                                            />
-                                                        </CCol>
-                                                        <CCol xs={9} md={9}>
-                                                            <CButton type="button" color="secondary" variant="outline">-</CButton>
-                                                            <CButton type="button" color="secondary" variant="outline">+</CButton>
-                                                        </CCol>
-                                                    </CInputGroup>
-                                                </CCardBody>
-                                            </CCol>
-                                            <CCol xs={3} md={3}>
-                                                <CRating readOnly value={3} />
-                                            </CCol>
-                                        </CRow>
-                                    </CCard>
-                                </CCol>
-                            ))}
-                        </CRow>
-                    </CCardBody>
-                </CCard>
-            </CCol>
+                    { unidadesMedida && unidadesMedida &&
+                      categorias && categorias.records && categorias.records.map((categoria) => {
+                          return (
+                            <CCol
+                              key={categoria.id}
+                              color={ filtroCategoria === categoria.id ? 'success' : 'light'}
+                              style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              textAlign: 'center',
+                              
+                          }}>
+                                  
 
-            <CModal visible={modalVisible} onClose={handleModalClose}>
-                <CModalHeader>
-                    <strong>{modalType === 'registrar' ? 'Registrar' : 'Saída'} do Estoque</strong>
-                </CModalHeader>
-                <CModalBody>
-                    <CCol>
-                        <div>
-                            <strong>Produto:</strong> {modalData?.produto}
-                        </div>
-                        <div>
-                            <strong>Quantidade Atual:</strong> {modalData?.quantidade} {modalData?.unidade}
-                        </div>
-                        <CFormInput type="number" placeholder="Quantidade" min="1" />
-                    </CCol>
-                </CModalBody>
-                <CModalFooter>
-                    <CButton color="secondary" onClick={handleModalClose}>
-                        Cancelar
-                    </CButton>
-                    <CButton
-                        color={modalType === 'registrar' ? 'success' : 'danger'}
-                        onClick={
-                            modalType === 'registrar' ? handleRegistrarEstoque : handleSaidaEstoque
+                              <CCol lg={4} onClick={() => { setFiltroCategoria(categoria.id); console.log('filtroCategoria:', categoria.id);  console.log('filtroCategoria:', filtroCategoria);}}>
+                                <CCardImage width="fit" orientation="top" src={`data:image/png;base64,${categoria.logoPath}`} />
+                              </CCol>
+                              <CCol>
+                                <CFormCheck
+                                    type='radio'
+                                    name="categoria"
+                                    id={`flexCheckChecked${categoria.id}`}
+                                    label={categoria.descricao}
+                                    value={categoria.id}
+                                    checked={filtroCategoria === categoria.id}
+                                    onChange={(e) => {setFiltroCategoria(e.target.value);  console.log('filtroCategoria:', categoria.id); console.log('filtroCategoria:', filtroCategoria);}}
+                                />
+                              </CCol>
+                            </CCol>
+                          );
+                        })}
+                    </CRow>
+
+                    <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }} >
+                      <CCol>
+                        <CFormInput
+                            type="text"
+                            size="lg"
+                            placeholder="Nome..."
+                            aria-label="lg input example"
+                            value={filtroNome}
+                            onChange={(e) => setFiltroNome(e.target.value)}
+                        />
+                      </CCol>
+                      <CCol>
+                        <CFormSelect
+                            size="lg"
+                            aria-label="Large select example"
+                            value={filtroFornecedor}
+                            onChange={(e) => setFiltroFornecedor(e.target.value)}
+                        >
+                          <option>Escolha o fornecedor...</option>
+                          {fornecedores &&
+                              fornecedores.records &&
+                              fornecedores.records.length > 0 &&
+                              fornecedores.records.map((fornecedor) => {
+                                return (
+                                  <option key={fornecedor.id} value={fornecedor.id}>
+                                    {fornecedor.nome}
+                                  </option>
+                                )
+                            })
+                          }
+                        </CFormSelect>
+                      </CCol>
+                      <CCol>
+                        <CButton color="secondary" onClick={limparFiltros}>Limpar filtros</CButton>
+                      </CCol>
+                    </CRow>
+                  </DocsExample>
+
+                  <DocsExample href="components/card/#background-and-color">
+                    <CRow xs={{ gutterY: 3}} className="justify-content-between">
+                        {
+                          estoquesInsumos.map((estoqueInsumo) => {
+                            return (
+                                <CCard style={{width: '32%'}}>
+                                  <CRow>
+                                    <CCol xs={3} md={4} style={{marginTop:20}}>
+                                      <CCardImage src={`data:image/png;base64,${estoqueInsumo.insumo.logoPath}`} />
+                                    </CCol>
+                                    <CCol xs={7} md={7}>
+                                      <CCardBody>
+                                        <CCardTitle>{estoqueInsumo.insumo.nome}</CCardTitle>
+                                        <CCardSubtitle>{estoqueInsumo.insumo.variedade}</CCardSubtitle>
+                                        <CCardText>
+                                          {formatarPreco(estoqueInsumo.preco)}
+                                        </CCardText>
+                                        <CCardText>
+                                          <small className="text-body-secondary">Estoque atual: {estoqueInsumo.quantidade}</small>
+                                        </CCardText>
+                                      </CCardBody>
+                                    </CCol>
+                                    <CCol xs={1} md={1} >
+                                        <CDropdown alignment="end">
+                                          <CDropdownToggle color="transparent" caret={false} className="p-0">
+                                            <CIcon icon={cilOptions} />
+                                          </CDropdownToggle>
+                                          <CDropdownMenu>
+                                            <CDropdownItem
+                                                onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, 'visualizar')}>
+                                            Visualizar</CDropdownItem>
+                                            <CDropdownItem
+                                                onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, 'editar')}>
+                                            Atualizar Dados</CDropdownItem>
+                                            <CDropdownItem
+                                                onClick={() => handleDeleteInsumoById(estoqueInsumo.id)}>
+                                            Excluir</CDropdownItem>
+                                          </CDropdownMenu>
+                                        </CDropdown>
+                                    </CCol>
+                                  </CRow>
+                                </CCard>
+                            )
+                          })
                         }
+                    </CRow>
+                  </DocsExample>
+                </CCardBody>
+              </CCard>
+            </CCol>
+            
+        
+      </CForm>
+
+      <CModal
+        alignment="center"
+        visible={showAdditionalFieldsModal}
+        onClose={handleCloseAdditionalFieldsModal}
+    >
+        <CModalHeader closeButton>
+          <strong>{modalMode === 'visualizar' ? 'Informações do cadastro do insumo' : 'Editar cadastro do insumo'}</strong>
+        </CModalHeader>
+        <CModalBody>
+          {insumoSelecionado && (
+              <CRow>
+                <CCol xs={6} md={6}>
+                  <CFormInput
+                    label="Nome"
+                    value={editedInsumo.nome}
+                    disabled={modalMode === 'visualizar'}
+                    onFocus={() => setEditingField('nome')}
+                    onChange={(e) =>
+                      setEditedInsumo({ ...editedInsumo, nome: e.target.value })
+                  }/>
+                </CCol>
+                <CCol xs={6} md={6}>
+                  <CFormInput
+                    label="Variedade"
+                    value={editedInsumo.variedade}
+                    disabled={modalMode === 'visualizar'}
+                    onFocus={() => setEditingField('variedade')}
+                    onChange={(e) =>
+                      setEditedInsumo({ ...editedInsumo, variedade: e.target.value })
+                  }/>
+                </CCol>
+                <CCol xs={12} md={12}>
+                  <CFormTextarea label="Descrição"
+                    value={editedInsumo.descricao}
+                    style={{ minHeight: '200px' }}
+                    maxLength={255}
+                    disabled={modalMode === 'visualizar'}
+                    onFocus={() => setEditingField('descricao')}
+                    onChange={(e) =>
+                      setEditedInsumo({ ...editedInsumo, descricao: e.target.value })
+                  }
+                    ></CFormTextarea>
+                </CCol>
+                <CCol xs={5} md={5}>
+                  <CFormSelect
+                      label="Unidade de Medida"
+                      id="unidade_medida"
+                      aria-label="Floating label select example"
+                      value={editedInsumo.unidade_medida}
+                      title=''
+                      disabled={modalMode === 'visualizar'}
+                      onFocus={() => setEditingField('unidade_medida')}
+                      onChange={(e) =>
+                        setEditedInsumo({ ...editedInsumo, unidade_medida: e.target.value })
+                      }
                     >
-                        {modalType === 'registrar' ? 'Registrar' : 'Registrar Saída'}
-                    </CButton>
-                </CModalFooter>
-            </CModal>
-      </CRow>
-    );
+                      {
+                        unidadesMedida && unidadesMedida.map((unidadeMedida) => {
+                          return (
+                            <option key={unidadeMedida.id} value={unidadeMedida.id}>{unidadeMedida.descricao}</option>
+                          )
+                      }
+                    )}
+                  </CFormSelect>
+                </CCol>
+                <CCol xs={3} md={3}>
+                  <CFormInput label="Quantidade"
+                  value={editedInsumo.quantidade} disabled={modalMode === 'visualizar'}
+                  onFocus={() => setEditingField('quantidade')}
+                  onChange={(e) =>
+                    setEditedInsumo({ ...editedInsumo, quantidade: e.target.value })
+                  }
+                />
+                 </CCol>
+                 <CCol xs={4} md={4}>
+                  <CFormInput
+                    label="Preço"
+                    value={editedInsumo.preco}
+                    onFocus={() => setEditingField('preco')}
+                    onChange={(e) =>
+                      setEditedInsumo({ ...editedInsumo, preco: e.target.value })
+                    }
+                    disabled={modalMode === 'visualizar'}/>
+                </CCol>
+              </CRow>
+          )}
+        </CModalBody>
+        <CModalFooter>
+            <CButton color="secondary" onClick={handleCloseAdditionalFieldsModal}>
+                Fechar
+            </CButton>
+            {modalMode === 'editar' && ( // Botão de salvar visível apenas no modo de edição
+            <CButton color="primary" onClick={handleSaveAdditionalFields}>
+              Salvar
+            </CButton>
+          )}
+        </CModalFooter>
+    </CModal>
+     
+    </CContainer>
+
+    
+  );
 };
 
 export default EstoqueVisaoGeral;
