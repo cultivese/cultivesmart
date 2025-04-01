@@ -406,13 +406,10 @@ const handleBack = (e) => {
                                           <CDropdownMenu>
                                             <CDropdownItem
                                                 onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, 'visualizar')}>
-                                            Visualizar</CDropdownItem>
+                                            Cadastrar Especificação</CDropdownItem>
                                             <CDropdownItem
                                                 onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, 'editar')}>
-                                            Atualizar Dados</CDropdownItem>
-                                            <CDropdownItem
-                                                onClick={() => handleDeleteInsumoById(estoqueInsumo.id)}>
-                                            Excluir</CDropdownItem>
+                                            Atualizar Especificação</CDropdownItem>
                                           </CDropdownMenu>
                                         </CDropdown>
                                     </CCol>
