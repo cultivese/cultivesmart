@@ -208,6 +208,17 @@ const GerenciadorPedidos = () => {
     }
   };
 
+  const handleDescontoChange = (item, insumo, value) => {
+    setInsumoValues({ ...insumoValues, [`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`]: value });
+
+    // Recalcula o total de desconto para a cotação
+    const updatedDesconto = item.insumos.reduce((total, currentInsumo) => {
+      const descontoValue = insumoValues[`${item.codigo_cotacao}-${currentInsumo.insumo_id}-desconto`] || currentInsumo.desconto;
+      return total + parseFloat(descontoValue || 0);
+    }, 0);
+
+    setTotalDescontoValues({ ...totalDescontoValues, [item.codigo_cotacao]: updatedDesconto });
+  };
 
   return (
       <CSmartTable
@@ -341,7 +352,7 @@ const GerenciadorPedidos = () => {
                                 <CFormInput
                                   type="text"
                                   value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] || insumo.desconto}
-                                  onChange={(e) => setInsumoValues({ ...insumoValues, [`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`]: e.target.value })}
+                                  onChange={(e) => handleDescontoChange(item, insumo, e.target.value)}
                                   id="exampleFormControlInput1"
                                   aria-describedby="exampleFormControlInputHelpInline"
                                   disabled={item.status.id !== 1}
