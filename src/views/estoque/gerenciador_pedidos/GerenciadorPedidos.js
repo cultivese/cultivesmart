@@ -150,6 +150,34 @@ const GerenciadorPedidos = () => {
       setDadosFiltrados(transformarDados);
   }, [filtro, items, loading, error]);
 
+  const handleRejeitar = async (item) => {
+
+    try{
+      const response = await fetch(`https://backend.cultivesmart.com.br/api/cotacao/${item.codigo_cotacao}/reject`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Cotação atualizada com sucesso:", data);
+
+      setIsProcessing(false);
+
+    } catch (err) {
+      console.error("Erro ao atualizar cotação:", err);
+      setIsProcessing(false);
+    }
+
+    window.location.reload();
+
+  }
+
   const handleAprovar = async (item) => {
     const insumosAtualizados = item.insumos.map(insumo => {
       return {
@@ -371,8 +399,9 @@ const GerenciadorPedidos = () => {
                         { isProcessing ? <CSpinner as="span" className="me-2" size="sm" aria-hidden="true" /> : null  }
                         Aprovar
                       </CButton>
-                      <CButton size="sm" color="danger" className="ms-1">
-                        Cancelar
+                      <CButton size="sm" color="danger" className="ms-1" onClick={() => handleRejeitar(item)}>
+                      { isProcessing ? <CSpinner as="span" className="me-2" size="sm" aria-hidden="true" /> : null  }
+                        Rejeitar
                       </CButton>
                     </div>
                   )}
