@@ -379,7 +379,7 @@ const handleBack = (e) => {
                   <DocsExample href="components/card/#background-and-color">
                     <CRow xs={{ gutterY: 3}} className="justify-content-between">
                         {
-                          estoquesInsumos.records.map((estoqueInsumo) => {
+                          estoquesInsumos.records && estoquesInsumos.records.map((estoqueInsumo) => {
                             return (
                                 <CCard style={{width: '32%'}}>
                                   <CRow>
