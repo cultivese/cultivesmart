@@ -108,7 +108,7 @@ const _nav = [
   // },
   {
     component: CNavTitle,
-    name: 'Insumos',
+    name: 'Catálogo de Insumos',
   },
   {
     component: CNavItem,
