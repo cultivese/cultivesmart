@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   CButton,
   CCard,
+  CBadge,
   CCardBody,
   CLoadingButton,
   CSpinner,
@@ -435,6 +436,7 @@ const handleBack = (e) => {
                                     </CCardText>
                                     <CCardText>
                                         <small className="text-body-secondary">Estoque atual: {estoqueInsumo.quantidade}</small>
+                                        <CBadge color="success">Em estoque</CBadge>
                                     </CCardText>
                                     </CCardBody>
                                 </CCol>
