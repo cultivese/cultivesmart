@@ -1,12 +1,15 @@
+name: 🚀 Deploy to Production on Main (via PR)
+
 on:
-  push:
+  pull_request:  # Triggered by Pull Requests
     branches:
-      - main
-name: 🚀 Deploy cultivesmart on push
+      - main     # Specifically when a PR is merged into main
+
 jobs:
-  web-deploy:
-    name: 🎉 Deploy
+  web-deploy-production:
+    name: 🎉 Deploy to Production
     runs-on: ubuntu-latest
+    if: github.event.action == 'closed' && github.event.merged == true #  Crucial condition!
     steps:
     - name: 🚚 Get latest code
       uses: actions/checkout@v4
@@ -24,7 +27,7 @@ jobs:
     - name: List output files
       run: find build/ -print
       
-    - name: 📂 Sync files
+    - name: 📂 Sync files to Production
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: 46.202.145.116
