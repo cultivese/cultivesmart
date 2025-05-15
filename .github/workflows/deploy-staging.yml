@@ -34,4 +34,4 @@ jobs:
         port: 21
         password: ${{ secrets.FTP_PASSWORD }} #  IMPORTANT: Create a new secret for staging!
         local-dir: build/
-        server-dir: domains/cultivesmart.com.br/public_html/stg
+        server-dir: domains/cultivesmart.com.br/public_html/stg/
