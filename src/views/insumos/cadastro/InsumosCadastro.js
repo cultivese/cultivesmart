@@ -29,7 +29,7 @@ const InsumosCadastro = () => {
   const [tiposMedida , setTiposMedida] = useState([]);
   
   const [selectedFornecedor, setSelectedFornecedor] = useState(null);
-  const [stepErrors, setStepErrors] = useState([false, false, false, false, false]); // Array to track errors for each step
+  a
   
   const hiddenFileInput = useRef(null);
   const [caracteresRestantes, setCaracteresRestantes] = useState(255); // Inicializa com o limite máximo
