@@ -68,6 +68,28 @@ const _nav = [
   // },
   {
     component: CNavTitle,
+    name: 'Plantio',
+  },
+  {
+    component: CNavItem,
+    name: 'Visão Geral',
+    to: '/plantio/visao_geral',
+    icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Simular Plantio',
+    to: '/plantio/simular_plantio',
+    icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Gerenciador de Plantios',
+    to: '/plantio/gerenciador_plantio',
+    icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
     name: 'Estoque',
   },
   {
@@ -75,7 +97,7 @@ const _nav = [
     name: 'Visão Geral',
     to: '/estoque/visao_geral',
     icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-  },  
+  },
   // {
   //   component: CNavItem,
   //   name: 'Especificação',
@@ -108,6 +130,22 @@ const _nav = [
   // },
   {
     component: CNavTitle,
+    name: 'Catálogo de Produtos',
+  },
+  {
+    component: CNavItem,
+    name: 'Listar',
+    to: '/produtos/listar',
+    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Cadastro',
+    to: '/produtos/cadastrar',
+    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
     name: 'Catálogo de Insumos',
   },
   {
@@ -122,6 +160,22 @@ const _nav = [
     name: 'Cadastro',
     to: '/insumos/cadastrar',
     icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'Clientes',
+  },
+  {
+    component: CNavItem,
+    name: 'Listar',
+    to: '/clientes/listar',
+    icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Cadastro',
+    to: '/clientes/cadastro',
+    icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
   },
   {
     component: CNavTitle,

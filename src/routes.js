@@ -7,6 +7,10 @@ const VisaoGeral = React.lazy(() => import('./views/producao/VisaoGeral'))
 const NovoLote = React.lazy(() => import('./views/producao/NovoLote'))
 const EncerrarLote = React.lazy(() => import('./views/producao/EncerrarLote'))
 
+// Plantio
+const SimularPlantio  = React.lazy(() => import('./views/plantio/simular_plantio/SimularPlantio'))
+const GerenciadorPlantios  = React.lazy(() => import('./views/plantio/gerenciador_plantios/GerenciadorPlantios'))
+
 // Estoque
 const EstoqueVisaoGeral = React.lazy(() => import('./views/estoque/visao_geral/EstoqueVisaoGeral'))
 //const EstoqueRegistrar = React.lazy(() => import('./views/estoque/registrar/EstoqueRegistrar'))
@@ -26,6 +30,9 @@ const InsumosListar = React.lazy(() => import('./views/insumos/listar/InsumosLis
 const FornecedoresListar = React.lazy(() => import('./views/fornecedores/listar/FornecedoresListar'))
 const FornecedoresCadastro = React.lazy(() => import('./views/fornecedores/cadastro/FornecedoresCadastro'))
 
+// Clientes
+const ClientesListar = React.lazy(() => import('./views/clientes/listar/ClientesListar'))
+const ClientesCadastro = React.lazy(() => import('./views/clientes/cadastro/ClientesCadastro'))
 
 const ProducaoCadastro = React.lazy(() => import('./views/producao/cadastro/ProducaoCadastro'))
 
@@ -41,6 +48,14 @@ const routes = [
   // { path: '/producao/novo_lote', name: 'NovoLote', element: NovoLote },
   // { path: '/producao/encerrar_lote', name: 'EncerrarLote', element: EncerrarLote },
   
+
+  
+  // Plantio
+  { path: '/plantio', name: 'Plantio', element: Cards, exact: true },
+  { path: '/plantio/simular_cotacao', name: 'Simular Cotação', element: SimularCotacao },
+  { path: '/plantio/simular_plantio/', name: 'Simular Plantio', element: SimularPlantio },
+  { path: '/plantio/gerenciador_plantios', name: 'Gerenciador de Plantios', element: GerenciadorPlantios },
+
   // Estoque
   { path: '/estoque', name: 'Estoque', element: Cards, exact: true },
   { path: '/estoque/visao_geral', name: 'Visão Geral', element: EstoqueVisaoGeral },
@@ -60,6 +75,11 @@ const routes = [
   { path: '/fornecedores', name: 'Fornecedores', element: Cards, exact: true },
   { path: '/fornecedores/cadastro', name: 'Cadastro', element: FornecedoresCadastro },
   { path: '/fornecedores/listar', name: 'Listar', element: FornecedoresListar },
+
+  // Clientes
+  { path: '/clientes', name: 'Clientes', element: Cards, exact: true },
+  { path: '/clientes/cadastro', name: 'Cadastro', element: ClientesCadastro },
+  { path: '/clientes/listar', name: 'Listar', element: ClientesListar },
   
 
   // Fornecedores
