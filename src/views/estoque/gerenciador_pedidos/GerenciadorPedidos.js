@@ -33,7 +33,7 @@ const getBadge = (status) => {
 }
 
 
-const GerenciadorPedidos = () => {
+const GerenciadorPlantios = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const filtro = searchParams.get("filtro") || "todos"; // Default: "todos"
@@ -80,7 +80,7 @@ const GerenciadorPedidos = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        
+
         const transformarDados = (records) => {
           return records.map(item => {
             return {
@@ -105,11 +105,11 @@ const GerenciadorPedidos = () => {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, []);
 
-  
+
   useEffect(() => {
     if (items.cotacao_insumos) {
         items.cotacao_insumos.forEach(async (insumo) => {
@@ -189,7 +189,7 @@ const GerenciadorPedidos = () => {
       };
     });
 
-    
+
 
     try {
       setIsProcessing(true);
@@ -204,16 +204,16 @@ const GerenciadorPedidos = () => {
           nota_fiscal: notaFiscalValues[item.codigo_cotacao], // Inclui nota_fiscal no mesmo nível
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const data = await response.json();
       console.log("Cotação atualizada com sucesso:", data);
-  
+
       setIsProcessing(false);
-  
+
     } catch (err) {
       console.error("Erro ao atualizar cotação:", err);
       setIsProcessing(false);
@@ -389,7 +389,7 @@ const GerenciadorPedidos = () => {
                             </CTableRow>
                           ))
                         }
-                    
+
                       </CTableBody>
                     </CTable>
                   </CForm>
@@ -430,4 +430,4 @@ const GerenciadorPedidos = () => {
   )
 };
 
-export default GerenciadorPedidos;
+export default GerenciadorPlantios;

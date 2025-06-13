@@ -29,8 +29,7 @@ const InsumosCadastro = () => {
   const [tiposMedida , setTiposMedida] = useState([]);
   
   const [selectedFornecedor, setSelectedFornecedor] = useState(null);
-  a
-  
+    const [stepErrors, setStepErrors] = useState([false, false, false, false, false]); // Array to track errors for each step
   const hiddenFileInput = useRef(null);
   const [caracteresRestantes, setCaracteresRestantes] = useState(255); // Inicializa com o limite máximo
   const stepLabels = [
@@ -480,26 +479,26 @@ const handleBack = (e) => {
                           <CCol md={7} xs={7}>
                           <CPopover content="Qual a quantidade (Kg/g) do saco" placement="right" trigger={['hover', 'focus']}>
                             <CFormSelect
-                              id="unidade_medida"
-                              floatingLabel="Unidade de Medida"
-                              aria-label="Floating label select example"
-                              value={formData.unidade_medida}
-                              title=''
-                              onChange={(e) => {
-                                handleChange(e);
-                              }}
-                              className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'mb-3 is-invalid' : 'mb-3'}
-                              required
-                            >
-                                  <option value="" disabled>Escolha...</option>
-                                  {
-                                      unidadesMedida && unidadesMedida.filter(unidadeMedida => unidadeMedida.tipo_medida_id === parseInt(formData.tipo_medida)).map((unidadeMedida) => {
-                                      return (  
-                                        <option key={unidadeMedida.id} value={unidadeMedida.id}>{unidadeMedida.sigla} ({unidadeMedida.descricao})</option>
-                                      )
-                                  }
-                                )}
-                              </CFormSelect>
+	id="unidade_medida"
+	floatingLabel="Unidade de Medida"
+	aria-label="Floating label select example"
+	value={formData.unidade_medida}
+	title=''
+	onChange={(e) => {
+	handleChange(e);
+	}}
+	className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'mb-3 is-invalid' : 'mb-3'}
+	required
+	>
+	  <option value="" disabled>Escolha...</option>
+	  {
+        unidadesMedida && unidadesMedida.filter(unidadeMedida => parseInt(unidadeMedida.tipo_medida_id) === parseInt(formData.tipo_medida)).map((unidadeMedida) => {
+		  return (  
+			<option key={unidadeMedida.id} value={unidadeMedida.id}>{unidadeMedida.descricao}</option>
+		  )
+	  }
+	)}
+</CFormSelect>
                             </CPopover>
                           </CCol>
                           

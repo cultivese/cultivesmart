@@ -435,7 +435,7 @@ const handleBack = (e) => {
                                         {formatarPreco(estoqueInsumo.preco)}
                                     </CCardText>
                                     <CCardText>
-                                        <small className="text-body-secondary">Estoque atual: {estoqueInsumo.quantidade}</small>
+                                        <small className="text-body-secondary">Estoque atual: {parseInt(estoqueInsumo.quantidade)}  sacos</small>
                                         <CBadge color="success">Em estoque</CBadge>
                                     </CCardText>
                                     </CCardBody>

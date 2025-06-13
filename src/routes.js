@@ -23,8 +23,11 @@ const InsumosEspecificacao = React.lazy(() => import('./views/estoque/especifica
 
 // Insumos
 const InsumosCadastro = React.lazy(() => import('./views/insumos/cadastro/InsumosCadastro'))
-
 const InsumosListar = React.lazy(() => import('./views/insumos/listar/InsumosListar'))
+
+// Produtos
+const ProdutosCadastro = React.lazy(() => import('./views/produtos/cadastro/ProdutosCadastro'))
+const ProdutosListar = React.lazy(() => import('./views/produtos/listar/ProdutosListar'))
 
 // Fornecedores
 const FornecedoresListar = React.lazy(() => import('./views/fornecedores/listar/FornecedoresListar'))
@@ -70,6 +73,11 @@ const routes = [
   { path: '/insumos/listar', name: 'Listar', element: InsumosListar },
   { path: '/insumos/especificacao', name: 'Especificação', element: InsumosEspecificacao },
   { path: '/insumos/cadastrar', name: 'Cadastrar', element: InsumosCadastro },
+
+  // Produtos
+  { path: '/produtos', name: 'Produtos', element: Cards, exact: true },
+  { path: '/produtos/listar', name: 'Listar', element: ProdutosListar },  
+  { path: '/produtos/cadastrar', name: 'Cadastrar', element: ProdutosCadastro },
 
   // Fornecedores
   { path: '/fornecedores', name: 'Fornecedores', element: Cards, exact: true },
