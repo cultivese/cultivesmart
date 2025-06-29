@@ -256,7 +256,7 @@ const handleBack = (e) => {
         }
       }
       
-      const response = await fetch('http://localhost:59536/api/insumos', {
+      const response = await fetch('https://backend.cultivesmart.com.br/api/insumos', {
         method: 'POST',
         body: formDataToSend,
       });
