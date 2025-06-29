@@ -231,7 +231,7 @@ const GerenciadorPlantios = () => {
           insumos: insumosAtualizados,
         })
 
-      const response = await fetch(`https://backend.cultivesmart.com.br/api/cotacao/${item.id}`, {
+      const response = await fetch(`http://localhost:61773/api/cotacao/${item.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

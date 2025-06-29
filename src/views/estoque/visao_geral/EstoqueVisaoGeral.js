@@ -218,23 +218,23 @@ const handleOpenImportPhotosModal = (insumo) => {
     setShowImportPhotosModal(true);
 }
 
-const handleOpenDetailsModal = (insumo) => {
+const handleOpenDetailsModal = (estoqueInsumo) => {
+    // Cria um array de barras de progresso com base na quantidade em estoque
+    const quantidadeEmEstoque = parseInt(estoqueInsumo.quantidade);
+    const usoSacosArray = Array.from({ length: quantidadeEmEstoque }, () => Math.floor(Math.random() * 101)); // Gera valores aleatórios de 0 a 100 para o progresso
 
-     const insumoDetails = {
-        foto: insumo.insumo.logoPath,
-        nome: insumo.insumo.nome,
-        descricao: insumo.insumo.variedade,
-        precoUnitario: insumo.preco,
-        precoPorGrama: 0.05, // Preço por grama utilizado (exemplo)
-        fornecedor: 'Agro Seeds Brasil',
-        notaFiscal: 'NF-2023-10-00123',
-        usoSacos: [25, 100, 100, 100], // Exemplo de evolução de uso dos sacos em porcentagem
+    const insumoDetails = {
+        foto: estoqueInsumo.insumo.logoPath,
+        nome: estoqueInsumo.insumo.nome,
+        descricao: estoqueInsumo.insumo.variedade,
+        precoUnitario: estoqueInsumo.preco, // O `preco` está no nível do estoque, não do insumo.
+        fornecedor: 'Agro Seeds Brasil', // Este dado pode precisar ser buscado do backend se não estiver no JSON
+        notaFiscal: 'NF-2023-10-00123', // Este dado também precisa ser buscado
+        usoSacos: usoSacosArray, // Agora é um array dinâmico
     };
     setInsumoDetail(insumoDetails);
-
-
     setShowDetailsModal(true);
-}
+};
 
 const handleSaveAdditionalFields = async () => {
 
@@ -363,7 +363,19 @@ const handleBack = (e) => {
           loadData();
       },[fetchedUnidadesMedida]);
 
-     
+const formatarCustoGrao = (totalLiquido, quantidade, peso_unitario) => {
+    const liquido = parseFloat(totalLiquido);
+    const qtd = parseFloat(quantidade);
+    const peso = parseInt(peso_unitario);
+
+    if (isNaN(liquido) || isNaN(qtd) || qtd <= 0) {
+        return 'N/A'; // Evita divisão por zero ou dados inválidos
+    }
+
+    const peso_total = (qtd * peso);
+    const custoPorUnidade = liquido / peso_total;
+    return custoPorUnidade.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
 
   return (
     <CContainer>
@@ -457,6 +469,10 @@ const handleBack = (e) => {
                         
                         const hasEspecificacoes = estoqueInsumo.insumo.especificacoes && estoqueInsumo.insumo.especificacoes.length > 0; // Para relacionamento hasMany
 
+                        const totalLiquido = estoqueInsumo?.cotacao_insumos?.total_liquido;
+                        const quantidade = estoqueInsumo?.quantidade;
+                        const peso = estoqueInsumo?.insumo?.quantidade;
+
                         return (
                           <CCard style={{width: '32%'}} key={estoqueInsumo.id}>
                                 <CRow>
@@ -472,7 +488,10 @@ const handleBack = (e) => {
                                     </CCardText>
                                     <CCardText>
                                         <CRow><small className="text-body-secondary">Estoque atual: {parseInt(estoqueInsumo.quantidade)}  sacos</small></CRow>
-                                        <CRow><small className="text-body-secondary">Custo do grão: R$ {parseInt(estoqueInsumo.quantidade)}/g </small></CRow>
+                                        <CRow>
+                                            <small className="text-body-secondary">
+                                                Custo do grão: R$ {formatarCustoGrao(totalLiquido, quantidade, peso)} /g.
+                                            </small></CRow>
                                         <CBadge color="danger">Abaixo do limite</CBadge>
                                     </CCardText>
                                      <CProgress height={2}>
@@ -685,21 +704,25 @@ const handleBack = (e) => {
                         </CTabPanel>
                         <CTabPanel className="p-3" aria-labelledby="profile-tab-pane" itemKey={2}>
                             <h4 className="mt-4">Evolução de Uso dos Sacos</h4>
+                            {/* Verifica se o array existe e se tem elementos */}
                             {insumoDetail.usoSacos && insumoDetail.usoSacos.length > 0 ? (
-                            insumoDetail.usoSacos.map((uso, index) => (
-                            <CProgress
-                                key={index}
-                                className="mb-2"
-                                color={
-                                uso < 30 ? 'danger' : uso < 60 ? 'warning' : uso < 85 ? 'info' : 'success'
-                                }
-                                value={uso}
-                            >
-                                <CProgressBar>{uso}%</CProgressBar>
-                            </CProgress>
-                            ))
+                                insumoDetail.usoSacos.map((uso, index) => (
+                                    <div key={index}> {/* Use uma div para encapsular o progresso e o texto */}
+                                        <small>Saco {index + 1}</small>
+                                        <CProgress
+                                            className="mb-2"
+                                            color={
+                                                uso < 30 ? 'danger' : uso < 60 ? 'warning' : uso < 85 ? 'info' : 'success'
+                                            }
+                                            value={uso}
+                                        >
+                                            {/* A barra de progresso agora exibe a porcentagem do uso */}
+                                            <CProgressBar>{uso}%</CProgressBar>
+                                        </CProgress>
+                                    </div>
+                                ))
                             ) : (
-                            <p>Não há informações sobre o uso dos sacos.</p>
+                                <p>Não há informações sobre o uso dos sacos.</p>
                             )}
                         </CTabPanel>
                         <CTabPanel className="p-3" aria-labelledby="contact-tab-pane" itemKey={3}>
