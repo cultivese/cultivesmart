@@ -543,7 +543,7 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                         // --- FIM DO CÓDIGO AJUSTADO ---
 
                         const totalLiquido = estoqueInsumo?.cotacao_insumos?.total_liquido;
-                        const quantidade = estoqueInsumo?.quantidade_total;
+                        const quantidade = estoqueInsumo?.cotacao_insumos?.quantidade * estoqueInsumo?.insumo?.quantidade;
 
                         return (
                           <CCard style={{width: '32%'}} key={estoqueInsumo.id}>
