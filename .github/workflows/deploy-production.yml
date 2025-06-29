@@ -1,15 +1,14 @@
 name: 🚀 Deploy to Production on Main (via PR)
 
 on:
-  pull_request:  # Triggered by Pull Requests
+  push:  # Triggered by Pull Requests
     branches:
       - main     # Specifically when a PR is merged into main
 
 jobs:
   web-deploy-production:
     name: 🎉 Deploy to Production
-    runs-on: ubuntu-latest
-    if: github.event.action == 'closed' && github.event.merged == true #  Crucial condition!
+    runs-on: ubuntu-latest    
     steps:
     - name: 🚚 Get latest code
       uses: actions/checkout@v4
