@@ -78,6 +78,9 @@ const EstoqueVisaoGeral = () => {
   const [modalMode, setModalMode] = useState('visualizar'); // Novo estado para controlar o modo do modal
   const [insumoDetail, setInsumoDetail] = useState('');
   
+  const [movimentacoesEstoque, setMovimentacoesEstoque] = useState([]);
+  const [isFetchingMovements, setIsFetchingMovements] = useState(false);
+
   const [editedInsumo, setEditedInsumo] = useState({
     nome: '',
     fornecedor_id: null,
@@ -218,7 +221,7 @@ const handleOpenImportPhotosModal = (insumo) => {
     setShowImportPhotosModal(true);
 }
 
-const handleOpenDetailsModal = (estoqueInsumo) => {
+const handleOpenDetailsModal = async  (estoqueInsumo) => {
     const totalSacos = parseInt(estoqueInsumo.cotacao_insumos.quantidade);
     const capacidadePorSaco = parseInt(estoqueInsumo.insumo.quantidade);
     
@@ -259,7 +262,25 @@ const handleOpenDetailsModal = (estoqueInsumo) => {
     
     // 5. Atualizar o estado e abrir o modal
     setInsumoDetail(insumoDetails);
+
+    setIsFetchingMovements(true);
+
+    try {
+        const response = await fetch(`https://backend.cultivesmart.com.br/api/estoque/${estoqueInsumo.id}/movements`);
+        if (!response.ok) {
+            throw new Error('Erro ao buscar movimentações');
+        }
+        const data = await response.json();
+        setMovimentacoesEstoque(data);
+    } catch (error) {
+        console.error('Erro ao buscar o histórico de movimentações:', error);
+        setMovimentacoesEstoque([]); // Limpa o estado em caso de erro
+    } finally {
+        setIsFetchingMovements(false);
+    }
+
     setShowDetailsModal(true);
+    setInsumoSelecionado(estoqueInsumo);
 };
 
 const handleSaveAdditionalFields = async () => {
@@ -691,71 +712,109 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
             <CModalTitle id="InsumoDetalhesModalLabel">Detalhes do Insumo</CModalTitle>
             </CModalHeader>
             <CModalBody>
-
-                <CTabs defaultActiveItemKey={2}>
-                    <CTabList variant="underline">
-                        <CTab aria-controls="home-tab-pane" itemKey={1}>Dados Gerais</CTab>
-                        <CTab aria-controls="profile-tab-pane" itemKey={2}>Evolução estoque</CTab>
-                        <CTab aria-controls="contact-tab-pane" itemKey={3}>Contact</CTab>
-                    </CTabList>
-                    <CTabContent>
-                        <CTabPanel className="p-3" aria-labelledby="home-tab-pane" itemKey={1}>
-                            <CRow>
-                                <CCol md="4">
-                                    <CCardImage src={`data:image/png;base64,${insumoDetail.foto}`} />
-                                </CCol>
-                                <CCol md="8">
-                                    <h2>{insumoDetail.nome}</h2>
-                                    <p>{insumoDetail.descricao}</p>
-                                    <p>
-                                        <strong>Preço Unitário:</strong> R$ {insumoDetail.precoUnitario && insumoDetail.precoUnitario.toFixed(2)}
-                                    </p>
-                                    {insumoDetail.precoPorGrama && (
+                {insumoSelecionado && (
+                    <CTabs key={insumoSelecionado.id} activeItemKey={1}>
+                        <CTabList variant="underline">
+                            <CTab aria-controls="home-tab-pane" itemKey={1}>Dados Gerais</CTab>
+                            <CTab aria-controls="profile-tab-pane" itemKey={2}>Evolução estoque</CTab>
+                            <CTab aria-controls="contact-tab-pane" itemKey={3}>Histórico de Retiradas</CTab>
+                        </CTabList>
+                        <CTabContent>
+                            <CTabPanel className="p-3" aria-labelledby="home-tab-pane" itemKey={1}>
+                                <CRow>
+                                    <CCol md="4">
+                                        <CCardImage src={`data:image/png;base64,${insumoDetail.foto}`} />
+                                    </CCol>
+                                    <CCol md="8">
+                                        <h2>{insumoDetail.nome}</h2>
+                                        <p>{insumoDetail.descricao}</p>
                                         <p>
-                                        <strong>Preço por Grama:</strong> R$ {insumoDetail.precoPorGrama.toFixed(2)}/g
+                                            <strong>Preço Unitário:</strong> R$ {insumoDetail.precoUnitario && insumoDetail.precoUnitario.toFixed(2)}
                                         </p>
-                                    )}
-                                    <p>
-                                        <strong>Fornecedor:</strong> {insumoDetail.fornecedor}
-                                    </p>
-                                    <p>
-                                        <strong>Nota Fiscal:</strong> {insumoDetail.notaFiscal}
-                                    </p>
-                                    
-                                </CCol>
-                            </CRow>
-                        </CTabPanel>
-                        <CTabPanel className="p-3" aria-labelledby="profile-tab-pane" itemKey={2}>
-                            <h4 className="mt-4">Evolução de Uso dos Sacos</h4>
-                            {/* Verifica se o array existe e se tem elementos */}
-                            {insumoDetail.usoSacos && insumoDetail.usoSacos.length > 0 ? (
-                                insumoDetail.usoSacos.map((uso, index) => (
-                                    <div key={index}> {/* Use uma div para encapsular o progresso e o texto */}
-                                        <small>Saco {index + 1}</small>
-                                        <CProgress
-                                            className="mb-2"
-                                            color={
-                                                uso < 30 ? 'danger' : uso < 60 ? 'warning' : uso < 85 ? 'info' : 'success'
-                                            }
-                                            value={uso}
-                                        >
-                                            {/* A barra de progresso agora exibe a porcentagem do uso */}
-                                            <CProgressBar>{uso}%</CProgressBar>
-                                        </CProgress>
-                                    </div>
-                                ))
+                                        {insumoDetail.precoPorGrama && (
+                                            <p>
+                                            <strong>Preço por Grama:</strong> R$ {insumoDetail.precoPorGrama.toFixed(2)}/g
+                                            </p>
+                                        )}
+                                        <p>
+                                            <strong>Fornecedor:</strong> {insumoDetail.fornecedor}
+                                        </p>
+                                        <p>
+                                            <strong>Nota Fiscal:</strong> {insumoDetail.notaFiscal}
+                                        </p>
+                                        
+                                    </CCol>
+                                </CRow>
+                            </CTabPanel>
+                            <CTabPanel className="p-3" aria-labelledby="profile-tab-pane" itemKey={2}>
+                                <h4 className="mt-4">Evolução de Uso dos Sacos</h4>
+                                {/* Verifica se o array existe e se tem elementos */}
+                                {insumoDetail.usoSacos && insumoDetail.usoSacos.length > 0 ? (
+                                    insumoDetail.usoSacos.map((uso, index) => (
+                                        <div key={index}> {/* Use uma div para encapsular o progresso e o texto */}
+                                            <small>Saco {index + 1}</small>
+                                            <CProgress
+                                                className="mb-2"
+                                                color={
+                                                    uso < 30 ? 'danger' : uso < 60 ? 'warning' : uso < 85 ? 'info' : 'success'
+                                                }
+                                                value={uso}
+                                            >
+                                                {/* A barra de progresso agora exibe a porcentagem do uso */}
+                                                <CProgressBar>{uso}%</CProgressBar>
+                                            </CProgress>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p>Não há informações sobre o uso dos sacos.</p>
+                                )}
+                            </CTabPanel>
+                            <CTabPanel className="p-3" aria-labelledby="contact-tab-pane" itemKey={3}>
+                            <h4 className="mt-4">Histórico de Movimentações</h4>
+                            {isFetchingMovements ? (
+                                <div className="text-center mt-5">
+                                    <CSpinner />
+                                    <p>Carregando histórico...</p>
+                                </div>
+                            ) : movimentacoesEstoque.length > 0 ? (
+                                <div className="table-responsive">
+                                    <table className="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Tipo</th>
+                                                <th>Quantidade</th>
+                                                <th>Motivo</th>
+                                                <th>Data</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {movimentacoesEstoque.map((movimentacao) => (
+                                                <tr key={movimentacao.id}>
+                                                    <td>
+                                                        {movimentacao.quantidade_retirada > 0 ? (
+                                                            <CBadge color="danger">Retirada</CBadge>
+                                                        ) : (
+                                                            <CBadge color="success">Entrada</CBadge>
+                                                        )}
+                                                    </td>
+                                                    <td>{movimentacao.quantidade_retirada}</td>
+                                                    <td>{movimentacao.motivo || 'N/A'}</td>
+                                                    <td>{new Date(movimentacao.created_at).toLocaleString('pt-BR')}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             ) : (
-                                <p>Não há informações sobre o uso dos sacos.</p>
+                                <p>Não há movimentações registradas para este insumo.</p>
                             )}
                         </CTabPanel>
-                        <CTabPanel className="p-3" aria-labelledby="contact-tab-pane" itemKey={3}>
-                        Contact tab content
-                        </CTabPanel>
-                        <CTabPanel className="p-3" aria-labelledby="disabled-tab-pane" itemKey={4}>
-                        Disabled tab content
-                        </CTabPanel>
-                    </CTabContent>
-                </CTabs>
+                            <CTabPanel className="p-3" aria-labelledby="disabled-tab-pane" itemKey={4}>
+                            Disabled tab content
+                            </CTabPanel>
+                        </CTabContent>
+                    </CTabs>
+                )}
             </CModalBody>
             <CModalFooter>
                 <CButton color="secondary" onClick={() => setShowDetailsModal(false)}>
