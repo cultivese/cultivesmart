@@ -363,17 +363,15 @@ const handleBack = (e) => {
           loadData();
       },[fetchedUnidadesMedida]);
 
-const formatarCustoGrao = (totalLiquido, quantidade, peso_unitario) => {
+const formatarCustoGrao = (totalLiquido, quantidade) => {
     const liquido = parseFloat(totalLiquido);
     const qtd = parseFloat(quantidade);
-    const peso = parseInt(peso_unitario);
 
     if (isNaN(liquido) || isNaN(qtd) || qtd <= 0) {
         return 'N/A'; // Evita divisão por zero ou dados inválidos
     }
 
-    const peso_total = (qtd * peso);
-    const custoPorUnidade = liquido / peso_total;
+    const custoPorUnidade = liquido / qtd;
     return custoPorUnidade.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
@@ -470,8 +468,7 @@ const formatarCustoGrao = (totalLiquido, quantidade, peso_unitario) => {
                         const hasEspecificacoes = estoqueInsumo.insumo.especificacoes && estoqueInsumo.insumo.especificacoes.length > 0; // Para relacionamento hasMany
 
                         const totalLiquido = estoqueInsumo?.cotacao_insumos?.total_liquido;
-                        const quantidade = estoqueInsumo?.quantidade;
-                        const peso = estoqueInsumo?.insumo?.quantidade;
+                        const quantidade = estoqueInsumo?.quantidade_total;
 
                         return (
                           <CCard style={{width: '32%'}} key={estoqueInsumo.id}>
@@ -490,7 +487,7 @@ const formatarCustoGrao = (totalLiquido, quantidade, peso_unitario) => {
                                         <CRow><small className="text-body-secondary">Estoque atual: {parseInt(estoqueInsumo.quantidade)}  sacos</small></CRow>
                                         <CRow>
                                             <small className="text-body-secondary">
-                                                Custo do grão: R$ {formatarCustoGrao(totalLiquido, quantidade, peso)} /g.
+                                                Custo do grão: R$ {formatarCustoGrao(totalLiquido, quantidade)} /g.
                                             </small></CRow>
                                         <CBadge color="danger">Abaixo do limite</CBadge>
                                     </CCardText>
