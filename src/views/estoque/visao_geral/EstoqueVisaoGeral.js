@@ -219,19 +219,45 @@ const handleOpenImportPhotosModal = (insumo) => {
 }
 
 const handleOpenDetailsModal = (estoqueInsumo) => {
-    // Cria um array de barras de progresso com base na quantidade em estoque
-    const quantidadeEmEstoque = parseInt(estoqueInsumo.quantidade);
-    const usoSacosArray = Array.from({ length: quantidadeEmEstoque }, () => Math.floor(Math.random() * 101)); // Gera valores aleatórios de 0 a 100 para o progresso
+    const totalSacos = parseInt(estoqueInsumo.cotacao_insumos.quantidade);
+    const capacidadePorSaco = parseInt(estoqueInsumo.insumo.quantidade);
+    
+    const quantidadeDisponivelAtual = estoqueInsumo.quantidade_total;
+    
+    let quantidadeRestante = quantidadeDisponivelAtual;
+    const usoSacosArray = [];
+    
+    for (let i = 0; i < totalSacos; i++) {
+        let usoPercentual = 0;
+        
+        if (quantidadeRestante >= capacidadePorSaco) {
+            // Se a quantidade restante for maior ou igual à capacidade do saco, ele está 100% cheio
+            usoPercentual = 100;
+            quantidadeRestante -= capacidadePorSaco;
+        } else if (quantidadeRestante > 0) {
+            // Se a quantidade restante for menor que a capacidade do saco, ele está parcialmente cheio
+            usoPercentual = (quantidadeRestante / capacidadePorSaco) * 100;
+            quantidadeRestante = 0; // O restante foi consumido por este saco
+        } else {
+            // Se não houver mais quantidade, os sacos restantes estão vazios
+            usoPercentual = 0;
+        }
+        
+        usoSacosArray.push(Math.round(usoPercentual)); // Arredonda o valor para um número inteiro
+    }
 
+    // 4. Montar o objeto de detalhes para o modal
     const insumoDetails = {
         foto: estoqueInsumo.insumo.logoPath,
         nome: estoqueInsumo.insumo.nome,
         descricao: estoqueInsumo.insumo.variedade,
-        precoUnitario: estoqueInsumo.preco, // O `preco` está no nível do estoque, não do insumo.
-        fornecedor: 'Agro Seeds Brasil', // Este dado pode precisar ser buscado do backend se não estiver no JSON
-        notaFiscal: 'NF-2023-10-00123', // Este dado também precisa ser buscado
-        usoSacos: usoSacosArray, // Agora é um array dinâmico
+        precoUnitario: estoqueInsumo.preco, // Preço do insumo em estoque
+        fornecedor: 'Agro Seeds Brasil', // Substitua por dados reais do JSON, se disponíveis
+        notaFiscal: 'NF-2023-10-00123', // Substitua por dados reais do JSON, se disponíveis
+        usoSacos: usoSacosArray, // Array de progresso calculado
     };
+    
+    // 5. Atualizar o estado e abrir o modal
     setInsumoDetail(insumoDetails);
     setShowDetailsModal(true);
 };
@@ -484,7 +510,7 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                                         {formatarPreco(estoqueInsumo.preco)}
                                     </CCardText>
                                     <CCardText>
-                                        <CRow><small className="text-body-secondary">Estoque atual: {parseInt(estoqueInsumo.quantidade)}  sacos</small></CRow>
+                                        <CRow><small className="text-body-secondary">Estoque atual: {parseInt(estoqueInsumo.cotacao_insumos.quantidade)}  sacos</small></CRow>
                                         <CRow>
                                             <small className="text-body-secondary">
                                                 Custo do grão: R$ {formatarCustoGrao(totalLiquido, quantidade)} /g.
