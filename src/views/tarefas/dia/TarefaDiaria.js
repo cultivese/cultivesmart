@@ -151,48 +151,96 @@ const TarefaDiaria = () => {
     });
   };
 
-  const handleModalSubmit = () => {
+  const handleModalSubmit = async () => {
     if (!currentTaskForModal) return;
 
     if (currentTaskForModal.type === 'plantio') {
-      const { quantidadeSementesTotal, quantidadeBandejasPlantio, sementesPorBandeja, substratoBase, substratoCobertura } = formData;
+      // Pega apenas a quantidade de sementes para a retirada no estoque
+      const { quantidadeSementesTotal, quantidadeBandejasPlantio, sementesPorBandeja } = formData;
 
-      // Adicionando uma verificação para valores vazios ou não numéricos, e depois para valores <= 0
+      // Validação de dados (mantida, é essencial!)
+      // A validação agora se concentra apenas nos campos relevantes para a tarefa
+      // e na quantidade de sementes, que é o que será retirado.
       if (
-        quantidadeSementesTotal === '' ||
-        quantidadeBandejasPlantio === '' ||
-        sementesPorBandeja === '' ||
-        substratoBase === '' ||
-        substratoCobertura === ''
-      ) {
-        alert('Por favor, preencha todos os campos obrigatórios para o plantio.');
-        return;
-      }
-
-      if (
+        !quantidadeSementesTotal ||
+        !quantidadeBandejasPlantio ||
+        !sementesPorBandeja ||
         parseFloat(quantidadeSementesTotal) <= 0 ||
         parseFloat(quantidadeBandejasPlantio) <= 0 ||
-        parseFloat(sementesPorBandeja) <= 0 ||
-        parseFloat(substratoBase) <= 0 ||
-        parseFloat(substratoCobertura) <= 0
+        parseFloat(sementesPorBandeja) <= 0
       ) {
-        alert('As quantidades devem ser maiores que zero.');
+        alert('Por favor, preencha a quantidade de sementes, bandejas e sementes por bandeja com valores maiores que zero.');
         return;
       }
+      
+      // Mapeamento dinâmico do insumo com base na descrição da tarefa
+      let sementeKey = '';
+      if (currentTaskForModal.description.includes('beterraba')) {
+        sementeKey = 'sementes_beterraba';
+      } else if (currentTaskForModal.description.includes('Rúcula')) {
+        sementeKey = 'sementes_rucula';
+      } else {
+        alert('Tipo de semente não reconhecido na descrição da tarefa. Impossível identificar o insumo no estoque.');
+        return;
+      }
+      
+      const sementeStockId = STOCK_IDS[sementeKey];
+
+      // Verifica se o ID do estoque para a semente foi configurado
+      if (!sementeStockId) {
+        alert(`ID do estoque para ${sementeKey} não configurado. Por favor, verifique a constante STOCK_IDS.`);
+        return;
+      }
+
+      // Prepara os dados para a única retirada: a de sementes.
+      const sementeMovementData = {
+        quantidade_retirada: quantidadeSementesTotal,
+        motivo: `Retirada para plantio: ${currentTaskForModal.description.split(':')[1].trim()}`,
+      };
+
+      try {
+        console.log(`Enviando requisição para dar baixa em sementes (Estoque ID: ${sementeStockId})...`);
+
+        // A URL do seu endpoint. Ajuste o domínio conforme necessário.
+        const apiUrl = `https://backend.cultivesmart.com.br/api/estoque/${sementeStockId}/withdraw`;
+        
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify(sementeMovementData),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`Falha ao dar baixa nas sementes: ${errorData.message || 'Erro desconhecido'}`);
+        }
+        
+        const responseData = await response.json();
+        console.log('Movimentação de sementes registrada com sucesso!', responseData);
+
+        // Se a chamada de API for bem-sucedida, atualiza o estado local.
+        setActiveTaskId(currentTaskForModal.id);
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === currentTaskForModal.id ? { ...task, status: 'active', registeredData: formData } : task,
+          ),
+        );
+        
+        setModalVisible(false);
+        setCurrentTaskForModal(null);
+        setFormData({});
+        
+        alert('Movimentação de sementes registrada com sucesso! A tarefa pode ser iniciada.');
+
+      } catch (error) {
+        // Em caso de erro na requisição, exibe um alerta e não atualiza o estado.
+        console.error('Erro ao registrar a movimentação de sementes:', error);
+        alert(`Erro: ${error.message}. Não foi possível registrar a retirada de sementes.`);
+      }
     }
-
-    console.log(`Registrando dados para a tarefa ${currentTaskForModal.id}:`, formData);
-
-    setActiveTaskId(currentTaskForModal.id);
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === currentTaskForModal.id ? { ...task, status: 'active', registeredData: formData } : task,
-      ),
-    );
-
-    setModalVisible(false);
-    setCurrentTaskForModal(null);
-    setFormData({});
   };
 
   const getStatusBadge = (status) => {
@@ -416,6 +464,37 @@ const TarefaDiaria = () => {
         return <p>Nenhum formulário específico para este tipo de tarefa.</p>;
     }
   };
+
+  /**
+ * Função mock para simular o registro de uma movimentação de estoque.
+ * Em um cenário real, esta função faria uma chamada a uma API (ex: usando fetch ou axios).
+ * @param {object} movementData - Os dados da movimentação a serem registrados.
+ * @returns {Promise<object>} Uma promessa que resolve com a resposta da API ou rejeita em caso de erro.
+ */
+const registerPlantingMovement = (movementData) => {
+  return new Promise((resolve, reject) => {
+    console.log('Simulando chamada ao serviço de movimentos com os dados:', movementData);
+    // Simula o tempo de resposta da API
+    setTimeout(() => {
+      // Aqui você pode adicionar lógica para simular falhas (ex: if (Math.random() > 0.9) { reject(...) })
+      const mockApiResponse = {
+        success: true,
+        message: 'Movimentação de estoque de plantio registrada com sucesso.',
+        data: movementData,
+        timestamp: new Date().toISOString()
+      };
+      console.log('Serviço de movimentos respondeu com sucesso.');
+      resolve(mockApiResponse);
+    }, 1500); // 1.5 segundos de delay
+  });
+};
+
+// ATENÇÃO: Você precisa preencher os IDs com os valores corretos do seu banco de dados.
+// Mantive os outros IDs aqui para referência futura, mas o código usará apenas o da semente.
+const STOCK_IDS = {
+  sementes_beterraba: 1,
+  sementes_rucula: 2,
+};
 
   return (
     <CContainer>

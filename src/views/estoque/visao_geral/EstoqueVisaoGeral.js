@@ -514,6 +514,34 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                         
                         const hasEspecificacoes = estoqueInsumo.insumo.especificacoes && estoqueInsumo.insumo.especificacoes.length > 0; // Para relacionamento hasMany
 
+                        // --- INÍCIO DO CÓDIGO AJUSTADO ---
+                        // Validação e cálculo dos valores para a barra de progresso
+                        const quantidadeTotalDisponivel = estoqueInsumo.quantidade_total; // Quantidade de insumo em gramas
+                        const quantidadePorSaco = estoqueInsumo.insumo.quantidade; // Capacidade de um saco em gramas
+                        const quantidadeTotalSacos = estoqueInsumo.cotacao_insumos.quantidade; // Quantidade de sacos comprados
+                        
+                        // Calcula a capacidade máxima total do estoque (em gramas)
+                        const capacidadeMaximaTotal = parseFloat(quantidadeTotalSacos) * parseFloat(quantidadePorSaco);
+                        
+                        // Calcula a porcentagem de ocupação do estoque
+                        let percentualEmEstoque = 0;
+                        if (capacidadeMaximaTotal > 0) {
+                            percentualEmEstoque = (parseFloat(quantidadeTotalDisponivel) / capacidadeMaximaTotal) * 100;
+                        }
+
+                        // Arredonda o valor para a barra de progresso
+                        const valorBarraProgresso = Math.round(percentualEmEstoque);
+
+                        // Define a cor da barra de progresso com base no valor
+                        let corBarraProgresso = 'success';
+                        if (valorBarraProgresso < 30) {
+                            corBarraProgresso = 'danger';
+                        } else if (valorBarraProgresso < 60) {
+                            corBarraProgresso = 'warning';
+                        }
+                        
+                        // --- FIM DO CÓDIGO AJUSTADO ---
+
                         const totalLiquido = estoqueInsumo?.cotacao_insumos?.total_liquido;
                         const quantidade = estoqueInsumo?.quantidade_total;
 
@@ -533,15 +561,16 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                                     <CCardText>
                                         <CRow><small className="text-body-secondary">Estoque atual: {parseInt(estoqueInsumo.cotacao_insumos.quantidade)}  sacos</small></CRow>
                                         <CRow>
-                                            <small className="text-body-secondary">
-                                                Custo do grão: R$ {formatarCustoGrao(totalLiquido, quantidade)} /g.
-                                            </small></CRow>
-                                        <CBadge color="danger">Abaixo do limite</CBadge>
-                                    </CCardText>
-                                     <CProgress height={2}>
-                                        <CProgressBar color={'danger'} value={25}></CProgressBar>
-                                    </CProgress>
-                                    </CCardBody>
+                                            <small className="text-body-secondary">
+                                                Custo do grão: R$ {formatarCustoGrao(totalLiquido, quantidade)} /g.
+                                            </small></CRow>
+                                    {/* Exibe a badge de alerta se a porcentagem for baixa */}
+                                    {valorBarraProgresso < 30 && <CBadge color="danger">Abaixo do limite</CBadge>}
+                                    </CCardText>
+                                     <CProgress height={2}>
+                                        <CProgressBar color={corBarraProgresso} value={valorBarraProgresso}></CProgressBar>
+                                    </CProgress>
+                                    </CCardBody>
                                 </CCol>
                                 <CCol xs={1} md={1} >
                                     <CDropdown alignment="end">
