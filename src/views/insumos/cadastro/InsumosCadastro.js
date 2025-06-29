@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback  } from 'react';
 import {
   CButton,
   CCard,
@@ -14,6 +14,7 @@ import {
   CFormInput,
   CFormSelect,
   CRow,
+  CFormCheck,
   CCardTitle,
   CCardText,
 } from '@coreui/react';
@@ -29,9 +30,14 @@ const InsumosCadastro = () => {
   const [tiposMedida , setTiposMedida] = useState([]);
   
   const [selectedFornecedor, setSelectedFornecedor] = useState(null);
-    const [stepErrors, setStepErrors] = useState([false, false, false, false, false]); // Array to track errors for each step
+  const [stepErrors, setStepErrors] = useState([false, false, false, false, false]); // Array to track errors for each step
   const hiddenFileInput = useRef(null);
   const [caracteresRestantes, setCaracteresRestantes] = useState(255); // Inicializa com o limite máximo
+
+  const [aliquotaHabilitada, setAliquotaHabilitada] = useState(false);
+  const [percentage, setPercentage] = useState('');
+
+
   const stepLabels = [
     { title: "Categoria", subtitle: "Escolha a categoria" },
     { title: "Fornecedor", subtitle: "Defina o fornecedor" },
@@ -48,7 +54,9 @@ const InsumosCadastro = () => {
     unidade_medida: '',
     tipo_medida: '',
     quantidade: null,
-    preco: 0,
+    preco: '',
+    aliquota: '',
+    aliquota_raw: '',
     logo: null
   });
 
@@ -239,13 +247,16 @@ const handleBack = (e) => {
       const precoDecimal = parseFloat(formData.preco) / 100;
       formDataToSend.append('preco', precoDecimal.toFixed(2)); // Garante duas casas decimais
 
+      const aliquotaDecimal = parseFloat(formData.aliquota) / 100;
+      formDataToSend.append('aliquota', aliquotaDecimal.toFixed(2));
+
       for (const key in formData) {
         if (key !== 'preco') { // Evita adicionar o preço bruto novamente
           formDataToSend.append(key, formData[key]);
         }
       }
       
-      const response = await fetch('https://backend.cultivesmart.com.br/api/insumos', {
+      const response = await fetch('http://localhost:59536/api/insumos', {
         method: 'POST',
         body: formDataToSend,
       });
@@ -267,6 +278,54 @@ const handleBack = (e) => {
     }
   };
 
+  
+   const formatValue = useCallback((rawValue) => {
+    // 1. Remove todos os caracteres que não sejam dígitos.
+    const digitsOnly = rawValue.replace(/\D/g, '');
+
+    // Se a string estiver vazia, retorna uma string vazia.
+    if (digitsOnly === '') {
+      return '';
+    }
+
+    // 2. Garante que a string tenha pelo menos 3 dígitos para formatar "0,01".
+    const paddedValue = digitsOnly.padStart(3, '0');
+
+    // 3. Insere a vírgula antes dos dois últimos dígitos.
+    const formattedValue = `${paddedValue.slice(0, -2)},${paddedValue.slice(-2)}`;
+
+    return formattedValue;
+  }, []);
+  
+
+  const handleKeyDown = useCallback((event) => {
+    // Se a tecla pressionada for 'Backspace' ou 'Delete'...
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      const currentValue = percentage;
+
+      // Remove a vírgula para obter apenas os dígitos.
+      const digitsOnly = currentValue.replace(/\D/g, '');
+
+      // Remove o último dígito.
+      const newValue = digitsOnly.slice(0, -1);
+
+      // Formata o novo valor e atualiza o estado.
+      setPercentage(formatValue(newValue));
+    }
+  }, [percentage, formatValue]); // Dependências para o useCallback.
+
+
+  const handleChangee = useCallback((event) => {
+    const rawValue = event.target.value;
+
+    // A lógica de formatação acontece aqui.
+    const formattedValue = formatValue(rawValue);
+
+    // Atualiza o estado do componente com o valor formatado.
+    setPercentage(formattedValue);
+  }, [formatValue]); // Dependência para o useCallback.
+
+  
   return (
     <CContainer>
       <Stepper activeStep={activeStep}>
@@ -518,6 +577,39 @@ const handleBack = (e) => {
                               />
                             </CPopover>
                           </CCol>
+                            <CCol md={12} className="mb-3">
+                            <hr/>
+                            </CCol>
+                          <CCol md={12} className="mb-3">
+                            <CFormCheck
+                              id="habilitarAliquota"
+                              label="Informar Alíquota (%)"
+                              checked={aliquotaHabilitada}
+                              onChange={(e) => setAliquotaHabilitada(e.target.checked)}
+                            />
+                          </CCol>
+
+                          
+                            <CCol md={6} xs={6}>
+                              <CPopover content="Alíquota (ICMS em %)" placement="right" trigger={['hover', 'focus']}>
+                                  <CFormInput
+                                    id="aliquota"
+                                    type="text"
+                                    value={formData.aliquota}
+                                    onChange={(e) => {
+
+                                        const valorNumerico = e.target.value.replace(/[^\d]/g, '');
+
+                                        const percentual = valorNumerico ? parseInt(valorNumerico) / 100 : '';
+                                        
+                                        setFormData({ ...formData, aliquota: percentual });
+                                    }}
+                                    placeholder="0,00"
+                                    disabled={!aliquotaHabilitada}
+                                  />
+                                </CPopover>
+                            </CCol>
+                            
                         </CRow>
                       </CCardBody>
                   </CCard>
@@ -542,6 +634,7 @@ const handleBack = (e) => {
                       <p><strong>Descrição:</strong> {formData.descricao}</p>
                       <p><strong>Quantidade:</strong> {formData.quantidade}</p>
                       <p><strong>Preço:</strong> {formatarPreco(formData.preco)}</p>
+                      <p><strong>Alíquota:</strong> {formData.aliquota}</p>
                     </div>
                   </CCardBody>
                 </CCard>

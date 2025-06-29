@@ -5,14 +5,23 @@ import {
   CCard,
   CBadge,
   CCardBody,
-  CLoadingButton,
+  CImage,
   CSpinner,
   CCardHeader,
+  CTableDataCell,
   CCol,
+  CAlert,
+  CAlertHeading,
+  CTabs,
+  CTabList,
+  CTab,
+  CTabContent,
+  CTabPanel,
   CFormLabel,
   CFormSwitch,
-  CInputGroup,
-  CInputGroupText,
+  CProgress,
+  CProgressBar,
+  CTableHead,
   COffcanvas,
   COffcanvasHeader,
   COffcanvasTitle,
@@ -23,7 +32,8 @@ import {
   CModalHeader,
   CModalFooter,
   CContainer,
-  CFormTextarea,
+  CTableHeaderCell,
+  CTableBody,
   CDropdown,
   CDropdownToggle,
   CDropdownMenu,
@@ -37,13 +47,16 @@ import {
   CCardTitle,
   CCardText,
   CCardSubtitle,
-  CSmartTable
+  CSmartTable,
+  CModalTitle
 } from '@coreui/react-pro';
 
 import CIcon from '@coreui/icons-react'
 
-
 import {
+  cilPrint,
+  cilSave,
+  cilWarning,
   cilOptions
 } from '@coreui/icons'
 
@@ -58,9 +71,13 @@ const EstoqueVisaoGeral = () => {
   const [filtroNome, setFiltroNome] = useState('');
   const [filtroFornecedor, setFiltroFornecedor] = useState('');
   const [showAdditionalFieldsModal, setShowAdditionalFieldsModal] = useState(false); // Estado para controlar o modal
+  const [showImportPhotosModal, setShowImportPhotosModal] = useState(false); // Estado para controlar o modal
+  const [showDetailsModal, setShowDetailsModal] = useState(false); // Estado para controlar o modal
   const [insumoSelecionado, setInsumoSelecionado] = useState(null);
-  const [editingField, setEditingField] = useState(null);
+  const [visible, setVisible] = useState(false)
   const [modalMode, setModalMode] = useState('visualizar'); // Novo estado para controlar o modo do modal
+  const [insumoDetail, setInsumoDetail] = useState('');
+  
   const [editedInsumo, setEditedInsumo] = useState({
     nome: '',
     fornecedor_id: null,
@@ -197,10 +214,27 @@ const handleOpenAdditionalFieldsModal = (insumo, mode) => {
   setShowAdditionalFieldsModal(true);
 };
 
+const handleOpenImportPhotosModal = (insumo) => {
+    setShowImportPhotosModal(true);
+}
 
-const handleCloseAdditionalFieldsModal = () => {
-  setShowAdditionalFieldsModal(false);
-};
+const handleOpenDetailsModal = (insumo) => {
+
+     const insumoDetails = {
+        foto: insumo.insumo.logoPath,
+        nome: insumo.insumo.nome,
+        descricao: insumo.insumo.variedade,
+        precoUnitario: insumo.preco,
+        precoPorGrama: 0.05, // Preço por grama utilizado (exemplo)
+        fornecedor: 'Agro Seeds Brasil',
+        notaFiscal: 'NF-2023-10-00123',
+        usoSacos: [25, 100, 100, 100], // Exemplo de evolução de uso dos sacos em porcentagem
+    };
+    setInsumoDetail(insumoDetails);
+
+
+    setShowDetailsModal(true);
+}
 
 const handleSaveAdditionalFields = async () => {
 
@@ -329,6 +363,8 @@ const handleBack = (e) => {
           loadData();
       },[fetchedUnidadesMedida]);
 
+     
+
   return (
     <CContainer>
        
@@ -435,9 +471,13 @@ const handleBack = (e) => {
                                         {formatarPreco(estoqueInsumo.preco)}
                                     </CCardText>
                                     <CCardText>
-                                        <small className="text-body-secondary">Estoque atual: {parseInt(estoqueInsumo.quantidade)}  sacos</small>
-                                        <CBadge color="success">Em estoque</CBadge>
+                                        <CRow><small className="text-body-secondary">Estoque atual: {parseInt(estoqueInsumo.quantidade)}  sacos</small></CRow>
+                                        <CRow><small className="text-body-secondary">Custo do grão: R$ {parseInt(estoqueInsumo.quantidade)}/g </small></CRow>
+                                        <CBadge color="danger">Abaixo do limite</CBadge>
                                     </CCardText>
+                                     <CProgress height={2}>
+                                        <CProgressBar color={'danger'} value={25}></CProgressBar>
+                                    </CProgress>
                                     </CCardBody>
                                 </CCol>
                                 <CCol xs={1} md={1} >
@@ -458,6 +498,14 @@ const handleBack = (e) => {
                                               Atualizar Especificação
                                             </CDropdownItem>
                                           )}
+                                            <CDropdownItem
+                                              onClick={() => handleOpenImportPhotosModal(estoqueInsumo)}>
+                                              Importar Fotos
+                                            </CDropdownItem>
+                                            <CDropdownItem
+                                              onClick={() => handleOpenDetailsModal(estoqueInsumo)}>
+                                              Detalhes
+                                            </CDropdownItem>
                                         </CDropdownMenu>
                                     </CDropdown>
                                 </CCol>
@@ -473,91 +521,91 @@ const handleBack = (e) => {
         </CCol>
 
         <COffcanvas placement="end" visible={showAdditionalFieldsModal} onHide={() => setShowAdditionalFieldsModal(false)}>
-    <COffcanvasHeader>
-        <COffcanvasTitle>Especificação</COffcanvasTitle>
-        <CCloseButton className="text-reset" onClick={() => setShowAdditionalFieldsModal(false)} />
-    </COffcanvasHeader>
-    <COffcanvasBody>
-        <CRow className="mb-5">
-            Informe as especificações técnicas para o plantio, de acordo com...
-        </CRow>
-        <CForm className="row g-3">
-            <CRow className="mb-3">
-                <CFormLabel htmlFor="pilha" className="col-sm-8 col-form-label">Dias em pilha</CFormLabel>
-                <CCol xs={4}>
-                    <CFormInput
-                        id="pilha"
-                        type="number"
-                        aria-describedby="basic-addon3"
-                        value={editedInsumo.dias_pilha || ''} // Bind ao estado
-                        onChange={(e) => setEditedInsumo({...editedInsumo, dias_pilha: e.target.value})} // Para controlar as mudanças (se necessário)
-                    />
-                </CCol>
+            <COffcanvasHeader>
+                <COffcanvasTitle>Especificação</COffcanvasTitle>
+                <CCloseButton className="text-reset" onClick={() => setShowAdditionalFieldsModal(false)} />
+            </COffcanvasHeader>
+            <COffcanvasBody>
+            <CRow className="mb-5">
+                Informe as especificações técnicas para o plantio, de acordo com...
             </CRow>
-            <CRow className="mb-3">
-                <CFormLabel htmlFor="blackout" className="col-sm-8 col-form-label">Blackout</CFormLabel>
-                <CCol xs={4}>
-                    <CFormInput
-                        id="blackout"
-                        type="number"
-                        aria-describedby="basic-addon3"
-                        value={editedInsumo.dias_blackout || ''} // Bind ao estado
-                        onChange={(e) => setEditedInsumo({...editedInsumo, dias_blackout: e.target.value})} // Para controlar as mudanças
-                    />
-                </CCol>
-            </CRow>
-            <CRow className="mb-3">
-                <CFormLabel htmlFor="dias_colheita" className="col-sm-8 col-form-label">Dias até a colheita</CFormLabel>
-                <CCol xs={4}>
-                    <CFormInput
-                        id="dias_colheita"
-                        type="number"
-                        aria-describedby="basic-addon3"
-                        value={editedInsumo.dias_colheita || ''} // Bind ao estado
-                        onChange={(e) => setEditedInsumo({...editedInsumo, dias_colheita: e.target.value})} // Para controlar as mudanças
-                    />
-                </CCol>
-            </CRow>
-            <hr />
-            <CRow className="mb-3">
-                <CFormLabel htmlFor="plantio" className="col-sm-8 col-form-label">Gramas para plantio</CFormLabel>
-                <CCol xs={4}>
-                    <CFormInput
-                        id="plantio"
-                        type="number"
-                        aria-describedby="basic-addon3"
-                        value={editedInsumo.gramas_para_plantio || ''} // Bind ao estado
-                        onChange={(e) => setEditedInsumo({...editedInsumo, gramas_para_plantio: e.target.value})} // Para controlar as mudanças
-                    />
-                </CCol>
-            </CRow>
-            <CRow className="mb-3">
-                <CFormLabel htmlFor="producao_estimada_por_bandeja" className="col-sm-8 col-form-label">Produção por bandeja</CFormLabel>
-                <CCol xs={4}>
-                    <CFormInput
-                        id="producao_estimada_por_bandeja"
-                        type="number"
-                        aria-describedby="basic-addon3"
-                        value={editedInsumo.producao_estimada_por_bandeja || ''} // Bind ao estado
-                        onChange={(e) => setEditedInsumo({...editedInsumo, producao_estimada_por_bandeja: e.target.value})} // Para controlar as mudanças
-                    />
-                </CCol>
-            </CRow>
-            <hr />
-            <CRow className="mb-3">
-                <CFormLabel htmlFor="hidratacao" className="col-sm-4 col-form-label">Hidratação</CFormLabel>
-                <CCol xs={8}>
-                    <CFormSelect
-                        id="hidratacao"
-                        value={editedInsumo.hidratacao || ''} // Bind ao estado
-                        onChange={(e) => setEditedInsumo({...editedInsumo, hidratacao: e.target.value})} // Para controlar as mudanças
-                    >
-                        <option value="">Selecione...</option>
-                        <option value="Irrigação">Irrigação</option>
-                        <option value="Aspersão">Aspersão</option>
-                    </CFormSelect>
-                </CCol>
-            </CRow>
+            <CForm className="row g-3">
+                <CRow className="mb-3">
+                    <CFormLabel htmlFor="pilha" className="col-sm-8 col-form-label">Dias em pilha</CFormLabel>
+                    <CCol xs={4}>
+                        <CFormInput
+                            id="pilha"
+                            type="number"
+                            aria-describedby="basic-addon3"
+                            value={editedInsumo.dias_pilha || ''} // Bind ao estado
+                            onChange={(e) => setEditedInsumo({...editedInsumo, dias_pilha: e.target.value})} // Para controlar as mudanças (se necessário)
+                        />
+                    </CCol>
+                </CRow>
+                <CRow className="mb-3">
+                    <CFormLabel htmlFor="blackout" className="col-sm-8 col-form-label">Blackout</CFormLabel>
+                    <CCol xs={4}>
+                        <CFormInput
+                            id="blackout"
+                            type="number"
+                            aria-describedby="basic-addon3"
+                            value={editedInsumo.dias_blackout || ''} // Bind ao estado
+                            onChange={(e) => setEditedInsumo({...editedInsumo, dias_blackout: e.target.value})} // Para controlar as mudanças
+                        />
+                    </CCol>
+                </CRow>
+                <CRow className="mb-3">
+                    <CFormLabel htmlFor="dias_colheita" className="col-sm-8 col-form-label">Dias até a colheita</CFormLabel>
+                    <CCol xs={4}>
+                        <CFormInput
+                            id="dias_colheita"
+                            type="number"
+                            aria-describedby="basic-addon3"
+                            value={editedInsumo.dias_colheita || ''} // Bind ao estado
+                            onChange={(e) => setEditedInsumo({...editedInsumo, dias_colheita: e.target.value})} // Para controlar as mudanças
+                        />
+                    </CCol>
+                </CRow>
+                <hr />
+                <CRow className="mb-3">
+                    <CFormLabel htmlFor="plantio" className="col-sm-8 col-form-label">Gramas para plantio</CFormLabel>
+                    <CCol xs={4}>
+                        <CFormInput
+                            id="plantio"
+                            type="number"
+                            aria-describedby="basic-addon3"
+                            value={editedInsumo.gramas_para_plantio || ''} // Bind ao estado
+                            onChange={(e) => setEditedInsumo({...editedInsumo, gramas_para_plantio: e.target.value})} // Para controlar as mudanças
+                        />
+                    </CCol>
+                </CRow>
+                <CRow className="mb-3">
+                    <CFormLabel htmlFor="producao_estimada_por_bandeja" className="col-sm-8 col-form-label">Produção por bandeja</CFormLabel>
+                    <CCol xs={4}>
+                        <CFormInput
+                            id="producao_estimada_por_bandeja"
+                            type="number"
+                            aria-describedby="basic-addon3"
+                            value={editedInsumo.producao_estimada_por_bandeja || ''} // Bind ao estado
+                            onChange={(e) => setEditedInsumo({...editedInsumo, producao_estimada_por_bandeja: e.target.value})} // Para controlar as mudanças
+                        />
+                    </CCol>
+                </CRow>
+                <hr />
+                <CRow className="mb-3">
+                    <CFormLabel htmlFor="hidratacao" className="col-sm-4 col-form-label">Hidratação</CFormLabel>
+                    <CCol xs={8}>
+                        <CFormSelect
+                            id="hidratacao"
+                            value={editedInsumo.hidratacao || ''} // Bind ao estado
+                            onChange={(e) => setEditedInsumo({...editedInsumo, hidratacao: e.target.value})} // Para controlar as mudanças
+                        >
+                            <option value="">Selecione...</option>
+                            <option value="Irrigação">Irrigação</option>
+                            <option value="Aspersão">Aspersão</option>
+                        </CFormSelect>
+                    </CCol>
+                </CRow>
 
             <CRow className="row mb-3 align-items-center">
                 <CFormLabel htmlFor="peso" className="col-sm-8 col-form-label">Colocar peso?</CFormLabel>
@@ -588,156 +636,94 @@ const handleBack = (e) => {
 
         </CForm>
     </COffcanvasBody>
-</COffcanvas>
+        </COffcanvas>
 
-       
+        <CModal
+            alignment="center"
+            size="xl"
+            visible={showDetailsModal}
+            onClose={() => setShowDetailsModal(false)}
+            aria-labelledby="InsumoDetalhesModalLabel"
+        >
+            <CModalHeader>
+            <CModalTitle id="InsumoDetalhesModalLabel">Detalhes do Insumo</CModalTitle>
+            </CModalHeader>
+            <CModalBody>
+
+                <CTabs defaultActiveItemKey={2}>
+                    <CTabList variant="underline">
+                        <CTab aria-controls="home-tab-pane" itemKey={1}>Dados Gerais</CTab>
+                        <CTab aria-controls="profile-tab-pane" itemKey={2}>Evolução estoque</CTab>
+                        <CTab aria-controls="contact-tab-pane" itemKey={3}>Contact</CTab>
+                    </CTabList>
+                    <CTabContent>
+                        <CTabPanel className="p-3" aria-labelledby="home-tab-pane" itemKey={1}>
+                            <CRow>
+                                <CCol md="4">
+                                    <CCardImage src={`data:image/png;base64,${insumoDetail.foto}`} />
+                                </CCol>
+                                <CCol md="8">
+                                    <h2>{insumoDetail.nome}</h2>
+                                    <p>{insumoDetail.descricao}</p>
+                                    <p>
+                                        <strong>Preço Unitário:</strong> R$ {insumoDetail.precoUnitario && insumoDetail.precoUnitario.toFixed(2)}
+                                    </p>
+                                    {insumoDetail.precoPorGrama && (
+                                        <p>
+                                        <strong>Preço por Grama:</strong> R$ {insumoDetail.precoPorGrama.toFixed(2)}/g
+                                        </p>
+                                    )}
+                                    <p>
+                                        <strong>Fornecedor:</strong> {insumoDetail.fornecedor}
+                                    </p>
+                                    <p>
+                                        <strong>Nota Fiscal:</strong> {insumoDetail.notaFiscal}
+                                    </p>
+                                    
+                                </CCol>
+                            </CRow>
+                        </CTabPanel>
+                        <CTabPanel className="p-3" aria-labelledby="profile-tab-pane" itemKey={2}>
+                            <h4 className="mt-4">Evolução de Uso dos Sacos</h4>
+                            {insumoDetail.usoSacos && insumoDetail.usoSacos.length > 0 ? (
+                            insumoDetail.usoSacos.map((uso, index) => (
+                            <CProgress
+                                key={index}
+                                className="mb-2"
+                                color={
+                                uso < 30 ? 'danger' : uso < 60 ? 'warning' : uso < 85 ? 'info' : 'success'
+                                }
+                                value={uso}
+                            >
+                                <CProgressBar>{uso}%</CProgressBar>
+                            </CProgress>
+                            ))
+                            ) : (
+                            <p>Não há informações sobre o uso dos sacos.</p>
+                            )}
+                        </CTabPanel>
+                        <CTabPanel className="p-3" aria-labelledby="contact-tab-pane" itemKey={3}>
+                        Contact tab content
+                        </CTabPanel>
+                        <CTabPanel className="p-3" aria-labelledby="disabled-tab-pane" itemKey={4}>
+                        Disabled tab content
+                        </CTabPanel>
+                    </CTabContent>
+                </CTabs>
+            </CModalBody>
+            <CModalFooter>
+                <CButton color="secondary" onClick={() => setShowDetailsModal(false)}>
+                    Fechar
+                </CButton>
+                <CButton color="info" onClick={print} className="ms-2">
+                    <CIcon icon={cilPrint} /> Imprimir
+                </CButton>
+            </CModalFooter>
+        </CModal>
 
     </CContainer>
     )
 
-  return (
-    <CContainer>
-      
-        <CForm onSubmit={handleSubmit} className="row g-3">
-        
-        <CCol xs={12}>
-            <CCard className="mb-4">
-            <CCardHeader>
-                <strong>Insumos - </strong>
-                <small>Consulta de Insumos</small>
-            </CCardHeader>
-            <CCardBody>
-                <DocsExample href="components/card/#background-and-color">
-                <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }} >
-
-                { unidadesMedida && unidadesMedida &&
-                    categorias && categorias.records && categorias.records.map((categoria) => {
-                        return (
-                        <CCol
-                            key={categoria.id}
-                            color={ filtroCategoria === categoria.id ? 'success' : 'light'}
-                            style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            textAlign: 'center',
-                            
-                        }}>
-                                
-
-                            <CCol lg={4} onClick={() => { setFiltroCategoria(categoria.id); console.log('filtroCategoria:', categoria.id);  console.log('filtroCategoria:', filtroCategoria);}}>
-                            <CCardImage width="fit" orientation="top" src={`data:image/png;base64,${categoria.logoPath}`} />
-                            </CCol>
-                            <CCol>
-                            <CFormCheck
-                                type='radio'
-                                name="categoria"
-                                id={`flexCheckChecked${categoria.id}`}
-                                label={categoria.descricao}
-                                value={categoria.id}
-                                checked={filtroCategoria === categoria.id}
-                                onChange={(e) => {setFiltroCategoria(e.target.value);  console.log('filtroCategoria:', categoria.id); console.log('filtroCategoria:', filtroCategoria);}}
-                            />
-                            </CCol>
-                        </CCol>
-                        );
-                    })}
-                </CRow>
-
-                <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }} >
-                    <CCol>
-                    <CFormInput
-                        type="text"
-                        size="lg"
-                        placeholder="Nome..."
-                        aria-label="lg input example"
-                        value={filtroNome}
-                        onChange={(e) => setFiltroNome(e.target.value)}
-                    />
-                    </CCol>
-                    <CCol>
-                    <CFormSelect
-                        size="lg"
-                        aria-label="Large select example"
-                        value={filtroFornecedor}
-                        onChange={(e) => setFiltroFornecedor(e.target.value)}
-                    >
-                        <option>Escolha o fornecedor...</option>
-                        {fornecedores &&
-                            fornecedores.records &&
-                            fornecedores.records.length > 0 &&
-                            fornecedores.records.map((fornecedor) => {
-                            return (
-                                <option key={fornecedor.id} value={fornecedor.id}>
-                                {fornecedor.nome}
-                                </option>
-                            )
-                        })
-                        }
-                    </CFormSelect>
-                    </CCol>
-                    <CCol>
-                    <CButton color="secondary" onClick={limparFiltros}>Limpar filtros</CButton>
-                    </CCol>
-                </CRow>
-                </DocsExample>
-
-                <DocsExample href="components/card/#background-and-color">
-                <CRow xs={{ gutterY: 3}} className="justify-content-between">
-                    {
-                        estoquesInsumos.records && estoquesInsumos.records.map((estoqueInsumo) => {
-                        return (
-                            <CCard style={{width: '32%'}}>
-                                <CRow>
-                                <CCol xs={3} md={4} style={{marginTop:20}}>
-                                    <CCardImage src={`data:image/png;base64,${estoqueInsumo.insumo.logoPath}`} />
-                                </CCol>
-                                <CCol xs={7} md={7}>
-                                    <CCardBody>
-                                    <CCardTitle>{estoqueInsumo.insumo.nome}</CCardTitle>
-                                    <CCardSubtitle>{estoqueInsumo.insumo.variedade}</CCardSubtitle>
-                                    <CCardText>
-                                        {formatarPreco(estoqueInsumo.preco)}
-                                    </CCardText>
-                                    <CCardText>
-                                        <small className="text-body-secondary">Estoque atual: {estoqueInsumo.quantidade}</small>
-                                    </CCardText>
-                                    </CCardBody>
-                                </CCol>
-                                <CCol xs={1} md={1} >
-                                    <CDropdown alignment="end">
-                                        <CDropdownToggle color="transparent" caret={false} className="p-0">
-                                        <CIcon icon={cilOptions} />
-                                        </CDropdownToggle>
-                                        <CDropdownMenu>
-                                        <CDropdownItem
-                                            onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, 'cadastrar')}>
-                                        Cadastrar Especificação</CDropdownItem>
-                                        <CDropdownItem
-                                            onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, 'atualizar')}>
-                                        Atualizar Especificação</CDropdownItem>
-                                        </CDropdownMenu>
-                                    </CDropdown>
-                                </CCol>
-                                </CRow>
-                            </CCard>
-                        )
-                        })
-                    }
-                </CRow>
-                </DocsExample>
-            </CCardBody>
-            </CCard>
-        </CCol>
-        
-    
-        </CForm>
-
-     
-    </CContainer>
-
-    
-  );
 };
 
 export default EstoqueVisaoGeral;

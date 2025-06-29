@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { CAvatar, CBadge, CButton, CCollapse, CSmartTable } from '@coreui/react-pro'
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
+CCardImage,
 CSpinner,
 CFormInput,
 CForm,
@@ -11,7 +12,9 @@ CTableRow,
 CTableHeaderCell,
 CTableBody,
 CTableDataCell, 
-CCol
+CCol,
+CRow,
+CFormLabel
 } from '@coreui/react';
 
 
@@ -46,6 +49,8 @@ const GerenciadorPlantios = () => {
   const [notaFiscalValues, setNotaFiscalValues] = useState({}); // Novo estado para nota_fiscal
   const [insumoQuantidades, setInsumoQuantidades] = useState({}); // Estado para armazenar as quantidades dos insumos
   const [isProcessing, setIsProcessing] = useState(false)
+  const [totalDescontoValues, setTotalDescontoValues] = useState({}); // Novo estado para o total de desconto da cotação
+  const [valorTotalLiquidoValues, setValorTotalLiquidoValues] = useState({}); // Novo estado para Valor Total Líquido
 
   const columns = [
     { key: 'codigo_cotacao', _style: { width: '15%' }, label: 'Código Cotação' },
@@ -70,6 +75,15 @@ const GerenciadorPlantios = () => {
     setDetails(newDetails)
   }
 
+  // Função para calcular o Valor Total Líquido
+  const calculateValorTotalLiquido = (quantidade, precoUnitario, imposto, desconto) => {
+    const qty = parseFloat(quantidade || 0);
+    const preco = parseFloat(precoUnitario || 0);
+    const icms = parseFloat(imposto || 0); // Renomeado para imposto para corresponder ao campo
+    const desc = parseFloat(desconto || 0);
+    return (qty * preco) + icms - desc;
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -90,13 +104,26 @@ const GerenciadorPlantios = () => {
               total: item.total,
               imposto: item.imposto,
               desconto: item.desconto,
-              nome_fornecedor: item.fornecedor.nome,
+              nome_fornecedor: item.fornecedor.nome, // Alterado de 'nome' para 'nome_fornecedor' para corresponder à coluna
+              logoPath: item.fornecedor.logo_base64,
+              cnpj: item.fornecedor.cnpj,
+              cep: item.fornecedor.cep,
+              endereco: item.fornecedor.endereco,
+              numero: item.fornecedor.numero,
+              bairro: item.fornecedor.bairro,
+              estado: item.fornecedor.estado,
+              cidade: item.fornecedor.cidade,
+              telefone: item.fornecedor.telefone,
+              email: item.fornecedor.email,
               status: item.status,
-              insumos: item.cotacao_insumos
+              insumos: item.cotacao_insumos.map(insumo => ({
+                ...insumo,
+                // Inicializa o valor total líquido para cada insumo
+                valor_total_liquido: calculateValorTotalLiquido(insumo.quantidade, insumo.preco_unitario, insumo.imposto, insumo.desconto)
+              }))
             };
           });
         };
-
 
         setItems(transformarDados(data.records)); // Executando a função e passando o resultado
       } catch (err) {
@@ -111,6 +138,10 @@ const GerenciadorPlantios = () => {
 
 
   useEffect(() => {
+    // Este useEffect precisa ser ajustado. `items.cotacao_insumos` não existe, é `item.insumos` dentro do loop da tabela.
+    // Se a intenção é buscar a quantidade de insumos, isso deve ser feito para cada insumo individualmente, ou os dados já devem vir na requisição principal.
+    // Por enquanto, vou comentar essa parte, pois a API já deve retornar a quantidade.
+    /*
     if (items.cotacao_insumos) {
         items.cotacao_insumos.forEach(async (insumo) => {
             const quantidade = await fetchInsumoQuantidade(insumo.id);
@@ -120,7 +151,8 @@ const GerenciadorPlantios = () => {
             }));
         });
     }
-  }, [items.cotacao_insumos]);
+    */
+  }, [items]);
 
 
   const limparFiltro = () => {
@@ -132,25 +164,17 @@ const GerenciadorPlantios = () => {
     if (loading) return;
     if (error) return;
 
-    const transformarDados = (itens) => {
-      return itens.map(item => {
-        return {
-          codigo_cotacao: item.codigo_cotacao,
-          nota_fiscal: item.nota_fiscal,
-          data_validade: item.data_validade,
-          total: item.total,
-          imposto: item.imposto,
-          desconto: item.desconto,
-          status: item.status,
-          insumos: item.cotacao_insumos
-        };
-      });
-    };
+    // Esta função `transformarDados` é desnecessária aqui se os `items` já estão transformados no primeiro `useEffect`.
+    // Vou remover a lógica de transformação, pois `setDadosFiltrados` provavelmente deve apenas filtrar os `items` existentes.
+    const filteredItems = filtro === "todos" 
+      ? items 
+      : items.filter(item => item.status.nome.toLowerCase().includes(filtro.toLowerCase()));
+    setDadosFiltrados(filteredItems);
 
-      setDadosFiltrados(transformarDados);
   }, [filtro, items, loading, error]);
 
   const handleRejeitar = async (item) => {
+    setIsProcessing(true); // Começa o processamento
 
     try{
       const response = await fetch(`https://backend.cultivesmart.com.br/api/cotacao/${item.codigo_cotacao}/reject`, {
@@ -167,42 +191,49 @@ const GerenciadorPlantios = () => {
       const data = await response.json();
       console.log("Cotação atualizada com sucesso:", data);
 
-      setIsProcessing(false);
-
     } catch (err) {
       console.error("Erro ao atualizar cotação:", err);
-      setIsProcessing(false);
+    } finally {
+      setIsProcessing(false); // Finaliza o processamento
+      window.location.reload(); // Recarrega a página após a operação
     }
-
-    window.location.reload();
-
   }
 
   const handleAprovar = async (item) => {
     const insumosAtualizados = item.insumos.map(insumo => {
+      // Usar os valores do estado insumoValues se existirem, caso contrário, usar os valores originais do insumo
+      const quantidade = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-quantidade`] || insumo.quantidade);
+      const preco_unitario = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] || insumo.preco_unitario);
+      const imposto = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`] || insumo.imposto);
+      const desconto = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] || insumo.desconto);
+
       return {
         ...insumo,
-        quantidade: insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-quantidade`] || insumo.quantidade,
-        preco_unitario: insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] || insumo.preco_unitario,
-        imposto: insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`] || insumo.imposto,
-        desconto: insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] || insumo.desconto,
+        quantidade: quantidade,
+        preco_unitario: preco_unitario,
+        imposto: imposto,
+        desconto: desconto,
+        // O valor_total_liquido não precisa ser enviado para a API se for um campo calculado no frontend,
+        // mas se a API espera, você pode incluí-lo aqui.
+        // Por segurança, a API deve fazer seu próprio cálculo para evitar inconsistências.
       };
     });
-
-
 
     try {
       setIsProcessing(true);
 
-      const response = await fetch(`https://backend.cultivesmart.com.br/api/cotacao/${item.codigo_cotacao}`, {
+      const payload = JSON.stringify({
+          insumos: insumosAtualizados,
+          approved: true,
+          nota_fiscal: notaFiscalValues[item.codigo_cotacao], // Inclui nota_fiscal no mesmo nível
+        })
+
+      const response = await fetch(`http://localhost:64614/api/cotacao/${item.codigo_cotacao}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          insumos: insumosAtualizados,
-          nota_fiscal: notaFiscalValues[item.codigo_cotacao], // Inclui nota_fiscal no mesmo nível
-        }),
+        body: payload,
       });
 
       if (!response.ok) {
@@ -212,16 +243,17 @@ const GerenciadorPlantios = () => {
       const data = await response.json();
       console.log("Cotação atualizada com sucesso:", data);
 
-      setIsProcessing(false);
-
     } catch (err) {
       console.error("Erro ao atualizar cotação:", err);
+    } finally {
       setIsProcessing(false);
+      window.location.reload();
     }
-
-    window.location.reload();
   }
 
+  // Esta função não parece ser usada em nenhum lugar no código atual.
+  // Se ela for necessária para buscar a quantidade de insumos, precisaria ser chamada dentro do loop para cada insumo.
+  /*
   const fetchInsumoQuantidade = async (insumoId) => {
     try {
         const response = await fetch(`https://backend.cultivesmart.com.br/api/insumos/${insumoId}`);
@@ -235,17 +267,40 @@ const GerenciadorPlantios = () => {
         return null; // Retorna null em caso de erro
     }
   };
+  */
 
-  const handleDescontoChange = (item, insumo, value) => {
-    setInsumoValues({ ...insumoValues, [`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`]: value });
+  const handleInputChange = (item, insumo, field, value) => {
+    // Atualiza o estado insumoValues para o campo específico
+    setInsumoValues(prevValues => ({
+      ...prevValues,
+      [`${item.codigo_cotacao}-${insumo.insumo_id}-${field}`]: value
+    }));
 
-    // Recalcula o total de desconto para a cotação
-    const updatedDesconto = item.insumos.reduce((total, currentInsumo) => {
-      const descontoValue = insumoValues[`${item.codigo_cotacao}-${currentInsumo.insumo_id}-desconto`] || currentInsumo.desconto;
-      return total + parseFloat(descontoValue || 0);
-    }, 0);
+    // Obtém os valores atuais dos campos para o cálculo
+    const currentQuantidade = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-quantidade`] || insumo.quantidade);
+    const currentPrecoUnitario = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] || insumo.preco_unitario);
+    const currentImposto = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`] || insumo.imposto);
+    const currentDesconto = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] || insumo.desconto);
 
-    setTotalDescontoValues({ ...totalDescontoValues, [item.codigo_cotacao]: updatedDesconto });
+    // Ajusta o valor que está sendo alterado no momento para o cálculo
+    let newQuantidade = currentQuantidade;
+    let newPrecoUnitario = currentPrecoUnitario;
+    let newImposto = currentImposto;
+    let newDesconto = currentDesconto;
+
+    if (field === 'quantidade') newQuantidade = parseFloat(value || 0);
+    if (field === 'preco') newPrecoUnitario = parseFloat(value || 0);
+    if (field === 'imposto') newImposto = parseFloat(value || 0);
+    if (field === 'desconto') newDesconto = parseFloat(value || 0);
+
+    // Calcula o novo valor total líquido
+    const newValorTotalLiquido = calculateValorTotalLiquido(newQuantidade, newPrecoUnitario, newImposto, newDesconto);
+    
+    // Atualiza o estado de valorTotalLiquidoValues
+    setValorTotalLiquidoValues(prevValues => ({
+      ...prevValues,
+      [`${item.codigo_cotacao}-${insumo.insumo_id}-valorTotalLiquido`]: newValorTotalLiquido
+    }));
   };
 
   return (
@@ -307,106 +362,176 @@ const GerenciadorPlantios = () => {
           details: (item) => {
             return (
               <CCollapse visible={details.includes(item.codigo_cotacao)}>
-                <div className="p-3">
-                <h4>{item.codigo_cotacao}</h4>
-        <p className="text-body-secondary">Fornecedor: {item.fornecedor_id}</p>
-        <p className="text-body-secondary">Data Validade: {item.data_validade}</p>
-                  <p className="text-body-secondary">Solicitado por: {item.criado_por}</p>
-                  <p className="text-body-secondary">Nota Fiscal: 
-                    <CCol xs={4}>
-                      <CFormInput
-                          type="text"
-                          id="exampleFormControlInput1"
-                          aria-describedby="exampleFormControlInputHelpInline"
-                          value={item.nota_fiscal}
-                          onChange={(e) => setNotaFiscalValues({ ...notaFiscalValues, [item.codigo_cotacao]: e.target.value })}
-                          disabled={item.status.id !== 1}
-                      />
-                    </CCol>
-                  </p>
-                  <p className="text-body-secondary">Insumos: {item.insumos.length}</p>
+              <div className="p-4" style={{ backgroundColor: '#f8f9fa' }}>
+                
+                {/* Seção de Dados do Fornecedor */}
+                <h5 className="mb-3">Dados do Fornecedor</h5>
+                <CRow className="mb-2">
+                   <CCol md={3} className="d-flex align-items-center">
+                    {/* Foto do Fornecedor */}
+                    <CCardImage src={`data:image/png;base64,${item.logoPath}`} />
+                  </CCol>
+                  <CCol md={6}>
+                    <CRow className="mb-2">
+                      <strong>Fornecedor:</strong>
+                      <p className="text-body-secondary mb-0">{item.nome_fornecedor}</p> {/* Alterado para nome_fornecedor */}
+                    </CRow>
+                    <CRow className="mb-2">
+                      <strong>CNPJ:</strong>
+                      <p className="text-body-secondary">{item.cnpj}</p>
+                    </CRow>
+                    <CRow className="mb-2">
+                      <CCol md={6}>
+                        <strong>Endereço:</strong>
+                        <p className="text-body-secondary">{`${item.endereco}, ${item.numero}`}</p>
+                      </CCol>
+                      <CCol md={3}>
+                        <strong>Bairro:</strong>
+                        <p className="text-body-secondary">{item.bairro}</p>
+                      </CCol>
+                      <CCol md={3}>
+                        <strong>CEP:</strong>
+                        <p className="text-body-secondary">{item.cep}</p>
+                      </CCol>
+                    </CRow>
 
-                  <CForm className="row g-3">
-                    <CTable>
-                      <CTableHead>
-                        <CTableRow>
-                          <CTableHeaderCell scope="col" style={{width:'5%'}}>#</CTableHeaderCell>
-                          <CTableHeaderCell scope="col" style={{width:'10%'}}>Insumo</CTableHeaderCell>
-                          <CTableHeaderCell scope="col" style={{width:'30%'}}>Variedade</CTableHeaderCell>
-                          <CTableHeaderCell scope="col" style={{width:'5%'}}>Quantidade</CTableHeaderCell>
-                          <CTableHeaderCell scope="col" style={{width:'10%'}}>Preço</CTableHeaderCell>
-                          <CTableHeaderCell scope="col" style={{width:'10%'}}>Imposto</CTableHeaderCell>
-                          <CTableHeaderCell scope="col" style={{width:'10%'}}>Desconto</CTableHeaderCell>
-                        </CTableRow>
-                      </CTableHead>
-                      <CTableBody>
-                        {
-                          item.insumos && item.insumos.map((insumo, index) => (
-                            <CTableRow key={index}>
-                              <CTableHeaderCell scope="row">1</CTableHeaderCell>
-                              <CTableDataCell>{insumo.insumo.nome}</CTableDataCell>
-                              <CTableDataCell>{insumo.insumo.variedade} - {insumo.insumo.quantidade}g</CTableDataCell>
-                              <CTableDataCell>
+                    <CRow className="mb-3">
+                    <CCol md={6}>
+                      <strong>Cidade / UF:</strong>
+                      <p className="text-body-secondary">{`${item.cidade} / ${item.estado}`}</p>
+                    </CCol>
+                    <CCol md={6}>
+                      <strong>Contato:</strong>
+                      <p className="text-body-secondary">{`${item.telefone} | ${item.email}`}</p>
+                    </CCol>
+                  </CRow>
+
+                  </CCol>
+                </CRow>
+                
+                  
+
+                <hr className="my-4" />
+
+                {/* Seção de Informações da Cotação */}
+                <h5 className="mb-3">Informações da Cotação</h5>
+                <CRow className="align-items-end">
+                    <CCol md={4}>
+                        <strong>Data de Validade:</strong>
+                        <p className="text-body-secondary">{item.data_validade}</p>
+                    </CCol>
+                    <CCol md={4}>
+                        <strong>Solicitado por:</strong>
+                        <p className="text-body-secondary">{item.criado_por || 'Não informado'}</p>
+                    </CCol>
+                    <CCol md={4}>
+                        <CFormLabel htmlFor={`notaFiscal-${item.codigo_cotacao}`}><strong>Nota Fiscal:</strong></CFormLabel>
+                        <CFormInput
+                            type="text"
+                            id={`notaFiscal-${item.codigo_cotacao}`}
+                            value={notaFiscalValues[item.codigo_cotacao] || item.nota_fiscal || ''}
+                            onChange={(e) => setNotaFiscalValues({ ...notaFiscalValues, [item.codigo_cotacao]: e.target.value })}
+                            disabled={item.status.id !== 1}
+                        />
+                    </CCol>
+                </CRow>
+                
+                <hr className="my-4" />
+
+                {/* Tabela de Insumos */}
+                <h5 className="mb-3">Insumos</h5>
+                <CForm className="row g-3">
+                  <CTable>
+                    <CTableHead>
+                      <CTableRow>
+                        <CTableHeaderCell scope="col" style={{width:'5%'}}>#</CTableHeaderCell>
+                        <CTableHeaderCell scope="col" style={{width:'20%'}}>Descrição do Insumo</CTableHeaderCell>
+                        <CTableHeaderCell scope="col" style={{width:'5%'}}>Quantidade</CTableHeaderCell>
+                        <CTableHeaderCell scope="col" style={{width:'5%'}}>Valor Unitário</CTableHeaderCell>
+                        <CTableHeaderCell scope="col" style={{width:'5%'}}>ICMS</CTableHeaderCell> {/* Alterado de "Desconto (R$)" para "ICMS" */}
+                        <CTableHeaderCell scope="col" style={{width:'5%'}}>Desconto (R$)</CTableHeaderCell> {/* Alterado de "ICMS" para "Desconto (R$)" */}
+                        <CTableHeaderCell scope="col" style={{width:'6%'}}>Valor Total Liq.</CTableHeaderCell>
+                      </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+                      {
+                        item.insumos && item.insumos.map((insumo, index) => (
+                          <CTableRow key={index}>
+                            <CTableHeaderCell scope="row">{index + 1}</CTableHeaderCell>
+                            <CTableDataCell>{insumo.insumo.nome} - {insumo.insumo.variedade}</CTableDataCell>
+                            <CTableDataCell>
                               <CFormInput
                                 type="number"
-                                value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-quantidade`] || insumo.quantidade}
-                                onChange={(e) => setInsumoValues({ ...insumoValues, [`${item.codigo_cotacao}-${insumo.insumo_id}-quantidade`]: e.target.value })}
-                                id="exampleFormControlInput1"
-                                aria-describedby="exampleFormControlInputHelpInline"
+                                value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-quantidade`] !== undefined 
+                                         ? insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-quantidade`] 
+                                         : insumo.quantidade}
+                                onChange={(e) => handleInputChange(item, insumo, 'quantidade', e.target.value)}
                                 disabled={item.status.id !== 1}
                               />
-                              </CTableDataCell>
-                              <CTableDataCell>
-                                <CFormInput
-                                  type="text"
-                                  value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] || insumo.preco_unitario}
-                                  onChange={(e) => setInsumoValues({ ...insumoValues, [`${item.codigo_cotacao}-${insumo.insumo_id}-preco`]: e.target.value })}
-                                  id="exampleFormControlInput1"
-                                  aria-describedby="exampleFormControlInputHelpInline"
-                                  disabled={item.status.id !== 1}
-                                />
-                              </CTableDataCell>
-                              <CTableDataCell>
-                                <CFormInput
-                                  type="text"
-                                  value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`] || insumo.imposto}
-                                  onChange={(e) => setInsumoValues({ ...insumoValues, [`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`]: e.target.value })}
-                                  id="exampleFormControlInput1"
-                                  aria-describedby="exampleFormControlInputHelpInline"
-                                  disabled={item.status.id !== 1}
-                                />
-                              </CTableDataCell>
-                              <CTableDataCell>
-                                <CFormInput
-                                  type="text"
-                                  value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] || insumo.desconto}
-                                  onChange={(e) => handleDescontoChange(item, insumo, e.target.value)}
-                                  id="exampleFormControlInput1"
-                                  aria-describedby="exampleFormControlInputHelpInline"
-                                  disabled={item.status.id !== 1}
-                                />
-                              </CTableDataCell>
-                            </CTableRow>
-                          ))
-                        }
-
-                      </CTableBody>
-                    </CTable>
-                  </CForm>
-                  {item.status.id === 1 && (
-                    <div>
-                      <CButton size="sm" color="info" onClick={() => handleAprovar(item)}>
-                        { isProcessing ? <CSpinner as="span" className="me-2" size="sm" aria-hidden="true" /> : null  }
-                        Aprovar
-                      </CButton>
-                      <CButton size="sm" color="danger" className="ms-1" onClick={() => handleRejeitar(item)}>
+                            </CTableDataCell>
+                            <CTableDataCell>
+                              <CFormInput
+                                type="number" // Alterado para number
+                                value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] !== undefined 
+                                         ? insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] 
+                                         : insumo.preco_unitario}
+                                onChange={(e) => handleInputChange(item, insumo, 'preco', e.target.value)}
+                                disabled={item.status.id !== 1}
+                              />
+                            </CTableDataCell>
+                            <CTableDataCell>
+                              <CFormInput
+                                type="number" // Alterado para number
+                                value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`] !== undefined 
+                                         ? insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`] 
+                                         : insumo.imposto}
+                                onChange={(e) => handleInputChange(item, insumo, 'imposto', e.target.value)}
+                                disabled={item.status.id !== 1}
+                              />
+                            </CTableDataCell>
+                            <CTableDataCell>
+                              <CFormInput
+                                type="number" // Alterado para number
+                                value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] !== undefined 
+                                         ? insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] 
+                                         : insumo.desconto}
+                                onChange={(e) => handleInputChange(item, insumo, 'desconto', e.target.value)}
+                                disabled={item.status.id !== 1}
+                              />
+                            </CTableDataCell>
+                            <CTableDataCell>
+                              <CFormInput
+                                type="text"
+                                value={(valorTotalLiquidoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-valorTotalLiquido`] !== undefined
+                                        ? valorTotalLiquidoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-valorTotalLiquido`]
+                                        : insumo.valor_total_liquido
+                                        ).toFixed(2)} 
+                                readOnly // Torna o campo somente leitura
+                                disabled={item.status.id !== 1}
+                              />
+                            </CTableDataCell>
+                          </CTableRow>
+                        ))
+                      }
+                    </CTableBody>
+                  </CTable>
+                </CForm>
+                
+                {/* Botões de Ação */}
+                {item.status.id === 1 && (
+                  <div className="mt-4">
+                    <CButton size="sm" color="info" onClick={() => handleAprovar(item)} disabled={isProcessing}>
                       { isProcessing ? <CSpinner as="span" className="me-2" size="sm" aria-hidden="true" /> : null  }
-                        Rejeitar
-                      </CButton>
-                    </div>
-                  )}
-                </div>
-              </CCollapse>
+                      Aprovar
+                    </CButton>
+                    <CButton size="sm" color="danger" className="ms-1" onClick={() => handleRejeitar(item)} disabled={isProcessing}>
+                      { isProcessing ? <CSpinner as="span" className="me-2" size="sm" aria-hidden="true" /> : null  }
+                      Rejeitar
+                    </CButton>
+                  </div>
+                )}
+              </div>
+            </CCollapse>
             )
           },
         }}

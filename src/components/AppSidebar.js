@@ -1,5 +1,6 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { useAuth } from '../context/AuthContext' // Importe o useAuth
 
 import logoImage from '../assets/images/logo.png'; // Atualize o caminho conforme necessário
 
@@ -18,13 +19,22 @@ import { AppSidebarNav } from './AppSidebarNav'
 import { logo } from 'src/assets/brand/logo'
 import { sygnet } from 'src/assets/brand/sygnet'
 
+
 // sidebar nav config
-import navigation from '../_nav'
+import getNavigation from '../_nav'
 
 const AppSidebar = () => {
   const dispatch = useDispatch()
   const unfoldable = useSelector((state) => state.sidebarUnfoldable)
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  const { userRole, loading } = useAuth() // Use o hook para obter o userRole
+
+   if (loading || !userRole) {
+    return null // Ou um spinner, dependendo da UX desejada
+  }
+
+    const filteredNavItems = getNavigation(userRole)
+
 
   return (
     <CSidebar
@@ -50,7 +60,7 @@ const AppSidebar = () => {
           onClick={() => dispatch({ type: 'set', sidebarShow: false })}
         />
       </CSidebarHeader>
-      <AppSidebarNav items={navigation} />
+      <AppSidebarNav items={filteredNavItems} />
       <CSidebarFooter className="border-top d-none d-lg-flex">
         <CSidebarToggler
           onClick={() => dispatch({ type: 'set', sidebarUnfoldable: !unfoldable })}

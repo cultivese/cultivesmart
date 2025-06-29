@@ -7,6 +7,11 @@ const VisaoGeral = React.lazy(() => import('./views/producao/VisaoGeral'))
 const NovoLote = React.lazy(() => import('./views/producao/NovoLote'))
 const EncerrarLote = React.lazy(() => import('./views/producao/EncerrarLote'))
 
+// Minhas tarefas diárias
+const TarefaDiaria  = React.lazy(() => import('./views/tarefas/dia/TarefaDiaria'))
+const HistoricoTarefa  = React.lazy(() => import('./views/tarefas/historico/HistoricoTarefa'))
+
+
 // Plantio
 const SimularPlantio  = React.lazy(() => import('./views/plantio/simular_plantio/SimularPlantio'))
 const GerenciadorPlantios  = React.lazy(() => import('./views/plantio/gerenciador_plantios/GerenciadorPlantios'))
@@ -52,7 +57,12 @@ const routes = [
   // { path: '/producao/encerrar_lote', name: 'EncerrarLote', element: EncerrarLote },
   
 
-  
+  // TarefaDiaria
+  { path: '/tarefas', name: 'Minhas Tarefas Diária', element: Cards, exact: true },
+  { path: '/tarefas/dia', name: 'Tarefas Diária', element: TarefaDiaria },
+  { path: '/tarefas/historico', name: 'Histórico de Tarefas', element: HistoricoTarefa },
+
+
   // Plantio
   { path: '/plantio', name: 'Plantio', element: Cards, exact: true },
   { path: '/plantio/simular_cotacao', name: 'Simular Cotação', element: SimularCotacao },

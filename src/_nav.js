@@ -6,6 +6,7 @@ import {
   cilArrowThickToTop,
   cilApplications,
   cilBasket,
+  cilClipboard,
   cilLineStyle,
   cilList,
   cilPuzzle,
@@ -15,256 +16,178 @@ import {
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
-const _nav = [
-  // {
-  //   component: CNavItem,
-  //   name: 'Dashboard',
-  //   to: '/dashboard',
-  //   icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
-  //   // badge: {
-  //   //   color: 'info',
-  //   //   text: 'NEW',
-  //   // },
-  // },
-  // {
-  //   component: CNavTitle,
-  //   name: 'Produção',
-  // },
-  // {
-  //   component: CNavGroup,
-  //   name: 'Acompanhamento',
-  //   to: '/producao',
-  //   icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
-  //   items: [
-  //     {
-  //       component: CNavItem,
-  //       name: 'Visão Geral',
-  //       to: '/producao/visao_geral',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Novo Lote',
-  //       to: '/producao/novo_lote',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Encerrar Lote',
-  //       to: '/producao/encerra_lote',
-  //     },
-  //   ],
-  // },
-  // {
-  //   component: CNavGroup,
-  //   name: 'Planejamento',
-  //   to: '/base',
-  //   icon: <CIcon icon={cilCalendarCheck} customClassName="nav-icon" />,
-  //   items: [
-  //     {
-  //       component: CNavItem,
-  //       name: 'Producao',
-  //       to: '/planejamento/producao',
-  //     }      
-  //   ],
-  // },
-  {
-    component: CNavTitle,
-    name: 'Plantio',
-  },
-  {
-    component: CNavItem,
-    name: 'Visão Geral',
-    to: '/plantio/visao_geral',
-    icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Simular Plantio',
-    to: '/plantio/simular_plantio',
-    icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Gerenciador de Plantios',
-    to: '/plantio/gerenciador_plantio',
-    icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavTitle,
-    name: 'Estoque',
-  },
-  {
-    component: CNavItem,
-    name: 'Visão Geral',
-    to: '/estoque/visao_geral',
-    icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-  },
-  // {
-  //   component: CNavItem,
-  //   name: 'Especificação',
-  //   to: '/insumos/especificacao',
-  //   icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
-  // },
-  {
-    component: CNavItem,
-    name: 'Simular Cotação',
-    to: '/estoque/simular_cotacao',
-    icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Gerenciador de Cotações',
-    to: '/estoque/gerenciador_pedidos',
-    icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
-  },
-  // {
-  //   component: CNavItem,
-  //   name: 'Listar',
-  //   to: '/estoque/listar',
-  //   icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
-  // },
-  // {
-  //   component: CNavItem,
-  //   name: 'Simular Pedido',
-  //   to: '/estoque/registrar',
-  //   icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
-  // },
-  {
-    component: CNavTitle,
-    name: 'Catálogo de Produtos',
-  },
-  {
-    component: CNavItem,
-    name: 'Listar',
-    to: '/produtos/listar',
-    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Cadastro',
-    to: '/produtos/cadastrar',
-    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavTitle,
-    name: 'Catálogo de Insumos',
-  },
-  {
-    component: CNavItem,
-    name: 'Listar',
-    to: '/insumos/listar',
-    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
-  },
-  
-  {
-    component: CNavItem,
-    name: 'Cadastro',
-    to: '/insumos/cadastrar',
-    icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavTitle,
-    name: 'Clientes',
-  },
-  {
-    component: CNavItem,
-    name: 'Listar',
-    to: '/clientes/listar',
-    icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Cadastro',
-    to: '/clientes/cadastro',
-    icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavTitle,
-    name: 'Fornecedores',
-  },
-  {
-    component: CNavItem,
-    name: 'Listar',
-    to: '/fornecedores/listar',
-    icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Cadastro',
-    to: '/fornecedores/cadastro',
-    icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-  },
-  // {
-  //   component: CNavItem,
-  //   name: 'Historico',
-  //   to: '/fornecedores/historico',
-  //   icon: <CIcon icon={cilList} customClassName="nav-icon" />,
-  // },
-  
-  // {
-  //   component: CNavItem,
-  //   name: 'Estoque',
-  //   to: '/insumos/estoque',
-  //   icon: <CIcon icon={cilApplications} customClassName="nav-icon" />,
-  // },
-  // {
-  //   component: CNavTitle,
-  //   name: 'Clientes',
-  // },
-  // {
-  //   component: CNavItem,
-  //   name: 'Cadastro',
-  //   to: '/fornecedores/cadastro',
-  //   icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-  // },
-  // ,
-  // {
-  //   component: CNavTitle,
-  //   name: 'Financeiro',
-  // },
-  // {
-  //   component: CNavItem,
-  //   name: 'Análise de Custos',
-  //   to: '/financeiro/analisedecustos',
-  //   icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
-  // },
-  // {
-  //   component: CNavTitle,
-  //   name: 'Relatórios',
-  // },
-  // {
-  //   component: CNavItem,
-  //   name: 'Relatório de Produção',
-  //   to: '/relatorio/producao',
-  //   icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-  // },
-  // {
-  //   component: CNavItem,
-  //   name: 'Relatório de Insumos',
-  //   to: '/relatorio/insumos',
-  //   icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-  // },
-  // {
-  //   component: CNavItem,
-  //   name: 'Relatório de Fornecedores',
-  //   to: '/relatorio/fornecedores',
-  //   icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-  // },
-  // {
-  //   component: CNavTitle,
-  //   name: 'Configuração',
-  // },
-  // {
-  //   component: CNavItem,
-  //   name: 'Lote',
-  //   to: '/configuracao/lote',
-  //   icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-  // },
-  // {
-  //   component: CNavItem,
-  //   name: 'Produção',
-  //   to: '/configuracao/producao',
-  //   icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-  // },
-]
+const _nav = (userRole) => {
+  // Função auxiliar para verificar se o item deve ser exibido para o userRole
+  const hasPermission = (item) => {
+    if (!item.roles) {
+      return true // Se não tem 'roles' definidas, é visível para todos por padrão
+    }
+    return item.roles.includes(userRole)
+  }
+
+  const navigateItems =
+  [
+    // --- MENU PARA OPERADOR ---
+    {
+      component: CNavTitle,
+      name: 'Minhas Tarefas Diárias', // Título mais específico
+      roles: ['operador'],
+    },
+    {
+      component: CNavItem,
+      name: 'Tarefas do Dia',
+      to: '/tarefas/dia', // Nova rota sugerida para a página específica do operador
+      icon: <CIcon icon={cilClipboard} customClassName="nav-icon" />, // Ícone mais sugestivo para "tarefas"
+      roles: ['operador'],
+    },
+    {
+      component: CNavItem,
+      name: 'Histórico de Execução', // Se houver necessidade de ver tarefas passadas
+      to: '/tarefas/historico',
+      icon: <CIcon icon={cilCalendarCheck} customClassName="nav-icon" />,
+      roles: ['operador'],
+    },
+    {
+      component: CNavTitle,
+      name: 'Plantio',
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Visão Geral',
+      to: '/plantio/visao_geral',
+      icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Simular Plantio',
+      to: '/plantio/simular_plantio',
+      icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Gerenciador de Plantios',
+      to: '/plantio/gerenciador_plantio',
+      icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavTitle,
+      name: 'Estoque',
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Visão Geral',
+      to: '/estoque/visao_geral',
+      icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Simular Cotação',
+      to: '/estoque/simular_cotacao',
+      icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Gerenciador de Cotações',
+      to: '/estoque/gerenciador_pedidos',
+      icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavTitle,
+      name: 'Catálogo de Produtos',
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Listar',
+      to: '/produtos/listar',
+      icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Cadastro',
+      to: '/produtos/cadastrar',
+      icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavTitle,
+      name: 'Catálogo de Insumos',
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Listar',
+      to: '/insumos/listar',
+      icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Cadastro',
+      to: '/insumos/cadastrar',
+      icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavTitle,
+      name: 'Clientes',
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Listar',
+      to: '/clientes/listar',
+      icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Cadastro',
+      to: '/clientes/cadastro',
+      icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavTitle,
+      name: 'Fornecedores',
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Listar',
+      to: '/fornecedores/listar',
+      icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+    {
+      component: CNavItem,
+      name: 'Cadastro',
+      to: '/fornecedores/cadastro',
+      icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+      roles: ['admin'],
+    },
+  ]
+
+  // Filtra os itens de navegação com base no userRole
+  const filteredNavigation = navigateItems.filter((item) => {
+    // Se o item for um CNavGroup, precisamos verificar seus filhos recursivamente
+    if (item.component === CNavGroup) {
+      const filteredChildren = item.items.filter(hasPermission)
+      return filteredChildren.length > 0
+    }
+    return hasPermission(item)
+  })
+
+  return filteredNavigation
+}
 
 export default _nav
