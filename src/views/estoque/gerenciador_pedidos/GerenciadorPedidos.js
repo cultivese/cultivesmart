@@ -53,13 +53,14 @@ const GerenciadorPlantios = () => {
   const [valorTotalLiquidoValues, setValorTotalLiquidoValues] = useState({}); // Novo estado para Valor Total Líquido
 
   const columns = [
-    { key: 'codigo_cotacao', _style: { width: '15%' }, label: 'Código Cotação' },
+    { key: 'id', _style: { width: '10%' }, label: 'Id' },
     { key: 'nota_fiscal', _style: { width: '15%' }, label: 'Nota Fiscal'},
     { key: 'nome_fornecedor', _style: { width: '20%' }, label: 'Fornecedor'},
     { key: 'data_validade', _style: { width: '15%' }, label: 'Data Validade' },
-    { key: 'total', _style: { width: '15%' }, label: 'Total Pedido' },
-    { key: 'imposto', _style: { width: '15%' }, label: 'Total Imposto' },
+    { key: 'total_bruto', _style: { width: '15%' }, label: 'Total Bruto' },
+    { key: 'icms', _style: { width: '15%' }, label: 'ICMS' },
     { key: 'desconto', _style: { width: '15%' }, label: 'Total Desconto' },
+    { key: 'total_liquido', _style: { width: '15%' }, label: 'Total Líquido' },
     { key: 'status', _style: { width: '20%' }, label: 'Status'},
     { key: 'show_details', label: '', _style: { width: '1%' }, filter: false, sorter: false },
   ]
@@ -98,12 +99,13 @@ const GerenciadorPlantios = () => {
         const transformarDados = (records) => {
           return records.map(item => {
             return {
-              codigo_cotacao: item.id,
+              id: item.id,
               nota_fiscal: item.nota_fiscal,
               data_validade: item.data_validade,
-              total: item.total,
-              imposto: item.imposto,
+              total_bruto: item.total_bruto,
+              icms: item.icms,
               desconto: item.desconto,
+              total_liquido: item.total_liquido,
               nome_fornecedor: item.fornecedor.nome, // Alterado de 'nome' para 'nome_fornecedor' para corresponder à coluna
               logoPath: item.fornecedor.logo_base64,
               cnpj: item.fornecedor.cnpj,
@@ -119,7 +121,7 @@ const GerenciadorPlantios = () => {
               insumos: item.cotacao_insumos.map(insumo => ({
                 ...insumo,
                 // Inicializa o valor total líquido para cada insumo
-                valor_total_liquido: calculateValorTotalLiquido(insumo.quantidade, insumo.preco_unitario, insumo.imposto, insumo.desconto)
+                valor_total_liquido: calculateValorTotalLiquido(insumo.quantidade, insumo.preco_unitario, insumo.icms, insumo.desconto)
               }))
             };
           });
@@ -177,7 +179,7 @@ const GerenciadorPlantios = () => {
     setIsProcessing(true); // Começa o processamento
 
     try{
-      const response = await fetch(`https://backend.cultivesmart.com.br/api/cotacao/${item.codigo_cotacao}/reject`, {
+      const response = await fetch(`https://backend.cultivesmart.com.br/api/cotacao/${item.id}/reject`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -202,16 +204,16 @@ const GerenciadorPlantios = () => {
   const handleAprovar = async (item) => {
     const insumosAtualizados = item.insumos.map(insumo => {
       // Usar os valores do estado insumoValues se existirem, caso contrário, usar os valores originais do insumo
-      const quantidade = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-quantidade`] || insumo.quantidade);
-      const preco_unitario = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] || insumo.preco_unitario);
-      const imposto = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`] || insumo.imposto);
-      const desconto = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] || insumo.desconto);
+      const quantidade = parseFloat(insumoValues[`${item.id}-${insumo.insumo_id}-quantidade`] || insumo.quantidade);
+      const preco_unitario = parseFloat(insumoValues[`${item.id}-${insumo.insumo_id}-preco`] || insumo.preco_unitario);
+      const icms = parseFloat(insumoValues[`${item.id}-${insumo.insumo_id}-imposto`] || insumo.icms);
+      const desconto = parseFloat(insumoValues[`${item.id}-${insumo.insumo_id}-desconto`] || insumo.desconto);
 
       return {
         ...insumo,
         quantidade: quantidade,
         preco_unitario: preco_unitario,
-        imposto: imposto,
+        icms: icms,
         desconto: desconto,
         // O valor_total_liquido não precisa ser enviado para a API se for um campo calculado no frontend,
         // mas se a API espera, você pode incluí-lo aqui.
@@ -223,12 +225,12 @@ const GerenciadorPlantios = () => {
       setIsProcessing(true);
 
       const payload = JSON.stringify({
-          insumos: insumosAtualizados,
+          nota_fiscal: notaFiscalValues[item.id],
           approved: true,
-          nota_fiscal: notaFiscalValues[item.codigo_cotacao], // Inclui nota_fiscal no mesmo nível
+          insumos: insumosAtualizados,
         })
 
-      const response = await fetch(`http://localhost:64614/api/cotacao/${item.codigo_cotacao}`, {
+      const response = await fetch(`https://backend.cultivesmart.com.br/api/cotacao/${item.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -273,14 +275,14 @@ const GerenciadorPlantios = () => {
     // Atualiza o estado insumoValues para o campo específico
     setInsumoValues(prevValues => ({
       ...prevValues,
-      [`${item.codigo_cotacao}-${insumo.insumo_id}-${field}`]: value
+      [`${item.cotacao_id}-${insumo.insumo_id}-${field}`]: value
     }));
 
     // Obtém os valores atuais dos campos para o cálculo
-    const currentQuantidade = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-quantidade`] || insumo.quantidade);
-    const currentPrecoUnitario = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] || insumo.preco_unitario);
-    const currentImposto = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`] || insumo.imposto);
-    const currentDesconto = parseFloat(insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] || insumo.desconto);
+    const currentQuantidade = parseFloat(insumoValues[`${item.cotacao_id}-${insumo.insumo_id}-quantidade`] || insumo.quantidade);
+    const currentPrecoUnitario = parseFloat(insumoValues[`${item.cotacao_id}-${insumo.insumo_id}-preco`] || insumo.preco_unitario);
+    const currentImposto = parseFloat(insumoValues[`${item.cotacao_id}-${insumo.insumo_id}-imposto`] || insumo.icms);
+    const currentDesconto = parseFloat(insumoValues[`${item.cotacao_id}-${insumo.insumo_id}-desconto`] || insumo.desconto);
 
     // Ajusta o valor que está sendo alterado no momento para o cálculo
     let newQuantidade = currentQuantidade;
@@ -299,7 +301,7 @@ const GerenciadorPlantios = () => {
     // Atualiza o estado de valorTotalLiquidoValues
     setValorTotalLiquidoValues(prevValues => ({
       ...prevValues,
-      [`${item.codigo_cotacao}-${insumo.insumo_id}-valorTotalLiquido`]: newValorTotalLiquido
+      [`${item.cotacao_id}-${insumo.insumo_id}-valorTotalLiquido`]: newValorTotalLiquido
     }));
   };
 
@@ -351,17 +353,17 @@ const GerenciadorPlantios = () => {
                   shape="square"
                   size="sm"
                   onClick={() => {
-                    toggleDetails(item.codigo_cotacao)
+                    toggleDetails(item.id)
                   }}
                 >
-                  {details.includes(item.codigo_cotacao) ? 'Fechar' : 'Visualizar'}
+                  {details.includes(item.id) ? 'Fechar' : 'Visualizar'}
                 </CButton>
               </td>
             )
           },
           details: (item) => {
             return (
-              <CCollapse visible={details.includes(item.codigo_cotacao)}>
+              <CCollapse visible={details.includes(item.id)}>
               <div className="p-4" style={{ backgroundColor: '#f8f9fa' }}>
                 
                 {/* Seção de Dados do Fornecedor */}
@@ -425,12 +427,12 @@ const GerenciadorPlantios = () => {
                         <p className="text-body-secondary">{item.criado_por || 'Não informado'}</p>
                     </CCol>
                     <CCol md={4}>
-                        <CFormLabel htmlFor={`notaFiscal-${item.codigo_cotacao}`}><strong>Nota Fiscal:</strong></CFormLabel>
+                        <CFormLabel htmlFor={`notaFiscal-${item.id}`}><strong>Nota Fiscal:</strong></CFormLabel>
                         <CFormInput
                             type="text"
-                            id={`notaFiscal-${item.codigo_cotacao}`}
-                            value={notaFiscalValues[item.codigo_cotacao] || item.nota_fiscal || ''}
-                            onChange={(e) => setNotaFiscalValues({ ...notaFiscalValues, [item.codigo_cotacao]: e.target.value })}
+                            id={`notaFiscal-${item.id}`}
+                            value={notaFiscalValues[item.id] || item.nota_fiscal || ''}
+                            onChange={(e) => setNotaFiscalValues({ ...notaFiscalValues, [item.id]: e.target.value })}
                             disabled={item.status.id !== 1}
                         />
                     </CCol>
@@ -462,8 +464,8 @@ const GerenciadorPlantios = () => {
                             <CTableDataCell>
                               <CFormInput
                                 type="number"
-                                value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-quantidade`] !== undefined 
-                                         ? insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-quantidade`] 
+                                value={insumoValues[`${item.cotacao_id}-${insumo.insumo_id}-quantidade`] !== undefined 
+                                         ? insumoValues[`${item.cotacao_id}-${insumo.insumo_id}-quantidade`] 
                                          : insumo.quantidade}
                                 onChange={(e) => handleInputChange(item, insumo, 'quantidade', e.target.value)}
                                 disabled={item.status.id !== 1}
@@ -472,8 +474,8 @@ const GerenciadorPlantios = () => {
                             <CTableDataCell>
                               <CFormInput
                                 type="number" // Alterado para number
-                                value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] !== undefined 
-                                         ? insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-preco`] 
+                                value={insumoValues[`${item.cotacao_id}-${insumo.insumo_id}-preco`] !== undefined 
+                                         ? insumoValues[`${item.cotacao_id}-${insumo.insumo_id}-preco`] 
                                          : insumo.preco_unitario}
                                 onChange={(e) => handleInputChange(item, insumo, 'preco', e.target.value)}
                                 disabled={item.status.id !== 1}
@@ -482,9 +484,9 @@ const GerenciadorPlantios = () => {
                             <CTableDataCell>
                               <CFormInput
                                 type="number" // Alterado para number
-                                value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`] !== undefined 
-                                         ? insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-imposto`] 
-                                         : insumo.imposto}
+                                value={insumoValues[`${item.cotacao_id}-${insumo.insumo_id}-imposto`] !== undefined 
+                                         ? insumoValues[`${item.cotacao_id}-${insumo.insumo_id}-imposto`] 
+                                         : insumo.icms}
                                 onChange={(e) => handleInputChange(item, insumo, 'imposto', e.target.value)}
                                 disabled={item.status.id !== 1}
                               />
@@ -492,8 +494,8 @@ const GerenciadorPlantios = () => {
                             <CTableDataCell>
                               <CFormInput
                                 type="number" // Alterado para number
-                                value={insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] !== undefined 
-                                         ? insumoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-desconto`] 
+                                value={insumoValues[`${item.cotacao_id}-${insumo.insumo_id}-desconto`] !== undefined 
+                                         ? insumoValues[`${item.cotacao_id}-${insumo.insumo_id}-desconto`] 
                                          : insumo.desconto}
                                 onChange={(e) => handleInputChange(item, insumo, 'desconto', e.target.value)}
                                 disabled={item.status.id !== 1}
@@ -502,8 +504,8 @@ const GerenciadorPlantios = () => {
                             <CTableDataCell>
                               <CFormInput
                                 type="text"
-                                value={(valorTotalLiquidoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-valorTotalLiquido`] !== undefined
-                                        ? valorTotalLiquidoValues[`${item.codigo_cotacao}-${insumo.insumo_id}-valorTotalLiquido`]
+                                value={(valorTotalLiquidoValues[`${item.cotacao_id}-${insumo.insumo_id}-valorTotalLiquido`] !== undefined
+                                        ? valorTotalLiquidoValues[`${item.cotacao_id}-${insumo.insumo_id}-valorTotalLiquido`]
                                         : insumo.valor_total_liquido
                                         ).toFixed(2)} 
                                 readOnly // Torna o campo somente leitura

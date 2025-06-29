@@ -158,13 +158,11 @@ const handleConfirmarOrcamento = () => {
 
 const handlerSalvarCotacao = () => {
 
-  const dataAtual = new Date();
-  const codigoCotacao = gerarCodigoOrcamento(insumosCotacao, dataAtual);
+  const dataAtual = new Date();  
   const fornecedorId = insumosCotacao.length > 0 ? insumosCotacao[0].fornecedor_id : null;
-  const subtotal = calcularTotal();
+
   const imposto = 0; // Substitua pelo valor correto do imposto, se disponível
   const desconto = 0; // Substitua pelo valor correto do desconto, se disponível
-  const total = subtotal + imposto - desconto;
 
   const insumosFormatados = insumosCotacao.map(insumo => ({
       insumo_id: insumo.id,
@@ -175,12 +173,7 @@ const handlerSalvarCotacao = () => {
   }));
 
   const bodyJson = JSON.stringify({
-      codigo_cotacao: codigoCotacao,
       fornecedor_id: fornecedorId,
-      subtotal: subtotal,
-      imposto: imposto,
-      desconto: desconto,
-      total: total,
       insumos: insumosFormatados,
   });
 
