@@ -98,7 +98,7 @@ const GerenciadorPlantios = () => {
         const transformarDados = (records) => {
           return records.map(item => {
             return {
-              codigo_cotacao: item.codigo_cotacao,
+              codigo_cotacao: item.id,
               nota_fiscal: item.nota_fiscal,
               data_validade: item.data_validade,
               total: item.total,
