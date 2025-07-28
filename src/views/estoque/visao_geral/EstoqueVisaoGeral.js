@@ -5,6 +5,8 @@ import {
   CCard,
   CBadge,
   CCardBody,
+  CInputGroup,
+  CInputGroupText,
   CImage,
   CSpinner,
   CCardHeader,
@@ -62,6 +64,7 @@ import {
 
 import { DocsExample } from 'src/components'
 const EstoqueVisaoGeral = () => {
+  const API_BASE_URL = 'https://backend.cultivesmart.com.br/api'; 
   const [estoquesInsumos, setEstoqueInsumos] = useState([]);  
   const [activeStep, setActiveStep] = useState(0);
   const [fornecedores, setFornecedores] = useState([]);
@@ -72,15 +75,16 @@ const EstoqueVisaoGeral = () => {
   const [filtroFornecedor, setFiltroFornecedor] = useState('');
   const [showAdditionalFieldsModal, setShowAdditionalFieldsModal] = useState(false); // Estado para controlar o modal
   const [showImportPhotosModal, setShowImportPhotosModal] = useState(false); // Estado para controlar o modal
+  const [showRetiradaEstoqueModal, setShowRetiradaEstoqueModal] = useState(false); // Estado para controlar o modal
   const [showDetailsModal, setShowDetailsModal] = useState(false); // Estado para controlar o modal
   const [insumoSelecionado, setInsumoSelecionado] = useState(null);
   const [visible, setVisible] = useState(false)
   const [modalMode, setModalMode] = useState('visualizar'); // Novo estado para controlar o modo do modal
   const [insumoDetail, setInsumoDetail] = useState('');
-  
+  const [quantidadeRetirada, setQuantidadeRetirada] = useState('');
   const [movimentacoesEstoque, setMovimentacoesEstoque] = useState([]);
   const [isFetchingMovements, setIsFetchingMovements] = useState(false);
-
+  const [motivoRetirada, setMotivoRetirada] = useState('');
   const [editedInsumo, setEditedInsumo] = useState({
     nome: '',
     fornecedor_id: null,
@@ -94,8 +98,9 @@ const EstoqueVisaoGeral = () => {
     preco: '',
   });
   const [isProcessing, setIsProcessing] = useState(false)
-  
-
+  const [message, setMessage] = useState(null); // Para mensagens de sucesso/erro
+  const [selectedInsumoId, setSelectedInsumoId] = useState(null); // <-- Adicione esta linha
+  const [messageType, setMessageType] = useState(''); // 'success' ou 'danger'
   const formatarPreco = (valor) => {
     if (!valor) return '';
     const valorNumerico = valor.replace(/[^\d]/g, '');
@@ -216,6 +221,12 @@ const handleOpenAdditionalFieldsModal = (insumo, mode) => {
   setEditedInsumo(initialEditedInsumo);
   setShowAdditionalFieldsModal(true);
 };
+
+const handleRetiradaEstoqueModal = (insumo) =>
+{
+    setSelectedInsumoId(insumo.id);
+    setShowRetiradaEstoqueModal(true);
+}
 
 const handleOpenImportPhotosModal = (insumo) => {
     setShowImportPhotosModal(true);
@@ -347,6 +358,66 @@ const handleCategorySelect = (category) => {
   }));
 };
 
+const handleRetiradaEstoqueSubmit = async (e) => {
+    e.preventDefault(); // Previne o comportamento padrão do formulário (recarregar a página)
+
+    setMessage(null); // Limpa mensagens anteriores
+
+    if (!selectedInsumoId) {
+      setMessage('Por favor, selecione um insumo para retirada.');
+      setMessageType('danger');
+      return;
+    }
+
+    const quantidade = parseFloat(quantidadeRetirada);
+    if (isNaN(quantidade) || quantidade <= 0) {
+      setMessage('Por favor, insira uma quantidade válida maior que zero.');
+      setMessageType('danger');
+      return;
+    }
+
+//    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/estoque/${selectedInsumoId}/withdraw`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          // Inclua o token CSRF ou de autenticação se sua API Laravel exigir
+          // 'X-CSRF-TOKEN': 'seu-token-csrf-aqui', 
+          // 'Authorization': `Bearer ${seuTokenDeAuth}` // Se houver autenticação JWT/Bearer
+        },
+        body: JSON.stringify({
+          quantidade_retirada: quantidade,
+          motivo: motivoRetirada || 'Retirada geral', // Use um motivo padrão se não for fornecido
+        }),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        // Se a resposta não for OK (status 4xx ou 5xx), lance um erro com a mensagem da API
+        throw new Error(responseData.message || 'Erro ao registrar retirada no estoque.');
+      }
+
+      setMessage(`Retirada de ${quantidade}g registrada com sucesso para o insumo!`);
+      setMessageType('success');
+      setQuantidadeRetirada(''); // Limpa o campo de quantidade
+      setMotivoRetirada('');     // Limpa o campo de motivo
+      setShowRetiradaEstoqueModal(false);
+      // Recarrega a lista de insumos para refletir a nova quantidade disponível
+
+    } catch (error) {
+      console.error('Erro na retirada:', error);
+      setMessage(`Erro na retirada: ${error.message}`);
+      setMessageType('danger');
+    } finally {
+      //setLoading(false);
+    }
+  };
+
+
 const fetchedUnidadesMedida = useMemo(async () => {
       try {
           const response = await fetch('https://backend.cultivesmart.com.br/api/unidades-medida');
@@ -424,7 +495,11 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
 
   return (
     <CContainer>
-       
+                     {message && (
+                       <CAlert color={messageType} className="mb-3">
+                         {message}
+                       </CAlert>
+                     )}
         <CCol xs={12}>
             <CCard className="mb-4">
             <CCardHeader>
@@ -590,10 +665,14 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                                               Atualizar Especificação
                                             </CDropdownItem>
                                           )}
-                                            <CDropdownItem
+                                            <CDropdownItem 
+                                              onClick={() => handleRetiradaEstoqueModal(estoqueInsumo)}>
+                                              Retirada
+                                            </CDropdownItem>
+                                            {/* <CDropdownItem
                                               onClick={() => handleOpenImportPhotosModal(estoqueInsumo)}>
                                               Importar Fotos
-                                            </CDropdownItem>
+                                            </CDropdownItem> */}
                                             <CDropdownItem
                                               onClick={() => handleOpenDetailsModal(estoqueInsumo)}>
                                               Detalhes
@@ -855,6 +934,69 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
             </CModalFooter>
         </CModal>
 
+        
+            <CModal
+                alignment="center"
+                size="xl"
+                visible={showRetiradaEstoqueModal}
+                onClose={() => setShowRetiradaEstoqueModal(false)}
+                aria-labelledby="InsumoRetiradaModalLabel"
+            >
+                <CModalHeader>
+                <CModalTitle id="InsumoRetiradaModalLabel">Retirada do Estoque</CModalTitle>
+                </CModalHeader>
+                <CForm onSubmit={handleRetiradaEstoqueSubmit}>
+                    <CModalBody>
+                            <CContainer className="mt-4">
+                                <CRow className="justify-content-center">
+                                    <CCol md={8} lg={6}>                    
+                        
+                                        <div className="mb-3">
+                                            <CFormLabel htmlFor="quantidadeRetirada">Quantidade a Retirar:</CFormLabel>
+                                            <CInputGroup>
+                                            <CFormInput
+                                                type="number"
+                                                id="quantidadeRetirada"
+                                                value={quantidadeRetirada}
+                                                onChange={(e) => setQuantidadeRetirada(e.target.value)}
+                                                placeholder="Ex: 500"
+                                                step="0.01"
+                                                min="0.01"
+                                                required
+                                            />
+                                            <CInputGroupText>gramas</CInputGroupText>
+                                            </CInputGroup>
+                                        </div>
+                        
+                                        <div className="mb-3">
+                                            <CFormLabel htmlFor="motivoRetirada">Motivo da Retirada (Opcional):</CFormLabel>
+                                            <CFormInput
+                                            as="textarea"
+                                            id="motivoRetirada"
+                                            value={motivoRetirada}
+                                            onChange={(e) => setMotivoRetirada(e.target.value)}
+                                            rows="2"
+                                            placeholder="Ex: Plantio de nova safra, Descarte por perda, etc."
+                                            />
+                                        </div>
+                        
+                                        
+                                    </CCol>
+                                </CRow>
+                                </CContainer>
+                    </CModalBody>
+
+                    <CModalFooter>
+                        <CButton color="secondary" onClick={() => setShowDetailsModal(false)}>
+                            Fechar
+                        </CButton>
+                        <CButton color="primary" type="submit">
+                            Retirar do Estoque
+                        </CButton>
+                    </CModalFooter>
+                </CForm>
+            </CModal>
+        
     </CContainer>
     )
 
