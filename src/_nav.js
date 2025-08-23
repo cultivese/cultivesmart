@@ -80,6 +80,21 @@ const _nav = (userRole) => {
     //   roles: ['admin'],
     // },
     {
+    component: CNavGroup,
+    name: 'Produção',
+    to: '/producao',
+    icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
+    roles: ['admin', 'operador'],
+    items: [
+      {
+        component: CNavItem,
+        name: 'Cronograma',
+        to: '/producao/cronograma', // Nova rota
+        roles: ['admin', 'operador'], // Visível para admin e operador
+      }      
+    ],
+  },
+    {
       component: CNavGroup,
       name: 'Estoque',
       to: '/estoque',
@@ -89,21 +104,18 @@ const _nav = (userRole) => {
         component: CNavItem,
         name: 'Visão Geral',
         to: '/estoque/visao_geral',
-        icon: <CIcon icon={cilMonitor} customClassName="nav-icon" />,
         roles: ['admin'],
       },
       {
         component: CNavItem,
         name: 'Simular Cotação',
         to: '/estoque/simular_cotacao',
-        icon: <CIcon icon={cilCalculator} customClassName="nav-icon" />,
         roles: ['admin'],
       },
       {
         component: CNavItem,
         name: 'Gerenciador de Cotações',
         to: '/estoque/gerenciador_pedidos',
-        icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
         roles: ['admin'],
       }
     ],
@@ -118,14 +130,12 @@ const _nav = (userRole) => {
           component: CNavItem,
           name: 'Listar',
           to: '/insumos/listar',
-          icon: <CIcon icon={cilList} customClassName="nav-icon" />,
           roles: ['admin'],
         },
         {
           component: CNavItem,
           name: 'Cadastro',
           to: '/insumos/cadastrar',
-          icon: <CIcon icon={cilLeaf} customClassName="nav-icon" />,
           roles: ['admin'],
         },
       ],
@@ -140,14 +150,12 @@ const _nav = (userRole) => {
           component: CNavItem,
           name: 'Listar',
           to: '/fornecedores/listar',
-          icon: <CIcon icon={cilListNumbered} customClassName="nav-icon" />,
           roles: ['admin'],
         },
         {
           component: CNavItem,
           name: 'Cadastro',
           to: '/fornecedores/cadastro',
-          icon: <CIcon icon={cilPlus} customClassName="nav-icon" />,
           roles: ['admin'],
         },
       ],

@@ -26,6 +26,13 @@ const GerenciadorPedidos = React.lazy(() => import('./views/estoque/gerenciador_
 
 const InsumosEspecificacao = React.lazy(() => import('./views/estoque/especificacao/InsumosEspecificacao'))
 
+// Produção
+const VisaoGeralProducao = React.lazy(() => import('./views/producao/VisaoGeral'));
+const NovoLoteProducao = React.lazy(() => import('./views/producao/NovoLote'));
+const EncerrarLoteProducao = React.lazy(() => import('./views/producao/EncerrarLote'));
+const CronogramaProducao = React.lazy(() => import('./views/producao/CronogramaProducao')); // Importa o novo componente
+
+
 // Insumos
 const InsumosCadastro = React.lazy(() => import('./views/insumos/cadastro/InsumosCadastro'))
 const InsumosListar = React.lazy(() => import('./views/insumos/listar/InsumosListar'))
@@ -63,6 +70,13 @@ const routes = [
   { path: '/tarefas/historico', name: 'Histórico de Tarefas', element: HistoricoTarefa },
 
 
+  // Produção
+  { path: '/producao', name: 'Produção', element: VisaoGeralProducao, exact: true },
+  { path: '/producao/visao-geral', name: 'Visão Geral', element: VisaoGeralProducao },
+  { path: '/producao/cronograma', name: 'Cronograma', element: CronogramaProducao }, // Define a rota para o novo componente
+  { path: '/producao/novo-lote', name: 'Novo Lote', element: NovoLoteProducao },
+  { path: '/producao/encerrar-lote', name: 'Encerrar Lote', element: EncerrarLote },
+  
   // Plantio
   { path: '/plantio', name: 'Plantio', element: Cards, exact: true },
   { path: '/plantio/simular_cotacao', name: 'Simular Cotação', element: SimularCotacao },

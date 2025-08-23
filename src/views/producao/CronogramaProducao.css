@@ -1,0 +1,48 @@
+/* src/views/producao/CronogramaProducao.css */
+
+/* Ajusta o calendário para ocupar 100% da largura do contêiner */
+.cultive-smart-calendar {
+  width: 100%;
+  border: 1px solid var(--cui-border-color);
+  border-radius: var(--cui-border-radius);
+  font-family: inherit;
+}
+
+/* Centraliza os botões de navegação */
+.cultive-smart-calendar .react-calendar__navigation {
+  display: flex;
+  justify-content: center;
+}
+
+/* Estilo para cada dia do calendário */
+.cultive-smart-calendar .react-calendar__tile {
+  text-align: center;
+  padding: 10px 5px; /* Adiciona um padding para os badges */
+  height: 100px; /* Aumenta a altura para caber os badges */
+  position: relative;
+}
+
+/* Container para os badges de evento */
+.cultive-smart-calendar .event-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px; /* Espaçamento entre os badges */
+  margin-top: 5px;
+}
+
+/* Estilo para os badges de evento */
+.cultive-smart-calendar .event-badge {
+  font-size: 0.65rem;
+  padding: 3px 6px;
+  white-space: nowrap; /* Impede quebras de linha */
+  text-align: center;
+  border-radius: 0.25rem;
+}
+
+/* Estilo para o dia do calendário que está ativo/selecionado */
+.cultive-smart-calendar .react-calendar__tile--active,
+.cultive-smart-calendar .react-calendar__tile--hasActive {
+  background-color: var(--cui-info-bg-rgb, #e6f7ff);
+  color: var(--cui-info-text-rgb, #001f3f);
+}
