@@ -35,6 +35,28 @@ const _nav = (userRole) => {
   [
     // --- MENU PARA OPERADOR ---
     {
+      component: CNavGroup,
+      name: 'Lotes',
+      icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
+      roles: ['admin'],
+      items: [
+        {
+          component: CNavItem,
+          name: 'Tarefas',
+          to: '/configuracao/tarefas',
+          icon: <CIcon icon={cilListNumbered} customClassName="nav-icon" />,
+          roles: ['admin'],
+        },
+        {
+          component: CNavItem,
+          name: 'Cadastro de Lote',
+          to: '/lotes/cadastro',
+          icon: <CIcon icon={cilPlus} customClassName="nav-icon" />,
+          roles: ['admin'],
+        },
+      ],
+    },
+    {
       component: CNavTitle,
       name: 'Minhas Tarefas Diárias', // Título mais específico
       roles: ['operador'],
@@ -53,32 +75,6 @@ const _nav = (userRole) => {
       icon: <CIcon icon={cilCalendarCheck} customClassName="nav-icon" />,
       roles: ['operador'],
     },
-    // {
-    //   component: CNavTitle,
-    //   name: 'Plantio',
-    //   roles: ['admin'],
-    // },
-    // {
-    //   component: CNavItem,
-    //   name: 'Visão Geral',
-    //   to: '/plantio/visao_geral',
-    //   icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-    //   roles: ['admin'],
-    // },
-    // {
-    //   component: CNavItem,
-    //   name: 'Simular Plantio',
-    //   to: '/plantio/simular_plantio',
-    //   icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-    //   roles: ['admin'],
-    // },
-    // {
-    //   component: CNavItem,
-    //   name: 'Gerenciador de Plantios',
-    //   to: '/plantio/gerenciador_plantio',
-    //   icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
-    //   roles: ['admin'],
-    // },
     {
     component: CNavGroup,
     name: 'Produção',

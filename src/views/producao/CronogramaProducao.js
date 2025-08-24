@@ -1,7 +1,8 @@
 // src/views/producao/CronogramaProducao.js
 import React, { useState, useEffect } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css'; // Estilos padrão do calendário
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import {
   CContainer,
   CRow,
@@ -11,73 +12,49 @@ import {
   CCardBody,
   CBadge,
 } from '@coreui/react';
-import './CronogramaProducao.css'; // Arquivo de estilos customizado
+import './CronogramaProducao.css';
+
+// Função para buscar lotes reais da API
+const fetchLotes = async () => {
+  try {
+    const response = await fetch('https://backend.cultivesmart.com.br/api/lotes');
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar lotes:', error);
+    return [];
+  }
+};
 
 const CronogramaProducao = () => {
-  const [value, onChange] = useState(new Date());
+  const [events, setEvents] = useState([]);
 
-  // Função para determinar os eventos de um dia específico
-  const getEventsForDate = (date) => {
-    const day = date.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
-    const events = [];
-
-    // Lógica dos eventos baseada nos dias da semana
-    if (day === 1 || day === 5) { // Segunda ou Sexta
-      events.push({ type: 'plantio', label: 'Plantio' });
-    }
-
-    if (day === 3) { // Quarta
-      events.push({ type: 'desempilhamento-beterraba', label: 'Desempilhamento' });
-    }
-
-    if (day === 5) { // Sexta
-      events.push({ type: 'desempilhamento-repolho', label: 'Desempilhamento' });
-    }
-
-    // Você pode adicionar lógica para saída do blackout e colheita aqui
-    // Exemplo: se houver dados de lotes, você poderia fazer uma busca por lote
-    // Aqui, estamos usando uma lógica estática para a demonstração
-    // if (day === 2) { // Exemplo: colheita nas terças
-    //   events.push({ type: 'colheita', label: 'Colheita' });
-    // }
-
-    return events;
-  };
-
-  // Função para renderizar o conteúdo do tile (dia do calendário)
-  const tileContent = ({ date, view }) => {
-    if (view === 'month') {
-      const events = getEventsForDate(date);
-      if (events.length > 0) {
-        return (
-          <div className="event-container">
-            {events.map((event, index) => (
-              <CBadge key={index} color={getBadgeColor(event.type)} className="event-badge">
-                {event.label}
-              </CBadge>
-            ))}
-          </div>
-        );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const responseTarefas = await fetch('https://backend.cultivesmart.com.br/api/tarefas');
+        const tarefas = await responseTarefas.json();
+        // Mapeia tarefas para eventos do FullCalendar
+        const eventos = tarefas.map(tarefa => ({
+          title: `${tarefa.tipo.charAt(0).toUpperCase() + tarefa.tipo.slice(1)} lote ${tarefa.lote_id}`,
+          start: tarefa.data_agendada,
+          color: getEventColor(tarefa.tipo),
+        }));
+        setEvents(eventos);
+      } catch (error) {
+        setEvents([]);
       }
-    }
-    return null;
-  };
+    };
+    fetchData();
+  }, []);
 
-  // Função para retornar a cor do badge com base no tipo de evento
-  const getBadgeColor = (type) => {
+  const getEventColor = (type) => {
     switch (type) {
-      case 'plantio':
-        return 'success';
-      case 'desempilhamento-beterraba':
-        return 'warning';
-      case 'desempilhamento-repolho':
-        return 'primary';
-      case 'saida-blackout':
-        return 'info';
-      case 'colheita':
-        return 'danger';
-      default:
-        return 'secondary';
+      case 'plantio': return '#2ecc40';
+      case 'blackout': return '#222f3e';
+      case 'colheita': return '#e74c3c';
+      case 'desempilhamento': return '#f7b731';
+      default: return '#b2bec3';
     }
   };
 
@@ -92,11 +69,12 @@ const CronogramaProducao = () => {
             <CCardBody>
               <CRow className="justify-content-center">
                 <CCol md={10} lg={8}>
-                  <Calendar
-                    onChange={onChange}
-                    value={value}
-                    tileContent={tileContent}
-                    className="cultive-smart-calendar"
+                  <FullCalendar
+                    plugins={[dayGridPlugin, interactionPlugin]}
+                    initialView="dayGridMonth"
+                    locale="pt-br"
+                    events={events}
+                    height={600}
                   />
                 </CCol>
               </CRow>

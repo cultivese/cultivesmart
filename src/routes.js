@@ -44,14 +44,13 @@ const ProdutosListar = React.lazy(() => import('./views/produtos/listar/Produtos
 // Fornecedores
 const FornecedoresListar = React.lazy(() => import('./views/fornecedores/listar/FornecedoresListar'))
 const FornecedoresCadastro = React.lazy(() => import('./views/fornecedores/cadastro/FornecedoresCadastro'))
-
-// Clientes
-const ClientesListar = React.lazy(() => import('./views/clientes/listar/ClientesListar'))
-const ClientesCadastro = React.lazy(() => import('./views/clientes/cadastro/ClientesCadastro'))
-
 const ProducaoCadastro = React.lazy(() => import('./views/producao/cadastro/ProducaoCadastro'))
 
 const Cards = React.lazy(() => import('./views/base/cards/Cards'))
+
+import ConfigurarTarefas from './views/configuracao/ConfigurarTarefas';
+
+const CadastroLote = React.lazy(() => import('./views/lotes/CadastroLote'));
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -108,15 +107,11 @@ const routes = [
   { path: '/fornecedores/cadastro', name: 'Cadastro', element: FornecedoresCadastro },
   { path: '/fornecedores/listar', name: 'Listar', element: FornecedoresListar },
 
-  // Clientes
-  { path: '/clientes', name: 'Clientes', element: Cards, exact: true },
-  { path: '/clientes/cadastro', name: 'Cadastro', element: ClientesCadastro },
-  { path: '/clientes/listar', name: 'Listar', element: ClientesListar },
-  
-
   // Fornecedores
   { path: '/planejamento', name: 'Planejamento', element: Cards, exact: true },
   { path: '/planejamento/producao', name: 'Produção', element: ProducaoCadastro },
+  { path: '/configuracao/tarefas', name: 'Configuração de Tarefas', element: ConfigurarTarefas },
+  { path: '/lotes/cadastro', name: 'Cadastro de Lote', element: CadastroLote },
   
 ]
 

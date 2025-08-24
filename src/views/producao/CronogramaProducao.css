@@ -22,6 +22,13 @@
   position: relative;
 }
 
+/* Destaca visualmente o dia de plantio */
+.cultive-smart-calendar .react-calendar__tile.plantio-dia {
+  background: linear-gradient(90deg, #d4f8e8 60%, #b2f7ef 100%);
+  border: 2px solid #2ecc40;
+  box-shadow: 0 0 8px #2ecc4033;
+}
+
 /* Container para os badges de evento */
 .cultive-smart-calendar .event-container {
   display: flex;
@@ -38,6 +45,12 @@
   white-space: nowrap; /* Impede quebras de linha */
   text-align: center;
   border-radius: 0.25rem;
+}
+
+.cultive-smart-calendar .event-badge.plantio {
+  background-color: #2ecc40 !important;
+  color: #fff !important;
+  font-weight: bold;
 }
 
 /* Estilo para o dia do calendário que está ativo/selecionado */
