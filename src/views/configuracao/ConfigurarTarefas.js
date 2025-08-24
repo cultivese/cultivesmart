@@ -17,6 +17,21 @@ const ConfigurarTarefas = () => {
     ? tarefas.filter(t => t.lote_id === parseInt(loteSelecionado))
     : tarefas;
 
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'pending':
+        return <span className="badge bg-warning text-dark">Pendente</span>;
+      case 'active':
+        return <span className="badge bg-info text-dark">Em Andamento</span>;
+      case 'completed':
+        return <span className="badge bg-success">Concluída</span>;
+      case 'blocked':
+        return <span className="badge bg-danger">Bloqueada</span>;
+      default:
+        return <span className="badge bg-secondary">Desconhecido</span>;
+    }
+  };
+
   useEffect(() => {
     const fetchLotes = async () => {
       const response = await fetch('https://backend.cultivesmart.com.br/api/lotes');
@@ -54,6 +69,10 @@ const ConfigurarTarefas = () => {
                 <CTableHead>
                   <CTableRow>
                     <CTableHeaderCell>Lote</CTableHeaderCell>
+                    <CTableHeaderCell>Insumo</CTableHeaderCell>
+                    <CTableHeaderCell>Variedade</CTableHeaderCell>
+                    <CTableHeaderCell>Bandejas</CTableHeaderCell>
+                    <CTableHeaderCell>Sementes</CTableHeaderCell>
                     <CTableHeaderCell>Tipo</CTableHeaderCell>
                     <CTableHeaderCell>Descrição</CTableHeaderCell>
                     <CTableHeaderCell>Data</CTableHeaderCell>
@@ -61,15 +80,22 @@ const ConfigurarTarefas = () => {
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {tarefasFiltradas.map((tarefa) => (
-                    <CTableRow key={tarefa.id}>
-                      <CTableDataCell>{tarefa.lote?.nome || tarefa.lote_id}</CTableDataCell>
-                      <CTableDataCell>{tarefa.tipo}</CTableDataCell>
-                      <CTableDataCell>{tarefa.descricao}</CTableDataCell>
-                      <CTableDataCell>{tarefa.data_agendada}</CTableDataCell>
-                      <CTableDataCell>{tarefa.status}</CTableDataCell>
-                    </CTableRow>
-                  ))}
+                  {tarefasFiltradas.map((tarefa) => {
+                    const lote = tarefa.lote || {};
+                    return (
+                      <CTableRow key={tarefa.id}>
+                        <CTableDataCell>{lote.nome || tarefa.lote_id}</CTableDataCell>
+                        <CTableDataCell>{lote.insumo_nome || lote.insumo || '-'}</CTableDataCell>
+                        <CTableDataCell>{lote.variedade || '-'}</CTableDataCell>
+                        <CTableDataCell>{lote.bandejas_necessarias || '-'}</CTableDataCell>
+                        <CTableDataCell>{lote.sementes_necessarias || '-'}</CTableDataCell>
+                        <CTableDataCell>{tarefa.tipo}</CTableDataCell>
+                        <CTableDataCell>{tarefa.descricao}</CTableDataCell>
+                        <CTableDataCell>{tarefa.data_agendada}</CTableDataCell>
+                        <CTableDataCell>{getStatusLabel(tarefa.status)}</CTableDataCell>
+                      </CTableRow>
+                    );
+                  })}
                 </CTableBody>
               </CTable>
             </CCardBody>
