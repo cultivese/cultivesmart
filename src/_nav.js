@@ -36,7 +36,7 @@ const _nav = (userRole) => {
     // --- MENU PARA OPERADOR ---
     {
       component: CNavGroup,
-      name: 'Lotes',
+      name: 'Plantios', // Substitui "Lotes" por "Plantios"
       icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
       roles: ['admin'],
       items: [
@@ -49,7 +49,7 @@ const _nav = (userRole) => {
         },
         {
           component: CNavItem,
-          name: 'Cadastro de Lote',
+          name: 'Cadastro de Plantio', // Substitui "Cadastro de Lote" por "Cadastro de Plantio"
           to: '/lotes/cadastro',
           icon: <CIcon icon={cilPlus} customClassName="nav-icon" />,
           roles: ['admin'],

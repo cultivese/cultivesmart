@@ -15,14 +15,14 @@ import {
 import CIcon from '@coreui/icons-react';
 import { cilCheckCircle, cilBan } from '@coreui/icons';
 
-// Função para buscar lotes reais da API
-const fetchLotes = async () => {
+// Função para buscar plantios reais da API
+const fetchPlantios = async () => {
   try {
-    const response = await fetch('https://backend.cultivesmart.com.br/api/lotes');
+    const response = await fetch('https://backend.cultivesmart.com.br/api/plantios');
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Erro ao buscar lotes:', error);
+    console.error('Erro ao buscar plantios:', error);
     return [];
   }
 };
@@ -39,64 +39,113 @@ const fetchInsumosEspecificacoes = async () => {
   }
 };
 
-// Função para gerar tarefas agendadas para cada lote
-const gerarTarefasPorLote = (lotes, insumos, dataHoje) => {
+// Função para gerar tarefas agendadas para cada plantio
+const gerarTarefasPorPlantio = (plantios, insumos, dataHoje) => {
   const tarefas = [];
-  lotes.forEach(lote => {
-    const insumo = insumos.find(i => i.id === lote.insumoId);
+  plantios.forEach(plantio => {
+    const insumo = insumos.find(i => i.id === plantio.insumo_id);
     const espec = insumo && insumo.especificacoes && insumo.especificacoes[0];
     if (!espec) return;
-    // Plantio: só aparece no dia do plantio
-    if (
-      lote.dataPlantio.getFullYear() === dataHoje.getFullYear() &&
-      lote.dataPlantio.getMonth() === dataHoje.getMonth() &&
-      lote.dataPlantio.getDate() === dataHoje.getDate()
-    ) {
+    const dataPlantio = plantio.data_plantio ? new Date(plantio.data_plantio) : null;
+    // Plantio
+    if (dataPlantio &&
+      dataPlantio.getFullYear() === dataHoje.getFullYear() &&
+      dataPlantio.getMonth() === dataHoje.getMonth() &&
+      dataPlantio.getDate() === dataHoje.getDate()) {
       tarefas.push({
-        id: `plantio-${lote.id}`,
-        description: `Plantio do lote ${lote.id} - ${lote.nome} (${lote.variedade})`,
+        id: `plantio-${plantio.id}`,
+        description: `Plantio do plantio ${plantio.id} - ${plantio.nome} (${plantio.variedade})`,
         type: 'plantio',
         status: 'pending',
-        loteId: lote.id,
+        plantioId: plantio.id,
         details: `Utilizar especificação: ${espec.gramas_para_plantio || ''}g por bandeja.`
       });
     }
-    // Blackout: X dias após plantio
-    if (espec.dias_blackout && espec.dias_blackout > 0) {
-      const dataBlackout = new Date(lote.dataPlantio);
-      dataBlackout.setDate(dataBlackout.getDate() + espec.dias_blackout);
-      if (
-        dataBlackout.getFullYear() === dataHoje.getFullYear() &&
-        dataBlackout.getMonth() === dataHoje.getMonth() &&
-        dataBlackout.getDate() === dataHoje.getDate()
-      ) {
+    // Desempilhamento
+    if (espec.dias_pilha && espec.dias_pilha > 0 && dataPlantio) {
+      const dataDesempilhamento = new Date(dataPlantio);
+      dataDesempilhamento.setDate(dataDesempilhamento.getDate() + espec.dias_pilha);
+      if (dataDesempilhamento.getFullYear() === dataHoje.getFullYear() &&
+        dataDesempilhamento.getMonth() === dataHoje.getMonth() &&
+        dataDesempilhamento.getDate() === dataHoje.getDate()) {
         tarefas.push({
-          id: `blackout-${lote.id}`,
-          description: `Iniciar blackout do lote ${lote.id} - ${lote.nome} (${lote.variedade})`,
-          type: 'blackout',
+          id: `desempilhamento-${plantio.id}`,
+          description: `Desempilhamento do plantio ${plantio.id} - ${plantio.nome} (${plantio.variedade})`,
+          type: 'desempilhamento',
           status: 'pending',
-          loteId: lote.id,
-          details: `Após ${espec.dias_blackout} dias do plantio.`
+          plantioId: plantio.id,
+          details: `Após ${espec.dias_pilha} dias do plantio.`
         });
       }
     }
-    // Colheita: Y dias após plantio
-    if (espec.dias_colheita && espec.dias_colheita > 0) {
-      const dataColheita = new Date(lote.dataPlantio);
-      dataColheita.setDate(dataColheita.getDate() + espec.dias_colheita);
-      if (
-        dataColheita.getFullYear() === dataHoje.getFullYear() &&
-        dataColheita.getMonth() === dataHoje.getMonth() &&
-        dataColheita.getDate() === dataHoje.getDate()
-      ) {
+    // Blackout
+    if (espec.dias_blackout && espec.dias_blackout > 0 && dataPlantio) {
+      // Blackout simples
+      const dataBlackout = new Date(dataPlantio);
+      dataBlackout.setDate(dataBlackout.getDate() + espec.dias_blackout);
+      if (dataBlackout.getFullYear() === dataHoje.getFullYear() &&
+        dataBlackout.getMonth() === dataHoje.getMonth() &&
+        dataBlackout.getDate() === dataHoje.getDate()) {
         tarefas.push({
-          id: `colheita-${lote.id}`,
-          description: `Colheita do lote ${lote.id} - ${lote.nome} (${lote.variedade})`,
+          id: `blackout-${plantio.id}`,
+          description: `Iniciar blackout do plantio ${plantio.id} - ${plantio.nome} (${plantio.variedade})`,
+          type: 'blackout',
+          status: 'pending',
+          plantioId: plantio.id,
+          details: `Após ${espec.dias_blackout} dias do plantio.`
+        });
+      }
+      // Blackout após desempilhamento
+      if (espec.dias_pilha) {
+        const dataBlackout2 = new Date(dataPlantio);
+        dataBlackout2.setDate(dataBlackout2.getDate() + espec.dias_pilha + espec.dias_blackout);
+        if (dataBlackout2.getFullYear() === dataHoje.getFullYear() &&
+          dataBlackout2.getMonth() === dataHoje.getMonth() &&
+          dataBlackout2.getDate() === dataHoje.getDate()) {
+          tarefas.push({
+            id: `blackout2-${plantio.id}`,
+            description: `Blackout após desempilhamento do plantio ${plantio.id} - ${plantio.nome} (${plantio.variedade})`,
+            type: 'blackout',
+            status: 'pending',
+            plantioId: plantio.id,
+            details: `Após desempilhamento + ${espec.dias_blackout} dias.`
+          });
+        }
+      }
+    }
+    // Colheita
+    if (espec.dias_colheita && espec.dias_colheita > 0 && dataPlantio) {
+      // Colheita simples
+      const dataColheita = new Date(dataPlantio);
+      dataColheita.setDate(dataColheita.getDate() + espec.dias_colheita);
+      if (dataColheita.getFullYear() === dataHoje.getFullYear() &&
+        dataColheita.getMonth() === dataHoje.getMonth() &&
+        dataColheita.getDate() === dataHoje.getDate()) {
+        tarefas.push({
+          id: `colheita-${plantio.id}`,
+          description: `Colheita do plantio ${plantio.id} - ${plantio.nome} (${plantio.variedade})`,
           type: 'colheita',
           status: 'pending',
-          loteId: lote.id,
+          plantioId: plantio.id,
           details: `Após ${espec.dias_colheita} dias do plantio.`
         });
+      }
+      // Colheita após desempilhamento + blackout + colheita
+      if (espec.dias_pilha && espec.dias_blackout) {
+        const dataColheita2 = new Date(dataPlantio);
+        dataColheita2.setDate(dataColheita2.getDate() + espec.dias_pilha + espec.dias_blackout + espec.dias_colheita);
+        if (dataColheita2.getFullYear() === dataHoje.getFullYear() &&
+          dataColheita2.getMonth() === dataHoje.getMonth() &&
+          dataColheita2.getDate() === dataHoje.getDate()) {
+          tarefas.push({
+            id: `colheita2-${plantio.id}`,
+            description: `Colheita do plantio ${plantio.id} - ${plantio.nome} (${plantio.variedade})`,
+            type: 'colheita',
+            status: 'pending',
+            plantioId: plantio.id,
+            details: `Após desempilhamento + blackout + ${espec.dias_colheita} dias.`
+          });
+        }
       }
     }
   });
@@ -108,10 +157,10 @@ const TarefaDiaria = () => {
 
   useEffect(() => {
     const carregarTarefas = async () => {
-      const lotes = await fetchLotes();
+      const plantios = await fetchPlantios(); // API ainda retorna lotes, mas tratamos como plantios
       const insumos = await fetchInsumosEspecificacoes();
       const hoje = new Date();
-      const tarefasHoje = gerarTarefasPorLote(lotes, insumos, hoje);
+      const tarefasHoje = gerarTarefasPorPlantio(plantios, insumos, hoje);
       setTasks(tarefasHoje);
     };
     carregarTarefas();

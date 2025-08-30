@@ -34,11 +34,11 @@ import './CadastroLote.css';
 // Função para buscar lotes reais da API
 const fetchLotes = async () => {
   try {
-    const response = await fetch('https://backend.cultivesmart.com.br/api/lotes');
+    const response = await fetch('https://backend.cultivesmart.com.br/api/plantios');
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Erro ao buscar lotes:', error);
+    console.error('Erro ao buscar plantios:', error);
     return [];
   }
 };
@@ -131,14 +131,22 @@ const CadastroLote = () => {
   const [lotesLista, setLotesLista] = useState([]);
   const [modalTarefasVisible, setModalTarefasVisible] = useState(false);
   const [tarefasPreview, setTarefasPreview] = useState([]);
+  // Adiciona o estado para recorrencia
+  const [recorrencia, setRecorrencia] = useState('');
 
   useEffect(() => {
     const carregarTarefas = async () => {
       const lotes = await fetchLotes();
       const insumos = await fetchInsumosEspecificacoes();
       setInsumosLista(insumos);
+      // Corrige dataPlantio para Date e insumoId
+      const lotesComData = lotes.map(lote => ({
+        ...lote,
+        dataPlantio: lote.data_plantio ? new Date(lote.data_plantio) : (lote.dataPlantio ? new Date(lote.dataPlantio) : null),
+        insumoId: lote.insumo_id || lote.insumoId
+      }));
       const hoje = new Date();
-      const tarefasHoje = gerarTarefasPorLote(lotes, insumos, hoje);
+      const tarefasHoje = gerarTarefasPorLote(lotesComData, insumos, hoje);
       setTasks(tarefasHoje);
     };
     carregarTarefas();
@@ -147,24 +155,62 @@ const CadastroLote = () => {
   useEffect(() => {
     const carregarLotes = async () => {
       const lotes = await fetchLotes();
-      setLotesLista(lotes);
+      // Corrige dataPlantio para Date e insumoId
+      const lotesComData = lotes.map(lote => ({
+        ...lote,
+        dataPlantio: lote.data_plantio ? new Date(lote.data_plantio) : (lote.dataPlantio ? new Date(lote.dataPlantio) : null),
+        insumoId: lote.insumo_id || lote.insumoId
+      }));
+      setLotesLista(lotesComData);
     };
     carregarLotes();
   }, []);
 
   const handleNovoLoteChange = (e) => {
     const { name, value } = e.target;
-    setNovoLote((prev) => ({ ...prev, [name]: value }));
+    if (name === 'recorrencia') {
+      setRecorrencia(value);
+    } else {
+      setNovoLote((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleCadastrarLote = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
     // Validação dos campos obrigatórios
-    if (!novoLote.insumoId || !novoLote.nome || !novoLote.dataPlantio || !novoLote.gramasDesejadas || parseFloat(novoLote.gramasDesejadas) <= 0) {
-      alert('Preencha todos os campos obrigatórios e informe uma quantidade de gramas desejada maior que zero.');
+    if (!novoLote.insumoId || !novoLote.nome || !novoLote.dataPlantio || !novoLote.gramasDesejadas || !recorrencia || parseFloat(novoLote.gramasDesejadas) <= 0) {
+      alert('Preencha todos os campos obrigatórios, selecione uma recorrência e informe uma quantidade de gramas desejada maior que zero.');
       return;
     }
-    try {
+
+    // Lógica para recorrência
+    let datasPlantio = [];
+    const primeiraData = novoLote.dataPlantio instanceof Date ? novoLote.dataPlantio : new Date(novoLote.dataPlantio);
+    let meses = 0;
+    if (recorrencia === '1m') meses = 1;
+    else if (recorrencia === '3m') meses = 3;
+    else if (recorrencia === '6m') meses = 6;
+    else if (recorrencia === '1y') meses = 12;
+
+    if (meses > 0) {
+      for (let i = 0; i <= meses * 4; i++) { // 4 semanas por mês
+        const d = new Date(primeiraData);
+        d.setDate(d.getDate() + i * 7);
+        // Só adiciona se for segunda ou sexta
+        if (d.getDay() === 1 || d.getDay() === 5) {
+          datasPlantio.push(new Date(d));
+        }
+      }
+    } else {
+      datasPlantio = [primeiraData];
+    }
+
+    // Remove datas duplicadas e ordena
+    datasPlantio = Array.from(new Set(datasPlantio.map(d => d.toISOString().slice(0,10)))).map(d => new Date(d)).sort((a,b) => a-b);
+
+    for (const dataPlantio of datasPlantio) {
       // Busca especificação do insumo selecionado
       const insumo = insumosLista.find(i => i.id === parseInt(novoLote.insumoId));
       const espec = insumo && insumo.especificacoes && insumo.especificacoes[0];
@@ -176,32 +222,31 @@ const CadastroLote = () => {
       const sementesPorBandeja = espec.sementes_por_bandeja || 0;
       const totalSementes = bandejasNecessarias * sementesPorBandeja;
 
-      // Cria o lote
-      const loteResponse = await fetch('https://backend.cultivesmart.com.br/api/lotes', {
+      // Cria o plantio
+      const loteResponse = await fetch('https://backend.cultivesmart.com.br/api/plantios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           insumo_id: novoLote.insumoId,
           nome: novoLote.nome,
           variedade: novoLote.variedade,
-          data_plantio: novoLote.dataPlantio,
+          data_plantio: formatDateLocal(dataPlantio),
           gramas_desejadas: novoLote.gramasDesejadas,
           bandejas_necessarias: bandejasNecessarias,
           sementes_necessarias: totalSementes,
         }),
       });
-      if (!loteResponse.ok) throw new Error('Erro ao cadastrar lote');
+      if (!loteResponse.ok) throw new Error('Erro ao cadastrar plantio');
       const lote = await loteResponse.json();
 
       // Gera tarefas automáticas
       const tarefas = [];
-      const dataPlantio = new Date(novoLote.dataPlantio);
       // Plantio
       tarefas.push({
         lote_id: lote.id,
         tipo: 'plantio',
         descricao: `Plantio de ${bandejasNecessarias} bandejas (${totalSementes} sementes)`,
-        data_agendada: dataPlantio.toISOString().slice(0, 10),
+        data_agendada: formatDateLocal(dataPlantio),
         status: 'pending',
       });
       // Desempilhamento
@@ -212,7 +257,7 @@ const CadastroLote = () => {
           lote_id: lote.id,
           tipo: 'desempilhamento',
           descricao: `Desempilhar após ${espec.dias_pilha} dias em pilha`,
-          data_agendada: dataDesempilhamento.toISOString().slice(0, 10),
+          data_agendada: formatDateLocal(dataDesempilhamento),
           status: 'pending',
         });
       }
@@ -224,7 +269,7 @@ const CadastroLote = () => {
           lote_id: lote.id,
           tipo: 'blackout',
           descricao: `Blackout após desempilhamento por ${espec.dias_blackout} dias`,
-          data_agendada: dataBlackout.toISOString().slice(0, 10),
+          data_agendada: formatDateLocal(dataBlackout),
           status: 'pending',
         });
       }
@@ -236,7 +281,7 @@ const CadastroLote = () => {
           lote_id: lote.id,
           tipo: 'colheita',
           descricao: `Colheita após ${espec.dias_colheita} dias de blackout`,
-          data_agendada: dataColheita.toISOString().slice(0, 10),
+          data_agendada: formatDateLocal(dataColheita),
           status: 'pending',
         });
       }
@@ -248,17 +293,16 @@ const CadastroLote = () => {
           body: JSON.stringify(tarefa),
         });
       }
-      setNovoLote({ insumoId: '', nome: '', variedade: '', dataPlantio: '', gramasDesejadas: '' });
-      // Atualiza tarefas/lotes
-      const lotes = await fetchLotes();
-      const insumos = await fetchInsumosEspecificacoes();
-      const hoje = new Date();
-      const tarefasHoje = gerarTarefasPorLote(lotes, insumos, hoje);
-      setTasks(tarefasHoje);
-      alert('Lote e tarefas cadastrados com sucesso!');
-    } catch (error) {
-      alert(error.message);
     }
+
+    setNovoLote({ insumoId: '', nome: '', variedade: '', dataPlantio: '', gramasDesejadas: '' });
+    // Atualiza tarefas/lotes
+    const lotes = await fetchLotes();
+    const insumos = await fetchInsumosEspecificacoes();
+    const hoje = new Date();
+    const tarefasHoje = gerarTarefasPorLote(lotes, insumos, hoje);
+    setTasks(tarefasHoje);
+    alert('Plantios e tarefas cadastrados com sucesso!');
   };
 
   const handleNovaTarefaChange = (e) => {
@@ -791,6 +835,13 @@ const STOCK_IDS = {
   sementes_rucula: 2,
 };
 
+function formatDateLocal(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
   return (
     <CContainer>
       <CRow>
@@ -820,26 +871,25 @@ const STOCK_IDS = {
                   <CFormLabel>Data de Plantio</CFormLabel>
                   <CDatePicker
                     locale="pt-BR"
-                    date={novoLote.dataPlantio ? new Date(novoLote.dataPlantio) : null}
-                    calendarDate={novoLote.dataPlantio ? new Date(novoLote.dataPlantio) : undefined}
+                    date={novoLote.dataPlantio || null}
+                    calendarDate={novoLote.dataPlantio || undefined}
                     disabledDates={date => {
-                      // Permite apenas segunda (1) e sexta (5)
                       const day = date.getDay();
                       return !(day === 1 || day === 5);
                     }}
-                    onDateChange={date => handleNovoLoteChange({ target: { name: 'dataPlantio', value: date ? date.toISOString().slice(0, 10) : '' } })}
+                    onDateChange={date => {
+                      if (!date || (novoLote.dataPlantio && date.getTime() === novoLote.dataPlantio.getTime())) return;
+                      handleNovoLoteChange({ target: { name: 'dataPlantio', value: date } });
+                    }}
                     minDate={null}
                     maxDate={null}
                     id="coreuipro-datepicker-plantio"
                     required
                     placeholder="Selecione a data do plantio"
                     selectButtonText="Selecione a data do plantio"
-                    // Adiciona customDayClass para destacar segundas e sextas
                     customDayClass={date => {
                       const day = date.getDay();
-                      if (day === 1 || day === 5) {
-                        return 'cs-dia-destaque';
-                      }
+                      if (day === 1 || day === 5) return 'cs-dia-destaque';
                       return '';
                     }}
                   />
@@ -847,6 +897,16 @@ const STOCK_IDS = {
                 <CCol md={3}>
                   <CFormLabel>Gramas Desejadas</CFormLabel>
                   <CFormInput type="number" name="gramasDesejadas" value={novoLote.gramasDesejadas} onChange={handleNovoLoteChange} required />
+                </CCol>
+                <CCol md={3}>
+                  <CFormLabel>Recorrência</CFormLabel>
+                  <CFormSelect name="recorrencia" value={recorrencia || ''} onChange={handleNovoLoteChange} required>
+                    <option value="">Não repetir</option>
+                    <option value="1m">1 mês</option>
+                    <option value="3m">3 meses</option>
+                    <option value="6m">6 meses</option>
+                    <option value="1y">1 ano</option>
+                  </CFormSelect>
                 </CCol>
                 <CCol md={12}>
                   <CButton type="submit" color="primary">Visualizar Tarefas</CButton>
