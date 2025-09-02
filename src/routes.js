@@ -91,6 +91,7 @@ const routes = [
   { path: '/estoque', name: 'Estoque', element: Cards, exact: true },
   { path: '/estoque/visao_geral', name: 'Visão Geral', element: EstoqueVisaoGeral },
   //{ path: '/estoque/registrar', name: 'Registrar', element: EstoqueRegistrar },
+  { path: '/estoque/retirada', name: 'Retirada', element: EstoqueRegistrar },
   { path: '/estoque/listar', name: 'Registrar', element: ListarEstoque },
   { path: '/estoque/simular_cotacao', name: 'Simular Cotação', element: SimularCotacao },
   { path: '/estoque/gerenciador_pedidos', name: 'Gerenciador de Pedidos', element: GerenciadorPedidos },

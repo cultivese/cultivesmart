@@ -113,6 +113,12 @@ const _nav = (userRole) => {
         name: 'Gerenciador de Cotações',
         to: '/estoque/gerenciador_pedidos',
         roles: ['admin'],
+      },
+      {
+        component: CNavItem,
+        name: 'Retirada',
+        to: '/estoque/retirada',
+        roles: ['admin'],
       }
     ],
   },
