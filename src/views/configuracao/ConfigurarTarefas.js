@@ -14,7 +14,7 @@ const ConfigurarTarefas = () => {
   const [lotes, setLotes] = useState([]);
   const [loteSelecionado, setLoteSelecionado] = useState('');
   const tarefasFiltradas = loteSelecionado
-    ? tarefas.filter(t => t.lote_id === parseInt(loteSelecionado))
+    ? tarefas.filter(t => t.plantio_id === parseInt(loteSelecionado))
     : tarefas;
 
   const getStatusLabel = (status) => {
@@ -34,7 +34,7 @@ const ConfigurarTarefas = () => {
 
   useEffect(() => {
     const fetchLotes = async () => {
-      const response = await fetch('https://backend.cultivesmart.com.br/api/lotes');
+      const response = await fetch('https://backend.cultivesmart.com.br/api/plantios');
       const data = await response.json();
       setLotes(data);
     };
