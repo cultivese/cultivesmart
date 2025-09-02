@@ -136,6 +136,12 @@ const _nav = (userRole) => {
         },
         {
           component: CNavItem,
+          name: 'Especificação',
+          to: '/insumos/especificacao',
+          roles: ['admin'],
+        },
+        {
+          component: CNavItem,
           name: 'Cadastro',
           to: '/insumos/cadastrar',
           roles: ['admin'],
