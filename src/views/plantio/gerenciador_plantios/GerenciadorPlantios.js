@@ -111,28 +111,16 @@ const GerenciadorPlantios = () => {
 
   
   useEffect(() => {
-    const fetchAllQuantidades = async () => {
-      const allInsumos = items
-        .flatMap(item => item.insumos || [])
-        .filter((insumo, idx, arr) =>
-          insumo && arr.findIndex(i => i.insumo_id === insumo.insumo_id) === idx
-        ); // Unique by insumo_id
-
-      const quantidades = await Promise.all(
-        allInsumos.map(async (insumo) => {
-          if (!insumo || !insumo.insumo_id) return [insumo.insumo_id, null];
-          const quantidade = await fetchInsumoQuantidade(insumo.insumo_id);
-          return [insumo.insumo_id, quantidade];
-        })
-      );
-      // Build object from array of [id, quantidade]
-      const quantidadesObj = Object.fromEntries(quantidades);
-      setInsumoQuantidades(quantidadesObj);
-    };
-    if (items.length > 0) {
-      fetchAllQuantidades();
+    if (items.cotacao_insumos) {
+        items.cotacao_insumos.forEach(async (insumo) => {
+            const quantidade = await fetchInsumoQuantidade(insumo.id);
+            setInsumoQuantidades(prevQuantidades => ({
+                ...prevQuantidades,
+                [insumo.id]: quantidade
+            }));
+        });
     }
-  }, [items]);
+  }, [items.cotacao_insumos]);
 
 
   const limparFiltro = () => {

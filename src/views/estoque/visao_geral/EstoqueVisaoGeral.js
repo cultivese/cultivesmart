@@ -653,7 +653,7 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                                         <CIcon icon={cilOptions} />
                                         </CDropdownToggle>
                                         <CDropdownMenu>
-                                          {!hasEspecificacoes && (
+                                          {/* {!hasEspecificacoes && (
                                             <CDropdownItem
                                               onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, 'cadastrar')}>
                                               Cadastrar Especificação
@@ -664,11 +664,11 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                                               onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, 'atualizar')}>
                                               Atualizar Especificação
                                             </CDropdownItem>
-                                          )}
-                                            <CDropdownItem 
+                                          )} */}
+                                            {/* <CDropdownItem 
                                               onClick={() => handleRetiradaEstoqueModal(estoqueInsumo)}>
                                               Retirada
-                                            </CDropdownItem>
+                                            </CDropdownItem> */}
                                             {/* <CDropdownItem
                                               onClick={() => handleOpenImportPhotosModal(estoqueInsumo)}>
                                               Importar Fotos
