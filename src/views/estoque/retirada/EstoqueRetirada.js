@@ -78,6 +78,7 @@ const RetiradaEstoque = () => {
     setLoading(true);
 
     try {
+      
       const response = await fetch(`${API_BASE_URL}/estoque/${selectedInsumoId}/withdraw`, {
         method: 'POST',
         headers: {
