@@ -142,7 +142,6 @@ const InsumosEspecificacao = () => {
       <CTabList variant="tabs">
         <CTab itemKey="todos">Todos</CTab>
         <CTab itemKey="microverdes">Microverdes</CTab>
-        <CTab itemKey="flores_comestiveis">Flores comestíveis</CTab>
       </CTabList>
       <CTabContent>
         <CTabPanel className="p-3" itemKey="todos">
@@ -321,38 +320,6 @@ const InsumosEspecificacao = () => {
                     </CCard>
                   </CCol>
                 ))}              
-            </CRow>
-          </CTabPanel>
-          <CTabPanel className="p-3" itemKey="flores_comestiveis">
-          <CRow xs={{ cols: 1, gutter: 4 }} md={{ cols: 6 }}>
-            {getFilteredInsumos('flores_comestiveis').map((insumo) => (
-                <CCol style={{ width: '20rem' }} key={insumo.id}>
-                  <CCard>
-                        <CCardImage orientation="top" src={`data:image/png;base64,${insumo.logoPath}`} />
-                        <CCardBody>
-                          <CCardTitle>{insumo.nome}</CCardTitle>
-                          <CCardSubtitle>{insumo.variedade}</CCardSubtitle>
-                          <CCardText>
-                            {insumo.unidade_medida
-                            }
-                          </CCardText>
-                          {insumo.categoria_id === 1 || insumo.categoria_id === 2 ? (
-                              insumo.especificacoes && insumo.especificacoes.length > 0 ? (
-                                  <CBadge color="warning">Especificação já definida</CBadge>
-                              ) : (
-                                  <CBadge color="danger">Especificação a definir</CBadge>
-                              )
-                          ) : null}
-                        </CCardBody>
-                        <CCardFooter className="text-center">
-                          <CButton color="primary" onClick={() => handleOpenModal(insumo)}>
-                            Visualizar
-                          </CButton>
-                          
-                        </CCardFooter>
-                    </CCard>
-                </CCol>
-              ))}
             </CRow>
           </CTabPanel>
       </CTabContent>
