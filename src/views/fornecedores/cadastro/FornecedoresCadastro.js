@@ -18,12 +18,80 @@ import {
   CToastBody,
   CToastHeader,
   CToaster,
+  CFormSelect,
+  CModal,
+  CModalHeader,
+  CModalBody,
+  CModalFooter,
 } from '@coreui/react'
 import { useNavigate } from 'react-router-dom'
 
 import avatar8 from './../../../assets/images/microverdes/product_default.png'
 
+// Imagens ilustrativas para cada categoria (substitua pelos caminhos reais se desejar)
+const categoriaData = [
+  {
+    key: 'sementes',
+    nome: 'Sementes',
+    descricao: 'Pacotes de sementes específicas para microverdes, hortaliças e flores comestíveis.',
+    exemplos: 'Sementes de rúcula, coentro, beterraba, repolho roxo, girassol.',
+    contagem: 'peso (g ou kg)',
+    img: 'https://cdn-icons-png.flaticon.com/512/2909/2909765.png',
+  },
+  {
+    key: 'substrato',
+    nome: 'Substratos',
+    descricao: 'Meios de cultivo que dão suporte ao crescimento das plantas.',
+    exemplos: 'Pó de coco, lã de rocha, perlita, vermiculita.',
+    contagem: 'sacos, blocos ou volume (L)',
+    img: 'https://cdn-icons-png.flaticon.com/512/2909/2909772.png',
+  },
+  {
+    key: 'lampadas',
+    nome: 'Lâmpadas de Cultivo',
+    descricao: 'Equipamentos de iluminação usados para o crescimento indoor.',
+    exemplos: 'Lâmpadas LED full spectrum, painéis LED, luminárias de cultivo.',
+    contagem: 'unidades',
+    img: 'https://cdn-icons-png.flaticon.com/512/1046/1046857.png',
+  },
+  {
+    key: 'bandejas',
+    nome: 'Bandejas de Cultivo',
+    descricao: 'Estruturas para germinação e desenvolvimento dos microverdes.',
+    exemplos: 'Bandejas 1020, bandejas furadas e sem furos, estantes de cultivo.',
+    contagem: 'unidades',
+    img: 'https://cdn-icons-png.flaticon.com/512/2909/2909770.png',
+  },
+  {
+    key: 'equipamentos',
+    nome: 'Equipamentos e Acessórios',
+    descricao: 'Ferramentas e dispositivos de apoio ao cultivo.',
+    exemplos: 'Medidor de pH/EC, pulverizadores, bombas d’água, ventiladores, timers.',
+    contagem: 'unidades',
+    img: 'https://cdn-icons-png.flaticon.com/512/1046/1046876.png',
+  },
+  {
+    key: 'insumos',
+    nome: 'Insumos Operacionais',
+    descricao: 'Materiais de consumo e apoio logístico.',
+    exemplos: 'Embalagens, adesivos, rótulos, uniformes, EPIs.',
+    contagem: 'pacotes ou unidades',
+    img: 'https://cdn-icons-png.flaticon.com/512/1046/1046866.png',
+  },
+  {
+    key: 'adubos',
+    nome: 'Adubos e Fertilizantes',
+    descricao: 'Produtos que fornecem nutrientes e suporte extra para as plantas.',
+    exemplos: 'Adubo orgânico, fertilizante líquido, nutrientes hidropônicos, mudas de plantas.',
+    contagem: 'sacos, litros, unidades (mudas)',
+    img: 'https://cdn-icons-png.flaticon.com/512/2909/2909771.png',
+  },
+];
+
 const FornecedoresCadastro = () => {
+  const [categoria, setCategoria] = useState('');
+  const [categoriaInfo, setCategoriaInfo] = useState(null);
+  const [showCategoriaModal, setShowCategoriaModal] = useState(false);
   const [formData, setFormData] = useState({
     nome: '',
     cnpj: '',
@@ -67,6 +135,13 @@ const FornecedoresCadastro = () => {
     hiddenFileInput.current.click();
   };
 
+  const handleCategoriaCardClick = (cat) => {
+    setCategoria(cat.key);
+    setCategoriaInfo(cat);
+    setShowCategoriaModal(true);
+    setValidated(false);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     const form = event.currentTarget
@@ -74,10 +149,10 @@ const FornecedoresCadastro = () => {
       event.stopPropagation()
     } else {
       try {
-        const formDataToSend = new FormData(); // Use FormData para enviar arquivos
-        
+        const formDataToSend = new FormData();
+        formDataToSend.append('categoria', categoria);
         for (const key in formData) {
-          formDataToSend.append(key, formData[key]); // Append all data to FormData
+          formDataToSend.append(key, formData[key]);
         }
 
         const response = await fetch('https://backend.cultivesmart.com.br/api/fornecedores', {
@@ -150,74 +225,125 @@ const FornecedoresCadastro = () => {
 
   return (
     <>
-    <CForm className="row g-3 needs-validation" noValidate validated={validated} onSubmit={handleSubmit}>
-      <CToaster push={toast} placement="top-end" />
-      <CRow>
-        <CCol md={7} xs={12}>
-          <CCard className="mb-4">
-            <CCardHeader>
-              <strong>Fornecedor</strong> <small>Dados Básicos</small>
-            </CCardHeader>
-            <CCardBody>
-              <CTabContent className={`rounded-bottom`}>
-                <CTabPane className="p-3 preview" visible>
-                  <CRow className="g-0" xs={{gutterY: 3}}>
-                    <CCol md={4}>
-                      
-                      <CImage fluid  orientation="left" src={formData.logoUrl || avatar8}
-                        onClick={handleImageClick}
-                        style={{ cursor: 'pointer', maxHeight: '15em', width: '100%', objectFit: 'cover',
-                          height: '100%' }} />
-                        <input
-                        type="file"
-                        ref={hiddenFileInput}
-                        onChange={handleLogoChange}
-                        style={{ display: 'none' }}
-                        accept="image/*"
-                      />
-                    </CCol>
+      {/* Cards de categoria */}
+      {!categoria && (
+        <>
+          <h4 className="mb-4 text-center">Selecione a Categoria do Fornecedor</h4>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '2rem' }}>
+            {categoriaData.map((cat) => (
+              <div
+                key={cat.key}
+                onClick={() => handleCategoriaCardClick(cat)}
+                style={{
+                  width: 160,
+                  height: 200,
+                  border: '2px solid #e0e0e0',
+                  borderRadius: 16,
+                  boxShadow: '0 2px 8px #0001',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  background: '#fff',
+                  transition: 'box-shadow 0.2s',
+                }}
+              >
+                <img src={cat.img} alt={cat.nome} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: 16 }} />
+                <div style={{ textAlign: 'center', fontWeight: 600, fontSize: 16 }}>{cat.nome}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
-                    <CCol md={{ span: 6, offset: 1 }}>
-                    <CCol md={12} xs={12}>
-                        <CFormInput
+      {/* Modal informativo da categoria */}
+      <CModal visible={showCategoriaModal} onClose={() => setShowCategoriaModal(false)}>
+        <CModalHeader>
+          <strong>{categoriaInfo?.nome}</strong>
+        </CModalHeader>
+        <CModalBody>
+          <div style={{ textAlign: 'center' }}>
+            <img src={categoriaInfo?.img} alt={categoriaInfo?.nome} style={{ width: 80, height: 80, marginBottom: 16 }} />
+            <p><strong>Descrição:</strong> {categoriaInfo?.descricao}</p>
+            <p><strong>Exemplos:</strong> {categoriaInfo?.exemplos}</p>
+            <p><strong>Contagem:</strong> {categoriaInfo?.contagem}</p>
+          </div>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="primary" onClick={() => setShowCategoriaModal(false)}>
+            Prosseguir para cadastro
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* Formulário de cadastro */}
+      {categoria && !showCategoriaModal && (
+        <CForm className="row g-3 needs-validation" noValidate validated={validated} onSubmit={handleSubmit}>
+          <CToaster push={toast} placement="top-end" />
+          <CRow>
+            <CCol md={7} xs={12}>
+              <CCard className="mb-4">
+                <CCardHeader>
+                  <strong>Fornecedor</strong> <small>Dados Básicos</small>
+                </CCardHeader>
+                <CCardBody>
+                  <CTabContent className={`rounded-bottom`}>
+                    <CTabPane className="p-3 preview" visible>
+                      <CRow className="g-0" xs={{gutterY: 3}}>
+                        <CCol md={4}>
+                          <CImage fluid  orientation="left" src={formData.logoUrl || avatar8}
+                            onClick={handleImageClick}
+                            style={{ cursor: 'pointer', maxHeight: '15em', width: '100%', objectFit: 'cover', height: '100%' }} />
+                          <input
+                            type="file"
+                            ref={hiddenFileInput}
+                            onChange={handleLogoChange}
+                            style={{ display: 'none' }}
+                            accept="image/*"
+                          />
+                        </CCol>
+                        <CCol md={{ span: 6, offset: 1 }}>
+                          <CCol md={12} xs={12}>
+                            <CFormInput
                               type="text"
                               id="nome"
                               floatingClassName="mb-3"
                               floatingLabel="Nome"
                               value={formData.nome}
                               onChange={handleChange} required
-                        />
-                        <CFormFeedback valid>Looks good!</CFormFeedback>
-                      </CCol>
-                      <CCol md={8} xs={12}>
-                        <InputMask mask="99.999.999/9999-99" value={formData.cnpj} onChange={handleChange}>
-                            {(inputProps) => 
-                            <CFormInput {...inputProps}
-                              type="text"
-                              id="cnpj"
-                              floatingClassName="mb-3"
-                              floatingLabel="CNPJ"
-                              value={formData.cnpj}
-                              onChange={handleChange} required
-                            />}
-                        </InputMask>
-                        <CFormFeedback valid>Looks good!</CFormFeedback>
-                      </CCol>
-                      <CCol md={7} xs={7}>
-                        <InputMask mask="(99) 99999-9999" value={formData.telefone} onChange={handleChange}>
-                          {(inputProps) =>  <CFormInput {...inputProps} 
-                              type="text"
-                              id="telefone"
-                              floatingClassName="mb-3"
-                              floatingLabel="Telefone"
-                              value={formData.telefone}
-                              onChange={handleChange} required
-                            />}
-                        </InputMask>
-                        <CFormFeedback valid>Looks good!</CFormFeedback>
-                      </CCol>
-                      <CCol md={12} xs={12}>
-                        <CFormInput 
+                            />
+                            <CFormFeedback valid>Looks good!</CFormFeedback>
+                          </CCol>
+                          <CCol md={8} xs={12}>
+                            <InputMask mask="99.999.999/9999-99" value={formData.cnpj} onChange={handleChange}>
+                              {(inputProps) => 
+                                <CFormInput {...inputProps}
+                                  type="text"
+                                  id="cnpj"
+                                  floatingClassName="mb-3"
+                                  floatingLabel="CNPJ"
+                                  required
+                                />
+                              }
+                            </InputMask>
+                            <CFormFeedback valid>Looks good!</CFormFeedback>
+                          </CCol>
+                          <CCol md={7} xs={7}>
+                            <InputMask mask="(99) 99999-9999" value={formData.telefone} onChange={handleChange}>
+                              {(inputProps) =>  <CFormInput {...inputProps} 
+                                  type="text"
+                                  id="telefone"
+                                  floatingClassName="mb-3"
+                                  floatingLabel="Telefone"
+                                  value={formData.telefone}
+                                  onChange={handleChange} required
+                                />}
+                            </InputMask>
+                            <CFormFeedback valid>Looks good!</CFormFeedback>
+                          </CCol>
+                          <CCol md={12} xs={12}>
+                            <CFormInput 
                               type="email"
                               id="email"
                               floatingClassName="mb-3"
@@ -225,130 +351,123 @@ const FornecedoresCadastro = () => {
                               value={formData.email}
                               onChange={handleChange} required
                             />
-                        <CFormFeedback valid>Looks good!</CFormFeedback>
-                      </CCol>
-                    </CCol>
-                  </CRow>
-                </CTabPane>
-              </CTabContent>
-            </CCardBody>
-          </CCard>
-        </CCol>
-
-        <CCol md={5}>
-          <CCard className="mb-4">
-            <CCardHeader>
-              <strong>Fornecedor</strong> <small>Endereço</small>
-            </CCardHeader>
-            <CCardBody>
-              <CTabContent className={`rounded-bottom`}>
-                <CTabPane className="p-3 preview" visible>
-                    <CRow md={12}>
-                      <CCol md={4} xs={8}>
+                            <CFormFeedback valid>Looks good!</CFormFeedback>
+                          </CCol>
+                        </CCol>
+                      </CRow>
+                    </CTabPane>
+                  </CTabContent>
+                </CCardBody>
+              </CCard>
+            </CCol>
+            <CCol md={5}>
+              <CCard className="mb-4">
+                <CCardHeader>
+                  <strong>Fornecedor</strong> <small>Endereço</small>
+                </CCardHeader>
+                <CCardBody>
+                  <CTabContent className={`rounded-bottom`}>
+                    <CTabPane className="p-3 preview" visible>
+                      <CRow md={12}>
+                        <CCol md={4} xs={8}>
                           <InputMask
-                                mask="99999-999"
+                            mask="99999-999"
+                            value={formData.cep}
+                            onChange={handleChange}
+                            onBlur={handleCepBlur}
+                          >
+                            {(inputProps) => (
+                              <CFormInput
+                                {...inputProps}
+                                type="text"
+                                id="cep"
+                                floatingClassName="mb-3"
+                                floatingLabel="CEP"
                                 value={formData.cep}
                                 onChange={handleChange}
-                                onBlur={handleCepBlur} // Adiciona o evento onBlur
-                              >
-                                {(inputProps) => (
-                              <CFormInput
-                              {...inputProps}
-                              type="text"
-                              id="cep"
-                              floatingClassName="mb-3"
-                              floatingLabel="CEP"
-                              value={formData.cep}
-                              onChange={handleChange}
-                              onBlur={handleCepBlur}
-                              required
-                            />
-                          )}
+                                onBlur={handleCepBlur}
+                                required
+                              />
+                            )}
                           </InputMask>
                           <CFormFeedback valid>Looks good!</CFormFeedback>
-                      </CCol>
-                      
-                      <CCol md={12} xs={12}>
-                        <CFormInput
+                        </CCol>
+                        <CCol md={12} xs={12}>
+                          <CFormInput
                             type="text"
                             id="endereco"
                             floatingClassName="mb-3"
                             floatingLabel="Endereço"
                             value={formData.endereco}
                             onChange={handleChange} required
-                            />
-                        <CFormFeedback valid>Looks good!</CFormFeedback>
-                      </CCol>
-
-                      <CCol md={8} xs={12}>
-                        <CFormInput
-                              type="text"
-                              id="bairro"
-                              floatingClassName="mb-3"
-                              floatingLabel="Bairro"
-                              value={formData.bairro}
-                              onChange={handleChange} required
-                            />
-                        <CFormFeedback valid>Looks good!</CFormFeedback>
-                      </CCol>
-
-                      <CCol md={4} xs={6}>
-                      <CFormInput
-                              type="text"
-                              id="numero"
-                              floatingClassName="mb-3"
-                              floatingLabel="Número"
-                              value={formData.numero}
-                              onChange={handleChange} required
-                              />
-                        <CFormFeedback valid>Looks good!</CFormFeedback>
-                      </CCol>
-                      
-                      <CCol md={4} xs={6}>
-                        <CFormInput
-                              type="text"
-                              id="estado"
-                              floatingClassName="mb-3"
-                              floatingLabel="Estado"
-                              value={formData.estado}
-                              onChange={handleChange} required
-                            />
-                        <CFormFeedback valid>Looks good!</CFormFeedback>
-                      </CCol>
-                      <CCol md={8} xs={12}>
-                        <CFormInput 
-                              type="text"
-                              id="cidade"
-                              floatingClassName="mb-3"
-                              floatingLabel="Cidade"
-                              value={formData.cidade}
-                              onChange={handleChange} required
-                            />
-                        <CFormFeedback valid>Looks good!</CFormFeedback>
-                      </CCol>
-                    </CRow>
-
-                </CTabPane>
-              </CTabContent>
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
-
-      <CRow className="justify-content-end">
-        <CCol xs={1}>
-          <CButton color="secondary" type="reset">
-            Cancelar
-          </CButton>
-        </CCol>
-        <CCol xs={6}>
-          <CButton color="primary" type="submit">
-            Cadastrar
-          </CButton>
-        </CCol>
-      </CRow>
-      
-      </CForm>
+                          />
+                          <CFormFeedback valid>Looks good!</CFormFeedback>
+                        </CCol>
+                        <CCol md={8} xs={12}>
+                          <CFormInput
+                            type="text"
+                            id="bairro"
+                            floatingClassName="mb-3"
+                            floatingLabel="Bairro"
+                            value={formData.bairro}
+                            onChange={handleChange} required
+                          />
+                          <CFormFeedback valid>Looks good!</CFormFeedback>
+                        </CCol>
+                        <CCol md={4} xs={6}>
+                          <CFormInput
+                            type="text"
+                            id="numero"
+                            floatingClassName="mb-3"
+                            floatingLabel="Número"
+                            value={formData.numero}
+                            onChange={handleChange} required
+                          />
+                          <CFormFeedback valid>Looks good!</CFormFeedback>
+                        </CCol>
+                        <CCol md={4} xs={6}>
+                          <CFormInput
+                            type="text"
+                            id="estado"
+                            floatingClassName="mb-3"
+                            floatingLabel="Estado"
+                            value={formData.estado}
+                            onChange={handleChange} required
+                          />
+                          <CFormFeedback valid>Looks good!</CFormFeedback>
+                        </CCol>
+                        <CCol md={8} xs={12}>
+                          <CFormInput 
+                            type="text"
+                            id="cidade"
+                            floatingClassName="mb-3"
+                            floatingLabel="Cidade"
+                            value={formData.cidade}
+                            onChange={handleChange} required
+                          />
+                          <CFormFeedback valid>Looks good!</CFormFeedback>
+                        </CCol>
+                      </CRow>
+                    </CTabPane>
+                  </CTabContent>
+                </CCardBody>
+              </CCard>
+            </CCol>
+          </CRow>
+          <CRow className="justify-content-end">
+            <CCol xs={1}>
+              <CButton color="secondary" type="button" onClick={() => setCategoria('')}>
+                Cancelar
+              </CButton>
+            </CCol>
+            <CCol xs={6}>
+              <CButton color="primary" type="submit">
+                Cadastrar
+              </CButton>
+            </CCol>
+          </CRow>
+        </CForm>
+      )}
     </>
   )
 }

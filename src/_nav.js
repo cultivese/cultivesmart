@@ -119,7 +119,13 @@ const _nav = (userRole) => {
         name: 'Retirada',
         to: '/estoque/retirada',
         roles: ['admin'],
-      }
+      },
+        {
+          component: CNavItem,
+          name: 'Especificação',
+          to: '/fornecedores/especificacao',
+          roles: ['admin'],
+        },
     ],
   },
   // {
@@ -170,12 +176,6 @@ const _nav = (userRole) => {
           component: CNavItem,
           name: 'Catálogo de Produtos dos Fornecedores',
           to: '/fornecedores/catalogo_produtos',
-          roles: ['admin'],
-        },
-        {
-          component: CNavItem,
-          name: 'Especificação de Produtos dos Fornecedores',
-          to: '/fornecedores/especificacao',
           roles: ['admin'],
         },
         {
