@@ -246,14 +246,59 @@ const FornecedoresCadastro = () => {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   background: '#fff',
-                  transition: 'box-shadow 0.2s',
+                  transition: 'box-shadow 0.2s, border-color 0.2s, background 0.2s',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.boxShadow = '0 4px 16px #0002';
+                  e.currentTarget.style.borderColor = '#4f8cff';
+                  e.currentTarget.style.background = '#f4faff';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.boxShadow = '0 2px 8px #0001';
+                  e.currentTarget.style.borderColor = '#e0e0e0';
+                  e.currentTarget.style.background = '#fff';
                 }}
               >
-                <img src={cat.img} alt={cat.nome} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: 16 }} />
+                <img src={cat.img} alt={cat.nome} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: 16, transition: 'transform 0.2s' }} />
                 <div style={{ textAlign: 'center', fontWeight: 600, fontSize: 16 }}>{cat.nome}</div>
+                <div style={{ position: 'absolute', top: 8, right: 8, opacity: 0, transition: 'opacity 0.2s', pointerEvents: 'none' }} className="hover-indicator">Clique para selecionar</div>
               </div>
             ))}
           </div>
+          <style>{`
+            div[style*='cursor: pointer']::after {
+              content: '';
+              display: block;
+              position: absolute;
+              inset: 0;
+              border-radius: 16px;
+              pointer-events: none;
+              transition: box-shadow 0.2s;
+            }
+            div[style*='cursor: pointer']:hover::after {
+              box-shadow: 0 0 0 4px #4f8cff33;
+            }
+            div[style*='cursor: pointer']:hover .hover-indicator {
+              opacity: 1;
+              color: #4f8cff;
+              font-size: 13px;
+              font-weight: 500;
+              background: #eaf3ff;
+              border-radius: 8px;
+              padding: 2px 8px;
+              top: 8px;
+              right: 8px;
+            }
+            div[style*='cursor: pointer']:active {
+              background: #eaf3ff;
+              box-shadow: 0 2px 8px #4f8cff33;
+            }
+            div[style*='cursor: pointer']:focus {
+              outline: 2px solid #4f8cff;
+            }
+          `}</style>
         </>
       )}
 
