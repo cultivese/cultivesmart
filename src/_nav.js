@@ -169,19 +169,19 @@ const _nav = (userRole) => {
          {
           component: CNavItem,
           name: 'Catálogo de Produtos dos Fornecedores',
-          to: '/insumos/listar',
+          to: '/fornecedores/catalogo_produtos',
           roles: ['admin'],
         },
         {
           component: CNavItem,
           name: 'Especificação de Produtos dos Fornecedores',
-          to: '/insumos/especificacao',
+          to: '/fornecedores/especificacao',
           roles: ['admin'],
         },
         {
           component: CNavItem,
           name: 'Cadastro de Catálogo de Produtos de Fornecedores',
-          to: '/insumos/cadastrar',
+          to: '/fornecedores/cadastrar_catalogo_produtos',
           roles: ['admin'],
         },
       ],

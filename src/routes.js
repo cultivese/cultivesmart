@@ -40,9 +40,9 @@ const ProdutosListar = React.lazy(() => import('./views/produtos/listar/Produtos
 // Fornecedores
 const FornecedoresListar = React.lazy(() => import('./views/fornecedores/listar/FornecedoresListar'))
 const FornecedoresCadastro = React.lazy(() => import('./views/fornecedores/cadastro/FornecedoresCadastro'))
-const InsumosCadastro = React.lazy(() => import('./views/insumos/cadastro/InsumosCadastro'))
-const InsumosListar = React.lazy(() => import('./views/insumos/listar/InsumosListar'))
-const InsumosEspecificacao = React.lazy(() => import('./views/estoque/especificacao/InsumosEspecificacao'))
+const InsumosCadastro = React.lazy(() => import('./views/fornecedores/catalogo_produtos/InsumosCadastro'))
+const InsumosListar = React.lazy(() => import('./views/fornecedores/catalogo_produtos/InsumosListar'))
+const InsumosEspecificacao = React.lazy(() => import('./views/fornecedores/especificacao/InsumosEspecificacao'))
 
 // Clientes
 // const ClientesListar = React.lazy(() => import('./views/clientes/listar/ClientesListar'))
@@ -107,9 +107,9 @@ const routes = [
   { path: '/fornecedores', name: 'Fornecedores', element: FornecedoresListar, exact: true },
   { path: '/fornecedores/cadastro', name: 'Cadastro de Fornecedores', element: FornecedoresCadastro },
   { path: '/fornecedores/listar', name: 'Lista de Fornecedores', element: FornecedoresListar },
-  { path: '/insumos/listar', name: 'Listar', element: InsumosListar },
-  { path: '/insumos/especificacao', name: 'Especificação', element: InsumosEspecificacao },
-  { path: '/insumos/cadastrar', name: 'Cadastro de Produtos de Fornecedores', element: InsumosCadastro },
+  { path: '/fornecedores/catalogo_produtos', name: 'Catálogo de Produtos dos Fornececores', element: InsumosListar },
+  { path: '/fornecedores/especificacao', name: 'Especificação de Produtos dos Fornececores', element: InsumosEspecificacao },
+  { path: '/fornecedores/cadastrar_catalogo_produtos', name: 'Cadastro de Catálogo de Produtos de Fornecedores', element: InsumosCadastro },
   
   // Clientes
   // { path: '/clientes', name: 'Clientes', element: Cards, exact: true },
