@@ -16,6 +16,7 @@ const HistoricoTarefa  = React.lazy(() => import('./views/tarefas/historico/Hist
 const SimularPlantio  = React.lazy(() => import('./views/plantio/simular_plantio/SimularPlantio'))
 const GerenciadorPlantios  = React.lazy(() => import('./views/plantio/gerenciador_plantios/GerenciadorPlantios'))
 
+
 // Estoque
 const EstoqueVisaoGeral = React.lazy(() => import('./views/estoque/visao_geral/EstoqueVisaoGeral'))
 //const EstoqueRegistrar = React.lazy(() => import('./views/estoque/registrar/EstoqueRegistrar'))
@@ -25,18 +26,12 @@ const RetiradaEstoque = React.lazy(() => import('./views/estoque/retirada/Estoqu
 const GerenciadorPedidos = React.lazy(() => import('./views/estoque/gerenciador_pedidos/GerenciadorPedidos'))
 
 
-const InsumosEspecificacao = React.lazy(() => import('./views/estoque/especificacao/InsumosEspecificacao'))
-
 // Produção
 const VisaoGeralProducao = React.lazy(() => import('./views/producao/VisaoGeral'));
 const NovoLoteProducao = React.lazy(() => import('./views/producao/NovoLote'));
 const EncerrarLoteProducao = React.lazy(() => import('./views/producao/EncerrarLote'));
 const CronogramaProducao = React.lazy(() => import('./views/producao/CronogramaProducao')); // Importa o novo componente
 
-
-// Insumos
-const InsumosCadastro = React.lazy(() => import('./views/insumos/cadastro/InsumosCadastro'))
-const InsumosListar = React.lazy(() => import('./views/insumos/listar/InsumosListar'))
 
 // Produtos
 const ProdutosCadastro = React.lazy(() => import('./views/produtos/cadastro/ProdutosCadastro'))
@@ -45,6 +40,9 @@ const ProdutosListar = React.lazy(() => import('./views/produtos/listar/Produtos
 // Fornecedores
 const FornecedoresListar = React.lazy(() => import('./views/fornecedores/listar/FornecedoresListar'))
 const FornecedoresCadastro = React.lazy(() => import('./views/fornecedores/cadastro/FornecedoresCadastro'))
+const InsumosCadastro = React.lazy(() => import('./views/insumos/cadastro/InsumosCadastro'))
+const InsumosListar = React.lazy(() => import('./views/insumos/listar/InsumosListar'))
+const InsumosEspecificacao = React.lazy(() => import('./views/estoque/especificacao/InsumosEspecificacao'))
 
 // Clientes
 // const ClientesListar = React.lazy(() => import('./views/clientes/listar/ClientesListar'))
@@ -53,6 +51,7 @@ const FornecedoresCadastro = React.lazy(() => import('./views/fornecedores/cadas
 const ProducaoCadastro = React.lazy(() => import('./views/producao/cadastro/ProducaoCadastro'))
 
 const Cards = React.lazy(() => import('./views/base/cards/Cards'))
+const Fornecedores = React.lazy(() => import('./views/base/cards/Cards'))
 
 import ConfigurarTarefas from './views/configuracao/ConfigurarTarefas';
 
@@ -98,22 +97,20 @@ const routes = [
   { path: '/estoque/gerenciador_pedidos', name: 'Gerenciador de Pedidos', element: GerenciadorPedidos },
   
 
-  // Insumos
-  { path: '/insumos', name: 'Insumos', element: Cards, exact: true },
-  { path: '/insumos/listar', name: 'Listar', element: InsumosListar },
-  { path: '/insumos/especificacao', name: 'Especificação', element: InsumosEspecificacao },
-  { path: '/insumos/cadastrar', name: 'Cadastrar', element: InsumosCadastro },
-
+  
   // Produtos
   { path: '/produtos', name: 'Produtos', element: Cards, exact: true },
   { path: '/produtos/listar', name: 'Listar', element: ProdutosListar },  
   { path: '/produtos/cadastrar', name: 'Cadastrar', element: ProdutosCadastro },
-
+  
   // Fornecedores
-  { path: '/fornecedores', name: 'Fornecedores', element: Cards, exact: true },
-  { path: '/fornecedores/cadastro', name: 'Cadastro', element: FornecedoresCadastro },
-  { path: '/fornecedores/listar', name: 'Listar', element: FornecedoresListar },
-
+  { path: '/fornecedores', name: 'Fornecedores', element: FornecedoresListar, exact: true },
+  { path: '/fornecedores/cadastro', name: 'Cadastro de Fornecedores', element: FornecedoresCadastro },
+  { path: '/fornecedores/listar', name: 'Lista de Fornecedores', element: FornecedoresListar },
+  { path: '/insumos/listar', name: 'Listar', element: InsumosListar },
+  { path: '/insumos/especificacao', name: 'Especificação', element: InsumosEspecificacao },
+  { path: '/insumos/cadastrar', name: 'Cadastro de Produtos de Fornecedores', element: InsumosCadastro },
+  
   // Clientes
   // { path: '/clientes', name: 'Clientes', element: Cards, exact: true },
   // { path: '/clientes/cadastro', name: 'Cadastro', element: ClientesCadastro },

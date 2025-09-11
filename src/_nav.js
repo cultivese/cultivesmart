@@ -122,48 +122,66 @@ const _nav = (userRole) => {
       }
     ],
   },
-  {
-      component: CNavGroup,
-      name: 'Insumos',
-      to: '/insumos',
-      icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-      items: [
-         {
-          component: CNavItem,
-          name: 'Listar',
-          to: '/insumos/listar',
-          roles: ['admin'],
-        },
-        {
-          component: CNavItem,
-          name: 'Especificação',
-          to: '/insumos/especificacao',
-          roles: ['admin'],
-        },
-        {
-          component: CNavItem,
-          name: 'Cadastro',
-          to: '/insumos/cadastrar',
-          roles: ['admin'],
-        },
-      ],
-    },
+  // {
+  //     component: CNavGroup,
+  //     name: 'Insumos',
+  //     to: '/insumos',
+  //     icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  //     items: [
+  //        {
+  //         component: CNavItem,
+  //         name: 'Listar',
+  //         to: '/insumos/listar',
+  //         roles: ['admin'],
+  //       },
+  //       {
+  //         component: CNavItem,
+  //         name: 'Especificação',
+  //         to: '/insumos/especificacao',
+  //         roles: ['admin'],
+  //       },
+  //       {
+  //         component: CNavItem,
+  //         name: 'Cadastro',
+  //         to: '/insumos/cadastrar',
+  //         roles: ['admin'],
+  //       },
+  //     ],
+  //   },
 {
       component: CNavGroup,
       name: 'Fornecedores',
       to: '/fornecedores',
       icon: <CIcon icon={cilInstitution} customClassName="nav-icon" />,
       items: [
-         {
+        {
           component: CNavItem,
-          name: 'Listar',
-          to: '/fornecedores/listar',
+          name: 'Cadastro de Fornecedores',
+          to: '/fornecedores/cadastro',
           roles: ['admin'],
         },
         {
           component: CNavItem,
-          name: 'Cadastro',
-          to: '/fornecedores/cadastro',
+          name: 'Lista de Fornecedores',
+          to: '/fornecedores/listar',
+          roles: ['admin'],
+        },
+         {
+          component: CNavItem,
+          name: 'Catálogo de Produtos dos Fornecedores',
+          to: '/insumos/listar',
+          roles: ['admin'],
+        },
+        {
+          component: CNavItem,
+          name: 'Especificação de Produtos dos Fornecedores',
+          to: '/insumos/especificacao',
+          roles: ['admin'],
+        },
+        {
+          component: CNavItem,
+          name: 'Cadastro de Catálogo de Produtos de Fornecedores',
+          to: '/insumos/cadastrar',
           roles: ['admin'],
         },
       ],
