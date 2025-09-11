@@ -11,7 +11,7 @@ const FornecedoresListar = () => {
   const [records, setRecords] = useState(0)
 
   const columns = [
-    { key: 'logo', label: '', _style: { width: '60px', minWidth: '60px' } },
+    { key: 'logo', label: '', _style: { width: '60px', minWidth: '60px' }, filter: false },
     { key: 'nome', _style: { minWidth: '130px' } },
     { key: 'cnpj', _style: { minWidth: '130px' } },
     { key: 'telefone', _style: { minWidth: '130px' } },
