@@ -1,3 +1,9 @@
 .sidebar {
   --cui-sidebar-width: 30rem !important;
 }
+
+@media (min-width: 992px) {
+  .sidebar:not(.hide):not(.sidebar-narrow):not(.sidebar-narrow-unfoldable:not(:hover)):not(.sidebar-narrow-unfoldable):not(.sidebar-overlaid):not(.sidebar-end) ~ * {
+    --cui-sidebar-occupy-start: 30rem !important; /* Valor com !important */
+  }
+}
