@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react'
 import { CSmartTable } from '@coreui/react-pro'
 
@@ -11,7 +12,7 @@ const FornecedoresListar = () => {
   const [records, setRecords] = useState(0)
 
   const columns = [
-    { key: 'logo', label: '', _style: { width: '60px', minWidth: '60px' }, filter: false },
+    { key: 'id', _style: { minWidth: '130px' } },
     { key: 'nome', _style: { minWidth: '130px' } },
     { key: 'cnpj', _style: { minWidth: '130px' } },
     { key: 'telefone', _style: { minWidth: '130px' } },
@@ -51,26 +52,15 @@ const FornecedoresListar = () => {
       columns={columns}
       items={users}
       columnFilter
-      loading={loading}
+      loading = {loading}
       columnSorter
       pagination
       itemsPerPage={5}
       tableProps={{
         hover: true,
       }}
-      scopedColumns={{
-        logo: (item) => (
-          <td style={{ textAlign: 'center' }}>
-            <img
-              src={`data:image/png;base64,${item.logoPath}`}
-              alt={item.nome}
-              style={{ width: 100, height: 100, objectFit: 'cover', background: '#f4f4f4' }}
-            />
-          </td>
-        ),
-      }}
     />
-  ) 
+    ) 
 }
 
 export default FornecedoresListar
