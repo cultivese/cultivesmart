@@ -424,7 +424,7 @@ const handleBack = (e) => {
                                     <CCol xs={7} md={7}>
                                       <CCardBody>
                                         <CCardTitle>{insumo.nome}</CCardTitle>
-                                        <CCardSubtitle>Tipo: {insumo.variedade}</CCardSubtitle>
+                                        <CCardSubtitle>Variedade: {insumo.variedade}</CCardSubtitle>
                                         <CCardText>Fornecedor: {(() => {
                                           const fornecedor = fornecedores && fornecedores.records && fornecedores.records.length > 0
                                             ? fornecedores.records.find(f => f.id === insumo.fornecedor_id)
