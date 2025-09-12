@@ -490,8 +490,7 @@ const handleBack = (e) => {
                 <CCol md={4} xs={4}>
                   <CCard className="mb-4" style={{cursor: 'pointer'}}>
                       <CCardHeader>
-                        <strong>Informações - </strong>
-                        <small>Detalhes</small>
+                        <strong>Especificações do Produto</strong>
                       </CCardHeader>
                       <CCardBody>
                         <CRow>
@@ -520,44 +519,46 @@ const handleBack = (e) => {
                                 </CFormSelect>
                               </CPopover>
                           </CCol>
-                          <CCol md={5} xs={5}>
-                          <CPopover content="Qual a quantidade (Kg/g) do saco" placement="right" trigger={['hover', 'focus']}>
-                            <CFormInput
-                                type="numeric"
-                                id="quantidade"
-                                floatingClassName="mb-3"
-                                floatingLabel="Quantidade"
-                                value={formData.quantidade}
-                                onChange={handleChange}
-                                required
-                                className={stepErrors[activeStep] && (!formData.quantidade) ? 'is-invalid' : ''}
-                              />
-                            </CPopover>
-                          </CCol>
+                          
 
                           <CCol md={7} xs={7}>
                           <CPopover content="Qual a quantidade (Kg/g) do saco" placement="right" trigger={['hover', 'focus']}>
                             <CFormSelect
-	id="unidade_medida"
-	floatingLabel="Unidade de Medida"
-	aria-label="Floating label select example"
-	value={formData.unidade_medida}
-	title=''
-	onChange={(e) => {
-	handleChange(e);
-	}}
-	className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'mb-3 is-invalid' : 'mb-3'}
-	required
-	>
-	  <option value="" disabled>Escolha...</option>
-	  {
-        unidadesMedida && unidadesMedida.filter(unidadeMedida => parseInt(unidadeMedida.tipo_medida_id) === parseInt(formData.tipo_medida)).map((unidadeMedida) => {
-		  return (  
-			<option key={unidadeMedida.id} value={unidadeMedida.id}>{unidadeMedida.descricao}</option>
-		  )
-	  }
-	)}
-</CFormSelect>
+                              id="unidade_medida"
+                              floatingLabel="Unidade de Medida"
+                              aria-label="Floating label select example"
+                              value={formData.unidade_medida}
+                              title=''
+                              onChange={(e) => {
+                              handleChange(e);
+                              }}
+                              className={stepErrors[activeStep] && (!formData.unidade_medida) ? 'mb-3 is-invalid' : 'mb-3'}
+                              required
+                              >
+                                <option value="" disabled>Escolha...</option>
+                                {
+                                    unidadesMedida && unidadesMedida.filter(unidadeMedida => parseInt(unidadeMedida.tipo_medida_id) === parseInt(formData.tipo_medida)).map((unidadeMedida) => {
+                                  return (  
+                                  <option key={unidadeMedida.id} value={unidadeMedida.id}>{unidadeMedida.descricao}</option>
+                                  )
+                                }
+                              )}
+                            </CFormSelect>
+                            </CPopover>
+                          </CCol>
+                          
+                          <CCol md={5} xs={5}>
+                            <CPopover content="Qual a quantidade (Kg/g) do saco" placement="right" trigger={['hover', 'focus']}>
+                              <CFormInput
+                                  type="numeric"
+                                  id="quantidade"
+                                  floatingClassName="mb-3"
+                                  floatingLabel="Quantidade"
+                                  value={formData.quantidade}
+                                  onChange={handleChange}
+                                  required
+                                  className={stepErrors[activeStep] && (!formData.quantidade) ? 'is-invalid' : ''}
+                                />
                             </CPopover>
                           </CCol>
                           
@@ -577,7 +578,7 @@ const handleBack = (e) => {
                               />
                             </CPopover>
                           </CCol>
-                            <CCol md={12} className="mb-3">
+                            {/* <CCol md={12} className="mb-3">
                             <hr/>
                             </CCol>
                           <CCol md={12} className="mb-3">
@@ -608,7 +609,7 @@ const handleBack = (e) => {
                                     disabled={!aliquotaHabilitada}
                                   />
                                 </CPopover>
-                            </CCol>
+                            </CCol> */}
                             
                         </CRow>
                       </CCardBody>

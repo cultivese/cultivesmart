@@ -332,8 +332,8 @@ const handleBack = (e) => {
             <CCol xs={12}>
               <CCard className="mb-4">
                 <CCardHeader>
-                  <strong>Insumos - </strong>
-                  <small>Consulta de Insumos</small>
+                  <strong>Consulta - </strong>
+                  <small>Catálogo de Produtos de Fornecedores</small>
                 </CCardHeader>
                 <CCardBody>
                   <DocsExample href="components/card/#background-and-color">
@@ -424,32 +424,27 @@ const handleBack = (e) => {
                                     <CCol xs={7} md={7}>
                                       <CCardBody>
                                         <CCardTitle>{insumo.nome}</CCardTitle>
-                                        <CCardSubtitle>{insumo.variedade}</CCardSubtitle>
-                                        <CCardText>
-                                          {formatarPreco(insumo.preco)}
-                                        </CCardText>
-                                        <CCardText>
-                                          <small className="text-body-secondary">{insumo.quantidade}{getUnidadeMedidaDescricao(insumo.unidade_medida)} por und.</small>
-                                        </CCardText>
+                                        <CCardSubtitle>Tipo: {insumo.variedade}</CCardSubtitle>
+                                        <CCardText>Fornecedor: {(() => {
+                                          const fornecedor = fornecedores && fornecedores.records && fornecedores.records.length > 0
+                                            ? fornecedores.records.find(f => f.id === insumo.fornecedor_id)
+                                            : null;
+                                          return fornecedor ? fornecedor.nome : insumo.fornecedor_id;
+                                        })()}</CCardText>
+                                        <CCardText>Preço: {formatarPreco(insumo.preco)}</CCardText>
+                                        <CCardText>Quantidade: <small className="text-body-secondary">{insumo.quantidade}{getUnidadeMedidaDescricao(insumo.unidade_medida)} por und.</small></CCardText>
                                       </CCardBody>
                                     </CCol>
-                                    <CCol xs={1} md={1} >
-                                        <CDropdown alignment="end">
-                                          <CDropdownToggle color="transparent" caret={false} className="p-0">
-                                            <CIcon icon={cilOptions} />
-                                          </CDropdownToggle>
-                                          <CDropdownMenu>
-                                            <CDropdownItem
-                                                onClick={() => handleOpenAdditionalFieldsModal(insumo, 'visualizar')}>
-                                            Visualizar</CDropdownItem>
-                                            <CDropdownItem
-                                                onClick={() => handleOpenAdditionalFieldsModal(insumo, 'editar')}>
-                                            Atualizar Dados</CDropdownItem>
-                                            <CDropdownItem
-                                                onClick={() => handleDeleteInsumoById(insumo.id)}>
-                                            Excluir</CDropdownItem>
-                                          </CDropdownMenu>
-                                        </CDropdown>
+                                    <CCol xs={12} style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: 12 }}>
+                                      <CButton size="sm" color="info" variant="outline" onClick={() => handleOpenAdditionalFieldsModal(insumo, 'visualizar')}>
+                                        Visualizar
+                                      </CButton>
+                                      <CButton size="sm" color="warning" variant="outline" onClick={() => handleOpenAdditionalFieldsModal(insumo, 'editar')}>
+                                        Atualizar
+                                      </CButton>
+                                      <CButton size="sm" color="danger" variant="outline" onClick={() => handleDeleteInsumoById(insumo.id)}>
+                                        Excluir
+                                      </CButton>
                                     </CCol>
                                   </CRow>
                                 </CCard>
