@@ -185,7 +185,7 @@ const FornecedoresCadastro = () => {
                 style={{
                   width: 160,
                   height: 200,
-                  border: '2px solid #e0e0e0',
+                  border: categoria === cat.id ? '2px solid #4f8cff' : '2px solid #e0e0e0',
                   borderRadius: 16,
                   boxShadow: '0 2px 8px #0001',
                   display: 'flex',
@@ -201,12 +201,10 @@ const FornecedoresCadastro = () => {
                 onMouseEnter={e => {
                   e.currentTarget.style.boxShadow = '0 4px 16px #0002';
                   e.currentTarget.style.borderColor = '#4f8cff';
-                  e.currentTarget.style.background = '#f4faff';
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.boxShadow = '0 2px 8px #0001';
-                  e.currentTarget.style.borderColor = '#e0e0e0';
-                  e.currentTarget.style.background = '#fff';
+                  e.currentTarget.style.borderColor = categoria === cat.id ? '#4f8cff' : '#e0e0e0';
                 }}
               >
                 <img src={`data:image/png;base64,${cat.logoPath}`} alt={cat.descricao} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: 16, transition: 'transform 0.2s' }} />

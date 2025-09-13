@@ -344,14 +344,14 @@ const handleBack = (e) => {
                           <CCard
                             className={`categoria-card-insumos${filtroCategoria === categoria.id ? ' selected' : ''}`}
                             onClick={() => setFiltroCategoria(categoria.id)}
-                            color={filtroCategoria === categoria.id ? 'success' : 'light'}
-                            textColor={filtroCategoria === categoria.id ? 'white' : ''}
+                            color="light"
+                            textColor="dark"
                             style={{
                               cursor: 'pointer',
                               border: filtroCategoria === categoria.id ? '2px solid #4f8cff' : '2px solid #e0e0e0',
-                              boxShadow: filtroCategoria === categoria.id ? '0 4px 16px #4f8cff33' : '0 2px 8px #0001',
+                              boxShadow: '0 2px 8px #0001',
                               borderRadius: 16,
-                              transition: 'box-shadow 0.2s, border-color 0.2s, background 0.2s',
+                              transition: 'box-shadow 0.2s, border-color 0.2s',
                               display: 'flex',
                               flexDirection: 'column',
                               alignItems: 'center',
@@ -359,6 +359,7 @@ const handleBack = (e) => {
                               minHeight: 150,
                               minWidth: 120,
                               textAlign: 'center',
+                              background: '#fff',
                             }}
                           >
                             <CCardImage
@@ -414,8 +415,6 @@ const handleBack = (e) => {
                       background-color: #fff !important;
                     }
                     .categoria-card-insumos.selected {
-                      background: #eaf3ff !important;
-                      background-color: #eaf3ff !important;
                       border-color: #4f8cff !important;
                     }
                   `}</style>
