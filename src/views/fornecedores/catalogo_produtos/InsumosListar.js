@@ -342,6 +342,7 @@ const handleBack = (e) => {
                       {categorias && categorias.records && categorias.records.map((categoria) => (
                         <CCol key={categoria.id} lg={2} md={3} sm={4} xs={6} style={{ marginBottom: 16 }}>
                           <CCard
+                            className={`categoria-card-insumos${filtroCategoria === categoria.id ? ' selected' : ''}`}
                             onClick={() => setFiltroCategoria(categoria.id)}
                             color={filtroCategoria === categoria.id ? 'success' : 'light'}
                             textColor={filtroCategoria === categoria.id ? 'white' : ''}
@@ -358,7 +359,6 @@ const handleBack = (e) => {
                               minHeight: 150,
                               minWidth: 120,
                               textAlign: 'center',
-                              background: filtroCategoria === categoria.id ? '#eaf3ff' : '#fff',
                             }}
                           >
                             <CCardImage
@@ -408,7 +408,17 @@ const handleBack = (e) => {
                       </CCol>
                     </CRow>
                   </DocsExample>
-
+                  <style>{`
+                    .categoria-card-insumos {
+                      background: #fff !important;
+                      background-color: #fff !important;
+                    }
+                    .categoria-card-insumos.selected {
+                      background: #eaf3ff !important;
+                      background-color: #eaf3ff !important;
+                      border-color: #4f8cff !important;
+                    }
+                  `}</style>
                   <DocsExample href="components/card/#background-and-color">
                     <CRow xs={{ gutterY: 3}} className="justify-content-between">
                         {
