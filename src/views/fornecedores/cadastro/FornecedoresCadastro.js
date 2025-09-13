@@ -28,67 +28,8 @@ import { useNavigate } from 'react-router-dom'
 
 import avatar8 from './../../../assets/images/microverdes/product_default.png'
 
-// Imagens ilustrativas para cada categoria (substitua pelos caminhos reais se desejar)
-const categoriaData = [
-  {
-    key: 'sementes',
-    nome: 'Sementes',
-    descricao: 'Pacotes de sementes específicas para microverdes, hortaliças e flores comestíveis.',
-    exemplos: 'Sementes de rúcula, coentro, beterraba, repolho roxo, girassol.',
-    contagem: 'peso (g ou kg)',
-    img: 'https://cdn-icons-png.flaticon.com/512/2909/2909765.png',
-  },
-  {
-    key: 'substrato',
-    nome: 'Substratos',
-    descricao: 'Meios de cultivo que dão suporte ao crescimento das plantas.',
-    exemplos: 'Pó de coco, lã de rocha, perlita, vermiculita.',
-    contagem: 'sacos, blocos ou volume (L)',
-    img: 'https://cdn-icons-png.flaticon.com/512/2909/2909772.png',
-  },
-  {
-    key: 'lampadas',
-    nome: 'Lâmpadas de Cultivo',
-    descricao: 'Equipamentos de iluminação usados para o crescimento indoor.',
-    exemplos: 'Lâmpadas LED full spectrum, painéis LED, luminárias de cultivo.',
-    contagem: 'unidades',
-    img: 'https://cdn-icons-png.flaticon.com/512/1046/1046857.png',
-  },
-  {
-    key: 'bandejas',
-    nome: 'Bandejas de Cultivo',
-    descricao: 'Estruturas para germinação e desenvolvimento dos microverdes.',
-    exemplos: 'Bandejas 1020, bandejas furadas e sem furos, estantes de cultivo.',
-    contagem: 'unidades',
-    img: 'https://cdn-icons-png.flaticon.com/512/2909/2909770.png',
-  },
-  {
-    key: 'equipamentos',
-    nome: 'Equipamentos e Acessórios',
-    descricao: 'Ferramentas e dispositivos de apoio ao cultivo.',
-    exemplos: 'Medidor de pH/EC, pulverizadores, bombas d’água, ventiladores, timers.',
-    contagem: 'unidades',
-    img: 'https://cdn-icons-png.flaticon.com/512/1046/1046876.png',
-  },
-  {
-    key: 'insumos',
-    nome: 'Insumos Operacionais',
-    descricao: 'Materiais de consumo e apoio logístico.',
-    exemplos: 'Embalagens, adesivos, rótulos, uniformes, EPIs.',
-    contagem: 'pacotes ou unidades',
-    img: 'https://cdn-icons-png.flaticon.com/512/1046/1046866.png',
-  },
-  {
-    key: 'adubos',
-    nome: 'Adubos e Fertilizantes',
-    descricao: 'Produtos que fornecem nutrientes e suporte extra para as plantas.',
-    exemplos: 'Adubo orgânico, fertilizante líquido, nutrientes hidropônicos, mudas de plantas.',
-    contagem: 'sacos, litros, unidades (mudas)',
-    img: 'https://cdn-icons-png.flaticon.com/512/2909/2909771.png',
-  },
-];
-
 const FornecedoresCadastro = () => {
+  const [categorias, setCategorias] = useState([]);
   const [categoria, setCategoria] = useState('');
   const [categoriaInfo, setCategoriaInfo] = useState(null);
   const [showCategoriaModal, setShowCategoriaModal] = useState(false);
@@ -109,6 +50,15 @@ const FornecedoresCadastro = () => {
   const [toast, setToast] = useState(null)
   const navigate = useNavigate()
   const hiddenFileInput = useRef(null);
+
+  useEffect(() => {
+    fetch('https://backend.cultivesmart.com.br/api/categorias')
+      .then(response => response.json())
+      .then(data => {
+        setCategorias(data.records || []);
+      })
+      .catch(error => console.error('Erro ao buscar categorias:', error));
+  }, []);
 
   const handleChange = (e) => {
     const { id, value } = e.target
@@ -133,13 +83,6 @@ const FornecedoresCadastro = () => {
 
   const handleImageClick = () => {
     hiddenFileInput.current.click();
-  };
-
-  const handleCategoriaCardClick = (cat) => {
-    setCategoria(cat.key);
-    setCategoriaInfo(cat);
-    setShowCategoriaModal(true);
-    setValidated(false);
   };
 
   const handleSubmit = async (event) => {
@@ -230,10 +173,15 @@ const FornecedoresCadastro = () => {
         <>
           <h4 className="mb-4 text-center">Selecione a Categoria do Fornecedor</h4>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '2rem' }}>
-            {categoriaData.map((cat) => (
+            {categorias.map((cat) => (
               <div
-                key={cat.key}
-                onClick={() => handleCategoriaCardClick(cat)}
+                key={cat.id}
+                onClick={() => {
+                  setCategoria(cat.id);
+                  setCategoriaInfo(cat);
+                  setShowCategoriaModal(true);
+                  setValidated(false);
+                }}
                 style={{
                   width: 160,
                   height: 200,
@@ -261,8 +209,8 @@ const FornecedoresCadastro = () => {
                   e.currentTarget.style.background = '#fff';
                 }}
               >
-                <img src={cat.img} alt={cat.nome} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: 16, transition: 'transform 0.2s' }} />
-                <div style={{ textAlign: 'center', fontWeight: 600, fontSize: 16 }}>{cat.nome}</div>
+                <img src={`data:image/png;base64,${cat.logoPath}`} alt={cat.descricao} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: 16, transition: 'transform 0.2s' }} />
+                <div style={{ textAlign: 'center', fontWeight: 600, fontSize: 16 }}>{cat.descricao}</div>
                 <div style={{ position: 'absolute', top: 8, right: 8, opacity: 0, transition: 'opacity 0.2s', pointerEvents: 'none' }} className="hover-indicator">Clique para selecionar</div>
               </div>
             ))}
@@ -305,14 +253,12 @@ const FornecedoresCadastro = () => {
       {/* Modal informativo da categoria */}
       <CModal visible={showCategoriaModal} onClose={() => setShowCategoriaModal(false)}>
         <CModalHeader>
-          <strong>{categoriaInfo?.nome}</strong>
+          <strong>{categoriaInfo?.descricao}</strong>
         </CModalHeader>
         <CModalBody>
           <div style={{ textAlign: 'center' }}>
-            <img src={categoriaInfo?.img} alt={categoriaInfo?.nome} style={{ width: 80, height: 80, marginBottom: 16 }} />
+            <img src={`data:image/png;base64,${categoriaInfo?.logoPath}`} alt={categoriaInfo?.descricao} style={{ width: 80, height: 80, marginBottom: 16 }} />
             <p><strong>Descrição:</strong> {categoriaInfo?.descricao}</p>
-            <p><strong>Exemplos:</strong> {categoriaInfo?.exemplos}</p>
-            <p><strong>Contagem:</strong> {categoriaInfo?.contagem}</p>
           </div>
         </CModalBody>
         <CModalFooter>

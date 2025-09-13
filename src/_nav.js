@@ -96,22 +96,23 @@ const _nav = (userRole) => {
       to: '/estoque',
       icon: <CIcon icon={cilMenu} customClassName="nav-icon" />,
       items: [
-        {
-        component: CNavItem,
-        name: 'Visão Geral',
-        to: '/estoque/visao_geral',
-        roles: ['admin'],
-      },
+       
       {
         component: CNavItem,
-        name: 'Simular Cotação',
+        name: 'Cotar Produtos de Fornecedores',
         to: '/estoque/simular_cotacao',
         roles: ['admin'],
       },
       {
         component: CNavItem,
-        name: 'Gerenciador de Cotações',
+        name: 'Gerenciar e Aprovar Cotações',
         to: '/estoque/gerenciador_pedidos',
+        roles: ['admin'],
+      },
+       {
+        component: CNavItem,
+        name: 'Gerenciar Estoque Adquirido',
+        to: '/estoque/visao_geral',
         roles: ['admin'],
       },
       {
