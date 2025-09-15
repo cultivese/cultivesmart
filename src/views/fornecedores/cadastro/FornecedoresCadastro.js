@@ -194,7 +194,7 @@ const FornecedoresCadastro = () => {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   background: '#fff',
-                  transition: 'box-shadow 0.2s, border-color 0.2s, background 0.2s',
+                  transition: 'box-shadow 0.2s, border-color 0.2s',
                   position: 'relative',
                   overflow: 'hidden',
                 }}
@@ -214,35 +214,14 @@ const FornecedoresCadastro = () => {
             ))}
           </div>
           <style>{`
-            div[style*='cursor: pointer']::after {
-              content: '';
-              display: block;
-              position: absolute;
-              inset: 0;
-              border-radius: 16px;
-              pointer-events: none;
-              transition: box-shadow 0.2s;
-            }
-            div[style*='cursor: pointer']:hover::after {
-              box-shadow: 0 0 0 4px #4f8cff33;
-            }
-            div[style*='cursor: pointer']:hover .hover-indicator {
-              opacity: 1;
-              color: #4f8cff;
-              font-size: 13px;
-              font-weight: 500;
-              background: #eaf3ff;
-              border-radius: 8px;
-              padding: 2px 8px;
-              top: 8px;
-              right: 8px;
+            div[style*='cursor: pointer'] {
+              background: #fff !important;
             }
             div[style*='cursor: pointer']:active {
-              background: #eaf3ff;
-              box-shadow: 0 2px 8px #4f8cff33;
+              background: #fff !important;
             }
-            div[style*='cursor: pointer']:focus {
-              outline: 2px solid #4f8cff;
+            div[style*='cursor: pointer']:hover {
+              background: #fff !important;
             }
           `}</style>
         </>
@@ -250,18 +229,18 @@ const FornecedoresCadastro = () => {
 
       {/* Modal informativo da categoria */}
       <CModal visible={showCategoriaModal} onClose={() => setShowCategoriaModal(false)}>
-        <CModalHeader>
-          <strong>{categoriaInfo?.descricao}</strong>
-        </CModalHeader>
         <CModalBody>
-          <div style={{ textAlign: 'center' }}>
-            <img src={`data:image/png;base64,${categoriaInfo?.logoPath}`} alt={categoriaInfo?.descricao} style={{ width: 80, height: 80, marginBottom: 16 }} />
-            <p><strong>Descrição:</strong> {categoriaInfo?.descricao}</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, marginBottom: 20 }}>
+            <img src={`data:image/png;base64,${categoriaInfo?.logoPath}`} alt={categoriaInfo?.descricao} style={{ width: 90, height: 90, objectFit: 'contain' }} />
+            <span style={{ fontWeight: 700, fontSize: 26 }}>{categoriaInfo?.descricao}</span>
+          </div>
+          <div style={{ textAlign: 'left', margin: '0 8px 8px 8px' }}>
+            <span style={{ color: '#666', fontSize: 17 }}>{categoriaInfo?.comentarios}</span>
           </div>
         </CModalBody>
-        <CModalFooter>
+        <CModalFooter style={{ justifyContent: 'center' }}>
           <CButton color="primary" onClick={() => setShowCategoriaModal(false)}>
-            Prosseguir para cadastro
+            Entendi
           </CButton>
         </CModalFooter>
       </CModal>
