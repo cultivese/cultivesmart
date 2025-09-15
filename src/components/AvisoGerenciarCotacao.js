@@ -41,7 +41,7 @@ const AvisoGerenciarCotacao = (props) => (
             </li>
           </ul>
           <div style={{ fontSize: 15, color: '#888', marginTop: 10 }}>
-            <em>Você pode acompanhar e aprovar cada etapa na área de Gerenciamento de Cotações.</em>
+            <em>Você pode acompanhar e aprovar cada etapa no botão Visualizar das cotações abaixo.</em>
           </div>
         </div>
       </div>
