@@ -408,71 +408,69 @@ const items = useMemo(() => {
                 <CCardBody>
                   <DocsExample href="components/card/#background-and-color">
                     <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }} >
-
-                    { unidadesMedida && unidadesMedida &&
-                      categorias && categorias.records && categorias.records.map((categoria) => {
-                          return (
-                            <CCol
-                              key={categoria.id}
-                              color={ filtroCategoria === categoria.id ? 'success' : 'light'}
-                              style={{
+                      {categorias && categorias.records && categorias.records.map((categoria) => (
+                        <CCol key={categoria.id} lg={2} md={3} sm={4} xs={6} style={{ marginBottom: 16 }}>
+                          <div
+                            onClick={() => setFiltroCategoria(categoria.id)}
+                            style={{
+                              width: 160,
+                              height: 200,
+                              border: filtroCategoria === categoria.id ? '2px solid #4f8cff' : '2px solid #e0e0e0',
+                              borderRadius: 16,
+                              boxShadow: '0 2px 8px #0001',
                               display: 'flex',
                               flexDirection: 'column',
                               alignItems: 'center',
-                              textAlign: 'center',
-                              
-                          }}>
-                                  
-
-                              <CCol lg={4} onClick={() => { setFiltroCategoria(categoria.id); console.log('filtroCategoria:', categoria.id);  console.log('filtroCategoria:', filtroCategoria);}}>
-                                <CCardImage width="fit" orientation="top" src={`data:image/png;base64,${categoria.logoPath}`} />
-                              </CCol>
-                              <CCol>
-                                <CFormCheck
-                                    type='radio'
-                                    name="categoria"
-                                    id={`flexCheckChecked${categoria.id}`}
-                                    label={categoria.descricao}
-                                    value={categoria.id}
-                                    checked={filtroCategoria === categoria.id}
-                                    onChange={(e) => {setFiltroCategoria(e.target.value);  console.log('filtroCategoria:', categoria.id); console.log('filtroCategoria:', filtroCategoria);}}
-                                />
-                              </CCol>
-                            </CCol>
-                          );
-                        })}
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              background: '#fff',
+                              transition: 'box-shadow 0.2s, border-color 0.2s',
+                              position: 'relative',
+                              overflow: 'hidden',
+                            }}
+                            onMouseEnter={e => {
+                              e.currentTarget.style.boxShadow = '0 4px 16px #0002';
+                              e.currentTarget.style.borderColor = '#4f8cff';
+                            }}
+                            onMouseLeave={e => {
+                              e.currentTarget.style.boxShadow = '0 2px 8px #0001';
+                              e.currentTarget.style.borderColor = filtroCategoria === categoria.id ? '#4f8cff' : '#e0e0e0';
+                            }}
+                          >
+                            <img src={`data:image/png;base64,${categoria.logoPath}`} alt={categoria.descricao} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: 16, transition: 'transform 0.2s' }} />
+                            <div style={{ textAlign: 'center', fontWeight: 600, fontSize: 16 }}>{categoria.descricao}</div>
+                          </div>
+                        </CCol>
+                      ))}
                     </CRow>
-
+                    {/* Filtros de nome e fornecedor permanecem abaixo */}
                     <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }} >
                       <CCol>
                         <CFormInput
-                            type="text"
-                            size="lg"
-                            placeholder="Nome..."
-                            aria-label="lg input example"
-                            value={filtroNome}
-                            onChange={(e) => setFiltroNome(e.target.value)}
+                          type="text"
+                          size="lg"
+                          placeholder="Nome..."
+                          aria-label="lg input example"
+                          value={filtroNome}
+                          onChange={(e) => setFiltroNome(e.target.value)}
                         />
                       </CCol>
                       <CCol>
                         <CFormSelect
-                            size="lg"
-                            aria-label="Large select example"
-                            value={filtroFornecedor}
-                            onChange={(e) => setFiltroFornecedor(e.target.value)}
+                          size="lg"
+                          aria-label="Large select example"
+                          value={filtroFornecedor}
+                          onChange={(e) => setFiltroFornecedor(e.target.value)}
                         >
                           <option>Escolha o fornecedor...</option>
                           {fornecedores &&
-                              fornecedores.records &&
-                              fornecedores.records.length > 0 &&
-                              fornecedores.records.map((fornecedor) => {
-                                return (
-                                  <option key={fornecedor.id} value={fornecedor.id}>
-                                    {fornecedor.nome}
-                                  </option>
-                                )
-                            })
-                          }
+                            fornecedores.records &&
+                            fornecedores.records.length > 0 &&
+                            fornecedores.records.map((fornecedor) => (
+                              <option key={fornecedor.id} value={fornecedor.id}>
+                                {fornecedor.nome}
+                              </option>
+                            ))}
                         </CFormSelect>
                       </CCol>
                       <CCol>

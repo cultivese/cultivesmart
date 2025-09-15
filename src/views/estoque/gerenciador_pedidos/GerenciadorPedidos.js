@@ -11,6 +11,8 @@ CTable,
 CTableHead,
 CTableRow,
 CTableHeaderCell,
+CInputGroup,
+CInputGroupText,
 CTableBody,
 CTableDataCell, 
 CCol,
@@ -448,13 +450,13 @@ const GerenciadorPlantios = () => {
                   <CTable>
                     <CTableHead>
                       <CTableRow>
-                        <CTableHeaderCell scope="col" style={{width:'5%'}}>#</CTableHeaderCell>
-                        <CTableHeaderCell scope="col" style={{width:'20%'}}>Descrição do Insumo</CTableHeaderCell>
-                        <CTableHeaderCell scope="col" style={{width:'5%'}}>Quantidade</CTableHeaderCell>
-                        <CTableHeaderCell scope="col" style={{width:'5%'}}>Valor Unitário</CTableHeaderCell>
-                        <CTableHeaderCell scope="col" style={{width:'5%'}}>ICMS</CTableHeaderCell> {/* Alterado de "Desconto (R$)" para "ICMS" */}
-                        <CTableHeaderCell scope="col" style={{width:'5%'}}>Desconto (R$)</CTableHeaderCell> {/* Alterado de "ICMS" para "Desconto (R$)" */}
-                        <CTableHeaderCell scope="col" style={{width:'6%'}}>Valor Total Liq.</CTableHeaderCell>
+                        <CTableHeaderCell scope="col" style={{width:'3%'}}>#</CTableHeaderCell>
+                        <CTableHeaderCell scope="col" style={{width:'15%'}}>Descrição do Insumo</CTableHeaderCell>
+                        <CTableHeaderCell scope="col" style={{width:'2%'}}>Quantidade</CTableHeaderCell>
+                        <CTableHeaderCell scope="col" style={{width:'6%'}}>Valor Unitário</CTableHeaderCell>
+                        <CTableHeaderCell scope="col" style={{width:'6%'}}>ICMS</CTableHeaderCell> {/* Alterado de "Desconto (R$)" para "ICMS" */}
+                        <CTableHeaderCell scope="col" style={{width:'6%'}}>Desconto</CTableHeaderCell> {/* Alterado de "ICMS" para "Desconto (R$)" */}
+                        <CTableHeaderCell scope="col" style={{width:'7%'}}>Valor Total Liq.</CTableHeaderCell>
                       </CTableRow>
                     </CTableHead>
                     <CTableBody>
@@ -474,17 +476,22 @@ const GerenciadorPlantios = () => {
                               />
                             </CTableDataCell>
                             <CTableDataCell>
-                              <CFormInput
-                                type="number" // Alterado para number
-                                value={insumoValues[`${item.id}-${insumo.insumo_id}-preco`] !== undefined 
-                                         ? insumoValues[`${item.id}-${insumo.insumo_id}-preco`] 
-                                         : insumo.preco_unitario}
-                                onChange={(e) => handleInputChange(item, insumo, 'preco', e.target.value)}
-                                disabled={item.status.id !== 1}
-                              />
+                              <CInputGroup className="mb-3">
+                                <CInputGroupText>R$</CInputGroupText>
+                                <CFormInput
+                                  type="number" // Alterado para number
+                                  value={insumoValues[`${item.id}-${insumo.insumo_id}-preco`] !== undefined 
+                                          ? insumoValues[`${item.id}-${insumo.insumo_id}-preco`] 
+                                          : insumo.preco_unitario}
+                                  onChange={(e) => handleInputChange(item, insumo, 'preco', e.target.value)}
+                                  disabled={item.status.id !== 1}
+                                />
+                              </CInputGroup>
                             </CTableDataCell>
                             <CTableDataCell>
-                              <CFormInput
+                              <CInputGroup className="mb-3">
+                                <CInputGroupText>R$</CInputGroupText>
+                                <CFormInput
                                 type="number" // Alterado para number
                                 value={insumoValues[`${item.id}-${insumo.insumo_id}-imposto`] !== undefined 
                                          ? insumoValues[`${item.id}-${insumo.insumo_id}-imposto`] 
@@ -492,9 +499,13 @@ const GerenciadorPlantios = () => {
                                 onChange={(e) => handleInputChange(item, insumo, 'imposto', e.target.value)}
                                 disabled={item.status.id !== 1}
                               />
+                              </CInputGroup>
+                              
                             </CTableDataCell>
                             <CTableDataCell>
-                              <CFormInput
+                              <CInputGroup className="mb-3">
+                                <CInputGroupText>R$</CInputGroupText>
+                                <CFormInput
                                 type="number" // Alterado para number
                                 value={insumoValues[`${item.id}-${insumo.insumo_id}-desconto`] !== undefined 
                                          ? insumoValues[`${item.id}-${insumo.insumo_id}-desconto`] 
@@ -502,9 +513,12 @@ const GerenciadorPlantios = () => {
                                 onChange={(e) => handleInputChange(item, insumo, 'desconto', e.target.value)}
                                 disabled={item.status.id !== 1}
                               />
+                              </CInputGroup>
                             </CTableDataCell>
                             <CTableDataCell>
-                              <CFormInput
+                              <CInputGroup className="mb-3">
+                                <CInputGroupText>R$</CInputGroupText>
+                                <CFormInput
                                 type="text"
                                 value={(valorTotalLiquidoValues[`${item.id}-${insumo.insumo_id}-valorTotalLiquido`] !== undefined
                                         ? valorTotalLiquidoValues[`${item.id}-${insumo.insumo_id}-valorTotalLiquido`]
@@ -513,6 +527,8 @@ const GerenciadorPlantios = () => {
                                 readOnly // Torna o campo somente leitura
                                 disabled={item.status.id !== 1}
                               />
+                              </CInputGroup>
+                              
                             </CTableDataCell>
                           </CTableRow>
                         ))
