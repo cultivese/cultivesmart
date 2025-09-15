@@ -15,12 +15,22 @@ const AvisoCotacao = (props) => (
         />
       </div>
       <div className="col-md col-12 px-lg-4">
-        <h3>Como funciona o Gerenciador de Cotações</h3>
+        <h3>Como funciona a Cotação de Produtos de Fornecedores</h3>
         <p>
           Crie sua cotação, envie ao fornecedor e acompanhe o retorno sobre
           disponibilidade. Quando o pedido chegar, finalize registrando a nota
-          fiscal. (este texto vai em cima do campo para descrever)
+          fiscal no Gerenciador de Aprovador de Cotações.
         </p>
+      </div>
+       <div className="col-md-auto col-12 mt-3 mt-lg-0">
+        <a
+          className="btn btn-primary text-nowrap text-white"
+          href={`https://coreui.io/react/docs/${props.href}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Gerenciar e Aprovar Cotações
+        </a>
       </div>
     </div>
   </div>

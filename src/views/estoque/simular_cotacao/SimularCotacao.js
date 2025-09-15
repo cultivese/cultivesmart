@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import CIcon from '@coreui/icons-react';
+import { AvisoCotacao } from 'src/components'
 import {
   cilCaretTop,
   cilCaretBottom,
@@ -396,7 +397,7 @@ const items = useMemo(() => {
   
   return (
     <CContainer>
-     
+      <AvisoCotacao href="components/buttons/" />
       <CForm onSubmit={handleSubmit} className="row g-3">
           
             <CCol xs={12}>
