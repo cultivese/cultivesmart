@@ -237,6 +237,12 @@ const FornecedoresCadastro = () => {
           <div style={{ textAlign: 'left', margin: '0 8px 8px 8px' }}>
             <span style={{ color: '#666', fontSize: 17 }}>{categoriaInfo?.comentarios}</span>
           </div>
+          <div style={{ textAlign: 'left', margin: '0 8px 8px 8px' }}>
+            <b>Exemplos: </b><span style={{ color: '#666', fontSize: 17 }}>{categoriaInfo?.exemplos}</span>
+          </div>
+          <div style={{ textAlign: 'left', margin: '0 8px 8px 8px' }}>
+            <b>Contagem: </b><span style={{ color: '#666', fontSize: 17 }}>{categoriaInfo?.contagem}</span>
+          </div>
         </CModalBody>
         <CModalFooter style={{ justifyContent: 'center' }}>
           <CButton color="primary" onClick={() => setShowCategoriaModal(false)}>
