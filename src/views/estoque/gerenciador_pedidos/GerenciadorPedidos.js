@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { CAvatar, CBadge, CButton, CCollapse, CSmartTable } from '@coreui/react-pro'
+import { AvisoCotacao } from 'src/components'
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
 CCardImage,
@@ -305,6 +306,8 @@ const GerenciadorPlantios = () => {
   };
 
   return (
+    <CRow>
+      <AvisoCotacao href="components/buttons/" />
       <CSmartTable
         cleaner
         onClean={() => limparFiltro()}
@@ -553,6 +556,8 @@ const GerenciadorPlantios = () => {
           className: 'align-middle',
         }}
       />
+
+    </CRow>
   )
 };
 

@@ -11,6 +11,7 @@ import DocsExample from './DocsExample'
 import EstoqueArea from './EstoqueArea'
 import OrcamentoArea from './OrcamentoArea'
 import FiltroCategoriaInsumo from './FiltroCategoriaInsumo'
+import AvisoCotacao from './AvisoCotacao'
 
 export {
   AppBreadcrumb,
@@ -26,4 +27,5 @@ export {
   EstoqueArea,
   OrcamentoArea,
   FiltroCategoriaInsumo,
+  AvisoCotacao,
 }
