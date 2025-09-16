@@ -23,14 +23,17 @@ CFormLabel
 
 const getBadge = (status) => {
   switch (status) {
-    case 'aprovado': {
-      return 'success'
+    case 'pendente de aprovação': {
+      return 'primary'
     }
-    case 'pendente': {
+    case 'enviada ao fornecedor': {
       return 'warning'
     }
-    case 'cancelado': {
+    case 'aguardando pedido': {
       return 'danger'
+    }
+    case 'pedido finalizado': {
+      return 'success'
     }
     default: {
       return 'primary'
@@ -56,14 +59,14 @@ const GerenciadorPlantios = () => {
   const [valorTotalLiquidoValues, setValorTotalLiquidoValues] = useState({}); // Novo estado para Valor Total Líquido
 
   const columns = [
-    { key: 'id', _style: { width: '10%' }, label: 'Id' },
+    { key: 'id', _style: { width: '8%' }, label: 'Id' },
     { key: 'nota_fiscal', _style: { width: '15%' }, label: 'Nota Fiscal'},
     { key: 'nome_fornecedor', _style: { width: '20%' }, label: 'Fornecedor'},
-    { key: 'data_validade', _style: { width: '15%' }, label: 'Data Validade' },
-    { key: 'total_bruto', _style: { width: '15%' }, label: 'Total Bruto' },
-    { key: 'icms', _style: { width: '15%' }, label: 'ICMS' },
-    { key: 'desconto', _style: { width: '15%' }, label: 'Total Desconto' },
-    { key: 'total_liquido', _style: { width: '15%' }, label: 'Total Líquido' },
+    { key: 'data_validade', _style: { width: '14%' }, label: 'Data Validade' },
+    { key: 'total_bruto', _style: { width: '14%' }, label: 'Total Bruto' },
+    { key: 'icms', _style: { width: '10%' }, label: 'ICMS' },
+    { key: 'desconto', _style: { width: '12%' }, label: 'Desconto' },
+    { key: 'total_liquido', _style: { width: '20%' }, label: 'Total Líq.' },
     { key: 'status', _style: { width: '20%' }, label: 'Status'},
     { key: 'show_details', label: '', _style: { width: '1%' }, filter: false, sorter: false },
   ]

@@ -16,32 +16,43 @@ const AvisoGerenciarCotacao = (props) => (
       </div>
       <div className="col-md col-12 px-lg-4">
         <h3 style={{ marginBottom: 12 }}>Como funciona o Gerenciador de Cotações</h3>
-        <div style={{ fontSize: 16, color: '#333' }}>
-          <strong>Status do Pedido:</strong>
-          <ul style={{ listStyle: 'none', paddingLeft: 0, marginTop: 10, marginBottom: 10 }}>
-            <li style={{ marginBottom: 6 }}>
-              <span style={{ fontSize: 22, verticalAlign: 'middle' }}>🔵</span>
-              <span style={{ marginLeft: 8, fontWeight: 500 }}>Cotação criada</span>
-              <span style={{ marginLeft: 8, color: '#666' }}>– Simulação gerada no sistema, ainda não enviada ao fornecedor.</span>
-            </li>
-            <li style={{ marginBottom: 6 }}>
-              <span style={{ fontSize: 22, verticalAlign: 'middle' }}>🟡</span>
-              <span style={{ marginLeft: 8, fontWeight: 500 }}>Enviada ao fornecedor</span>
-              <span style={{ marginLeft: 8, color: '#666' }}>– Cotação foi enviada e está aguardando retorno.</span>
-            </li>
-            <li style={{ marginBottom: 6 }}>
-              <span style={{ fontSize: 22, verticalAlign: 'middle' }}>🟠</span>
-              <span style={{ marginLeft: 8, fontWeight: 500 }}>Disponibilidade confirmada</span>
-              <span style={{ marginLeft: 8, color: '#666' }}>– Fornecedor confirmou a possibilidade de atender.</span>
-            </li>
-            <li style={{ marginBottom: 6 }}>
-              <span style={{ fontSize: 22, verticalAlign: 'middle' }}>🟢</span>
-              <span style={{ marginLeft: 8, fontWeight: 500 }}>Pedido finalizado</span>
-              <span style={{ marginLeft: 8, color: '#666' }}>– Mercadoria recebida e nota fiscal vinculada.</span>
-            </li>
-          </ul>
-          <div style={{ fontSize: 15, color: '#888', marginTop: 10 }}>
-            <em>Você pode acompanhar e aprovar cada etapa no botão Visualizar das cotações abaixo.</em>
+        <div className="row" style={{ display: 'flex', flexWrap: 'wrap' }}>
+          <div className="col-md-5 col-12" style={{ marginBottom: 12 }}>
+            <p style={{ fontWeight: 500 }}>Antes de aprovar a cotação e prosseguir com o pedido junto ao fornecedor, verifique:</p>
+            <ul style={{ marginLeft: 16, marginBottom: 12 }}>
+              <li>Quantidade</li>
+              <li>Valor unitário</li>
+              <li>ICMS</li>
+              <li>Desconto</li>
+            </ul>
+            <div style={{ fontSize: 15, color: '#888', marginTop: 10 }}>
+              <em>Você pode acompanhar e aprovar cada etapa no botão Visualizar das cotações abaixo.</em>
+            </div>
+          </div>
+          <div className="col-md-7 col-12">
+            <div style={{ fontSize: 16, color: '#333', fontWeight: 500, marginBottom: 8 }}>Status do Pedido:</div>
+            <ul style={{ listStyle: 'none', paddingLeft: 0, marginTop: 0, marginBottom: 10 }}>
+              <li style={{ marginBottom: 6 }}>
+                <span style={{ fontSize: 22, verticalAlign: 'middle' }}>🔵</span>
+                <span style={{ marginLeft: 8, fontWeight: 500 }}>Pendente de aprovação</span>
+                <span style={{ marginLeft: 8, color: '#666' }}>– Dados pendentes de validação antes de aprovar.</span>
+              </li>
+              <li style={{ marginBottom: 6 }}>
+                <span style={{ fontSize: 22, verticalAlign: 'middle' }}>🟡</span>
+                <span style={{ marginLeft: 8, fontWeight: 500 }}>Aguardando pedido</span>
+                <span style={{ marginLeft: 8, color: '#666' }}>– Pedido enviado ao fornecedor, aguardando sua chegada.</span>
+              </li>
+              <li style={{ marginBottom: 6 }}>
+                <span style={{ fontSize: 22, verticalAlign: 'middle' }}>🟢</span>
+                <span style={{ marginLeft: 8, fontWeight: 500 }}>Pedido Finalizado</span>
+                <span style={{ marginLeft: 8, color: '#666' }}>– Mercadoria recebida e nota fiscal vinculada.</span>
+              </li>
+              <li style={{ marginBottom: 6 }}>
+                <span style={{ fontSize: 22, verticalAlign: 'middle' }}>🟠</span>
+                <span style={{ marginLeft: 8, fontWeight: 500 }}>Cotação Rejeitada</span>
+                <span style={{ marginLeft: 8, color: '#666' }}>– Cotação rejeitada, não enviada ao fornecedor.</span>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
