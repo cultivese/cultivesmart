@@ -716,34 +716,7 @@ const items = useMemo(() => {
                     </CTableBody>
                   </CTable>
                   <CRow>
-                    <CCol lg={6} sm={5}>
-
-                    <CAlert color="warning">
-                      <CRow className="align-items-center">
-                        <CCol xs={2}>
-                          <CIcon icon={cilWarning} className="flex-shrink-0 me-2" width={24} height={24} />
-                        </CCol>
-                        <CCol xs={10}>
-                          <CAlertHeading as="h4">Aviso!</CAlertHeading>
-                        </CCol>
-                      </CRow>
-
-                      <p>
-                        Antes de aprovar a cotação e prosseguir com o pedido junto ao fornecedor,
-                        é fundamental que você verifique os seguintes pontos de cada insumo do orçamento:.
-                      </p>
-                      <hr />
-                      <p className="mb-0">
-                        <ul>
-                          <li>Custo unitário</li>
-                          <li>Imposto</li>
-                          <li>Descontoo</li>
-                        </ul>
-                      </p>
-                    </CAlert>
-      
-                    </CCol>
-                    <CCol lg={4} sm={5} className="ms-auto">
+                    <CCol lg={5} sm={5}>
                       <CTable>
                         <CTableBody>
                           <CTableRow>

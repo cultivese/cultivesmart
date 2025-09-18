@@ -26,14 +26,14 @@ const getBadge = (status) => {
     case 'pendente de aprovação': {
       return 'primary'
     }
-    case 'enviada ao fornecedor': {
-      return 'warning'
-    }
     case 'aguardando pedido': {
-      return 'danger'
+      return 'warning'
     }
     case 'pedido finalizado': {
       return 'success'
+    }
+    case 'cotação rejeitada': {
+      return 'danger'
     }
     default: {
       return 'primary'
@@ -233,7 +233,8 @@ const GerenciadorPlantios = () => {
 
       const payload = JSON.stringify({
           nota_fiscal: notaFiscalValues[item.id],
-          approved: true,
+          approved: true,          
+          finalized: false,
           insumos: insumosAtualizados,
         })
 
@@ -440,8 +441,54 @@ const GerenciadorPlantios = () => {
                             id={`notaFiscal-${item.id}`}
                             value={notaFiscalValues[item.id] || item.nota_fiscal || ''}
                             onChange={(e) => setNotaFiscalValues({ ...notaFiscalValues, [item.id]: e.target.value })}
-                            disabled={item.status.id !== 1}
+                            disabled={item.status.id === 3}
                         />
+                        {item.status.nome === 'aguardando pedido' && (
+                          <CButton
+                            size="sm"
+                            color="success"
+                            className="ms-2 mt-2"
+                            onClick={async () => {
+                              setIsProcessing(true);
+                              try {
+                                const insumosAtualizados = item.insumos.map(insumo => {
+                                  const quantidade = parseFloat(insumoValues[`${item.id}-${insumo.insumo_id}-quantidade`] || insumo.quantidade);
+                                  const preco_unitario = parseFloat(insumoValues[`${item.id}-${insumo.insumo_id}-preco`] || insumo.preco_unitario);
+                                  const icms = parseFloat(insumoValues[`${item.id}-${insumo.insumo_id}-imposto`] || insumo.icms);
+                                  const desconto = parseFloat(insumoValues[`${item.id}-${insumo.insumo_id}-desconto`] || insumo.desconto);
+                                  return {
+                                    ...insumo,
+                                    quantidade,
+                                    preco_unitario,
+                                    icms,
+                                    desconto,
+                                  };
+                                });
+                                const payload = JSON.stringify({
+                                  nota_fiscal: notaFiscalValues[item.id],
+                                  approved: true,
+                                  finalized: true,
+                                  insumos: insumosAtualizados,
+                                });
+                                const response = await fetch(`https://backend.cultivesmart.com.br/api/cotacao/${item.id}`, {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: payload,
+                                });
+                                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                                window.location.reload();
+                              } catch (err) {
+                                console.error('Erro ao finalizar pedido:', err);
+                              } finally {
+                                setIsProcessing(false);
+                              }
+                            }}
+                            disabled={isProcessing || !(notaFiscalValues[item.id])}
+                          >
+                            {isProcessing ? <CSpinner as="span" className="me-2" size="sm" aria-hidden="true" /> : null}
+                            Finalizar Pedido
+                          </CButton>
+                        )}
                     </CCol>
                 </CRow>
                 

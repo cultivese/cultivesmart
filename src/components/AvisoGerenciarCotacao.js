@@ -25,9 +25,7 @@ const AvisoGerenciarCotacao = (props) => (
               <li>ICMS</li>
               <li>Desconto</li>
             </ul>
-            <div style={{ fontSize: 15, color: '#888', marginTop: 10 }}>
-              <em>Você pode acompanhar e aprovar cada etapa no botão Visualizar das cotações abaixo.</em>
-            </div>
+            
           </div>
           <div className="col-md-7 col-12">
             <div style={{ fontSize: 16, color: '#333', fontWeight: 500, marginBottom: 8 }}>Status do Pedido:</div>
@@ -54,6 +52,13 @@ const AvisoGerenciarCotacao = (props) => (
               </li>
             </ul>
           </div>
+
+          <div>
+            <div style={{ fontSize: 15, color: '#888', marginTop: 10 }}>
+              <em>Você pode acompanhar e aprovar cada etapa no botão Visualizar das cotações abaixo.</em>
+            </div>
+          </div>
+          
         </div>
       </div>
     </div>
