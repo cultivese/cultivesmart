@@ -621,67 +621,58 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                         const quantidade = estoqueInsumo?.cotacao_insumos?.quantidade * estoqueInsumo?.insumo?.quantidade;
 
                         return (
-                          <CCard style={{width: '32%'}} key={estoqueInsumo.id}>
-                                <CRow>
-                                <CCol xs={3} md={4} style={{marginTop:20}}>
-                                    <CCardImage src={`data:image/png;base64,${estoqueInsumo.insumo.logoPath}`} />
+                          <CCard style={{ width: '28%', minWidth: 320, borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} key={estoqueInsumo.id} className="mb-4">
+                            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', marginTop: 16 }}>
+                              <CCardImage src={`data:image/png;base64,${estoqueInsumo.insumo.logoPath}`} style={{ width: 100, height: 120, objectFit: 'contain', marginRight: 16 }} />
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+                                <CCardTitle style={{ fontSize: 28, fontWeight: 700, textAlign: 'left', marginBottom: 0 }}>{estoqueInsumo.insumo.nome}</CCardTitle>
+                                <CCardSubtitle style={{ fontSize: 20, fontWeight: 400, textAlign: 'left', marginBottom: 0 }}>{estoqueInsumo.insumo.variedade}</CCardSubtitle>
+                                <CCardText style={{ fontSize: 16, textAlign: 'left', marginBottom: 0 }}>{(() => {
+                                  const fornecedorObj = fornecedores && fornecedores.records && fornecedores.records.find(f => f.id === estoqueInsumo.insumo.fornecedor_id);
+                                  return fornecedorObj ? fornecedorObj.nome : estoqueInsumo.insumo.fornecedor_id;
+                                })()}</CCardText>
+                                <CCardText style={{ fontSize: 16, textAlign: 'left', marginBottom: 0 }}>NF {estoqueInsumo.insumo.nota_fiscal || '-'}</CCardText>
+                              </div>
+                            </div>
+                            <CCardBody style={{ paddingTop: 0 }}>
+                              <div style={{ fontWeight: 700, fontSize: 22, marginTop: 8, marginBottom: 8 }}>Especificações</div>
+                              <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
+                                <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <span style={{ fontSize: 22 }}>🌱</span> Semeadura:
                                 </CCol>
-                                <CCol xs={7} md={7}>
-                                    <CCardBody>
-                                    <CCardTitle>{estoqueInsumo.insumo.nome}</CCardTitle>
-                                    <CCardSubtitle>{estoqueInsumo.insumo.variedade}</CCardSubtitle>
-                                    <CCardText>
-                                        {formatarPreco(estoqueInsumo.preco)}
-                                    </CCardText>
-                                    <CCardText>
-                                        <CRow><small className="text-body-secondary">Estoque atual: {parseInt(estoqueInsumo.cotacao_insumos.quantidade)}  sacos</small></CRow>
-                                        <CRow>
-                                            <small className="text-body-secondary">
-                                                Custo do grão: R$ {formatarCustoGrao(totalLiquido, quantidade)} /g.
-                                            </small></CRow>
-                                    {/* Exibe a badge de alerta se a porcentagem for baixa */}
-                                    {valorBarraProgresso < 30 && <CBadge color="danger">Abaixo do limite</CBadge>}
-                                    </CCardText>
-                                     <CProgress height={2}>
-                                        <CProgressBar color={corBarraProgresso} value={valorBarraProgresso}></CProgressBar>
-                                    </CProgress>
-                                    </CCardBody>
+                                <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.gramas_para_plantio || '-'} g/bandeja</CCol>
+                              </CRow>
+                              <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
+                                <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <span style={{ fontSize: 22 }}>🗄️</span> Dias em pilha:
                                 </CCol>
-                                <CCol xs={1} md={1} >
-                                    <CDropdown alignment="end">
-                                        <CDropdownToggle color="transparent" caret={false} className="p-0">
-                                        <CIcon icon={cilOptions} />
-                                        </CDropdownToggle>
-                                        <CDropdownMenu>
-                                          {/* {!hasEspecificacoes && (
-                                            <CDropdownItem
-                                              onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, 'cadastrar')}>
-                                              Cadastrar Especificação
-                                            </CDropdownItem>
-                                          )}
-                                          {hasEspecificacoes && (
-                                            <CDropdownItem
-                                              onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, 'atualizar')}>
-                                              Atualizar Especificação
-                                            </CDropdownItem>
-                                          )} */}
-                                            {/* <CDropdownItem 
-                                              onClick={() => handleRetiradaEstoqueModal(estoqueInsumo)}>
-                                              Retirada
-                                            </CDropdownItem> */}
-                                            {/* <CDropdownItem
-                                              onClick={() => handleOpenImportPhotosModal(estoqueInsumo)}>
-                                              Importar Fotos
-                                            </CDropdownItem> */}
-                                            <CDropdownItem
-                                              onClick={() => handleOpenDetailsModal(estoqueInsumo)}>
-                                              Detalhes
-                                            </CDropdownItem>
-                                        </CDropdownMenu>
-                                    </CDropdown>
+                                <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.dias_pilha || '-'}</CCol>
+                              </CRow>
+                              <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
+                                <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <span style={{ fontSize: 22 }}>🌑</span> Dias de blackout:
                                 </CCol>
-                                </CRow>
-                            </CCard>
+                                <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.dias_blackout || '-'}</CCol>
+                              </CRow>
+                              <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
+                                <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <span style={{ fontSize: 22 }}>⏳</span> Dias até a colheita:
+                                </CCol>
+                                <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.dias_colheita || '-'}</CCol>
+                              </CRow>
+                              <CProgress height={8} style={{ margin: '16px 0' }}>
+                                <CProgressBar color={corBarraProgresso} value={valorBarraProgresso}></CProgressBar>
+                              </CProgress>
+                              <div style={{ fontSize: 16, marginBottom: 4 }}>Estoque atual: <b>{parseInt(estoqueInsumo.cotacao_insumos.quantidade)} sacos</b></div>
+                              <div style={{ fontSize: 16, marginBottom: 12 }}>Custo do grão: <b>R$ {formatarCustoGrao(totalLiquido, quantidade)} /g</b></div>
+                              <CButton color="secondary" variant="outline" style={{ width: '100%', marginBottom: 8 }} onClick={() => handleOpenDetailsModal(estoqueInsumo)}>
+                                Verificar consumo do estoque
+                              </CButton>
+                              <CButton color="primary" variant="outline" style={{ width: '100%' }} onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, 'atualizar')}>
+                                Editar especificações
+                              </CButton>
+                            </CCardBody>
+                          </CCard>
                         )
                         })
                     }

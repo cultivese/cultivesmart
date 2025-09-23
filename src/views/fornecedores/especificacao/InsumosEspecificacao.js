@@ -43,6 +43,7 @@ const InsumosEspecificacao = () => {
   const [hidratacao, setHidratacao] = useState('');
   const [colocar_peso, setColocarPeso] = useState(false);
   const [estoque_minimo, setEstoqueMinimo] = useState('');
+  const [quantidade_bandeja, setQuantidadeBandeja] = useState('');
   const [activeTab, setActiveTab] = useState('todos'); // Estado para controlar a tab ativa
   const [filteredInsumos, setFilteredInsumos] = useState([]); // Novo estado para insumos filtrados
   const [insumoSelecionado, setInsumoSelecionado] = useState(null); // Novo estado para o insumo selecionado
@@ -61,6 +62,7 @@ const InsumosEspecificacao = () => {
       hidratacao,
       colocar_peso,
       estoque_minimo,
+      quantidade_bandeja,
       insumo_id: insumoSelecionado.id, // Supondo que você tenha o ID do insumo selecionado
     };
 
@@ -100,6 +102,7 @@ const InsumosEspecificacao = () => {
         setHidratacao(especificacao.hidratacao);
         setColocarPeso(especificacao.colocar_peso);
         setEstoqueMinimo(especificacao.estoque_minimo);
+        setQuantidadeBandeja(especificacao.quantidade_bandeja || '');
     } else {
         setDiasPilha('');
         setDiasBlackout('');
@@ -107,6 +110,7 @@ const InsumosEspecificacao = () => {
         setHidratacao('');
         setColocarPeso(false);
         setEstoqueMinimo('');
+        setQuantidadeBandeja('');
     }
 }, [insumoSelecionado]);
 
@@ -154,7 +158,7 @@ const InsumosEspecificacao = () => {
                           <CCardTitle>{insumo.nome}</CCardTitle>
                           <CCardSubtitle>{insumo.variedade}</CCardSubtitle>
                           <CCardText>{insumo.unidade_medida}</CCardText>
-                          {insumo.categoria_id === 1 || insumo.categoria_id === 2 ? (
+                          {insumo.categoria_id === 4 || insumo.categoria_id === 5 ? (
                               insumo.especificacoes && insumo.especificacoes.length > 0 ? (
                                   <CBadge color="warning">Especificação já definida</CBadge>
                               ) : (
@@ -163,7 +167,7 @@ const InsumosEspecificacao = () => {
                           ) : null}
                         </CCardBody>
                         {
-                            (insumo.categoria_id === 1 || insumo.categoria_id === 2) ?
+                            (insumo.categoria_id === 4 || insumo.categoria_id === 5) ?
                         <CCardFooter className="text-center">
                           
                             <CButton color="primary" onClick={() => handleOpenModal(insumo)}>
@@ -223,11 +227,11 @@ const InsumosEspecificacao = () => {
                                   <CInputGroup className="mb-3">
                                     <CInputGroupText id="basic-addon3">Quantidade (g) por bandeija plantada</CInputGroupText>
                                     <CFormInput
-                                      id="basic-url"
+                                      id="quantidade-bandeja"
                                       type='number'
                                       aria-describedby="basic-addon3"
-                                      value={dias_colheita}
-                                      onChange={(e) => setDiasColheita(e.target.value)}
+                                      value={quantidade_bandeja}
+                                      onChange={(e) => setQuantidadeBandeja(e.target.value)}
                                     />
                                   </CInputGroup>
                                 </CCol>
