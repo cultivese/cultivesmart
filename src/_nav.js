@@ -33,25 +33,31 @@ const _nav = (userRole) => {
 
   const navigateItems =
   [
-    // --- MENU PARA OPERADOR ---
     {
       component: CNavGroup,
-      name: 'Plantios', // Substitui "Lotes" por "Plantios"
+      name: 'Caderno de Atividades',
       icon: <CIcon icon={cilBasket} customClassName="nav-icon" />,
       roles: ['admin'],
       items: [
         {
           component: CNavItem,
-          name: 'Tarefas',
+          name: 'Cadastro de Semeadura', // Substitui "Cadastro de Lote" por "Cadastro de Plantio"
+          to: '/lotes/cadastro',
+          icon: <CIcon icon={cilPlus} customClassName="nav-icon" />,
+          roles: ['admin'],
+        },
+        {
+          component: CNavItem,
+          name: 'Cronograma de Atividades',
           to: '/configuracao/tarefas',
           icon: <CIcon icon={cilListNumbered} customClassName="nav-icon" />,
           roles: ['admin'],
         },
         {
           component: CNavItem,
-          name: 'Cadastro de Plantio', // Substitui "Cadastro de Lote" por "Cadastro de Plantio"
-          to: '/lotes/cadastro',
-          icon: <CIcon icon={cilPlus} customClassName="nav-icon" />,
+          name: 'Acompanhamento de Atividades',
+          to: '/configuracao/tarefas',
+          icon: <CIcon icon={cilListNumbered} customClassName="nav-icon" />,
           roles: ['admin'],
         },
       ],
@@ -74,22 +80,7 @@ const _nav = (userRole) => {
       to: '/tarefas/historico',
       icon: <CIcon icon={cilCalendarCheck} customClassName="nav-icon" />,
       roles: ['operador'],
-    },
-    {
-    component: CNavGroup,
-    name: 'Produção',
-    to: '/producao',
-    icon: <CIcon icon={cilLineStyle} customClassName="nav-icon" />,
-    roles: ['admin', 'operador'],
-    items: [
-      {
-        component: CNavItem,
-        name: 'Cronograma',
-        to: '/producao/cronograma', // Nova rota
-        roles: ['admin', 'operador'], // Visível para admin e operador
-      }      
-    ],
-  },
+    },   
     {
       component: CNavGroup,
       name: 'Estoque',
@@ -115,18 +106,18 @@ const _nav = (userRole) => {
         to: '/estoque/visao_geral',
         roles: ['admin'],
       },
-      {
-        component: CNavItem,
-        name: 'Retirada',
-        to: '/estoque/retirada',
-        roles: ['admin'],
-      },
-        {
-          component: CNavItem,
-          name: 'Especificação',
-          to: '/fornecedores/especificacao',
-          roles: ['admin'],
-        },
+      // {
+      //   component: CNavItem,
+      //   name: 'Retirada',
+      //   to: '/estoque/retirada',
+      //   roles: ['admin'],
+      // },
+      //   {
+      //     component: CNavItem,
+      //     name: 'Especificação',
+      //     to: '/fornecedores/especificacao',
+      //     roles: ['admin'],
+      //   },
     ],
   },
   // {

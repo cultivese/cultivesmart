@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { CAvatar, CBadge, CButton, CCollapse, CSmartTable } from '@coreui/react-pro'
-import { AvisoGerenciarCotacao } from 'src/components'
+import { AvisoGerenciarEstoque } from 'src/components'
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
 CCardImage,
@@ -313,7 +313,7 @@ const GerenciadorPlantios = () => {
 
   return (
     <CRow>
-      <AvisoGerenciarCotacao href="components/buttons/" />
+      <AvisoGerenciarEstoque href="components/buttons/" />
       <CSmartTable
         cleaner
         onClean={() => limparFiltro()}

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { AvisoGerenciarEstoque } from 'src/components'
 import {
   CButton,
   CCard,
@@ -213,7 +214,7 @@ const handleOpenAdditionalFieldsModal = (insumo, mode) => {
       dias_blackout: insumo.insumo.especificacoes?.[0]?.dias_blackout || '',
       dias_colheita: insumo.insumo.especificacoes?.[0]?.dias_colheita || '', // Ajuste o nome do campo se necessário
       gramas_para_plantio: insumo.insumo.especificacoes?.[0]?.gramas_para_plantio || '',     // Ajuste o nome do campo se necessário
-      producao_estimada_por_bandeja: insumo.insumo.especificacoes?.[0]?.producao_estimada_por_bandeja || '', // Ajuste o nome
+      quantidade_bandeja: insumo.insumo.especificacoes?.[0]?.quantidade_bandeja || '', // Ajuste o nome
       hidratacao: insumo.insumo.especificacoes?.[0]?.hidratacao || '',
       colocar_peso: Boolean(insumo.insumo.especificacoes?.[0]?.colocar_peso) || false,
       cobertura_substrato: Boolean(insumo.insumo.especificacoes?.[0]?.cobertura_substrato) || false,
@@ -309,9 +310,10 @@ const handleSaveAdditionalFields = async () => {
     dias_blackout: editedInsumo.dias_blackout ? parseInt(editedInsumo.dias_blackout) : null,
     dias_colheita: editedInsumo.dias_colheita ? parseInt(editedInsumo.dias_colheita) : null,
     gramas_para_plantio: editedInsumo.gramas_para_plantio ? parseInt(editedInsumo.gramas_para_plantio) : null,
-    producao_estimada_por_bandeja: editedInsumo.producao_estimada_por_bandeja ? parseInt(editedInsumo.producao_estimada_por_bandeja) : null,
+    quantidade_bandeja: editedInsumo.quantidade_bandeja ? parseInt(editedInsumo.quantidade_bandeja) : null,
     hidratacao: editedInsumo.hidratacao || null,
     colocar_peso: editedInsumo.colocar_peso || false,
+    estoque_minimo: 1,
     cobertura_substrato: editedInsumo.cobertura_substrato  || false
   };
 
@@ -500,6 +502,7 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                          {message}
                        </CAlert>
                      )}
+        <AvisoGerenciarEstoque href="components/buttons/" />
         <CCol xs={12}>
             <CCard className="mb-4">
             <CCardHeader>
@@ -509,40 +512,41 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
             <CCardBody>
                 <DocsExample href="components/card/#background-and-color">
                 <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }} >
-
-                { unidadesMedida && unidadesMedida &&
-                    categorias && categorias.records && categorias.records.map((categoria) => {
-                        return (
-                        <CCol
-                            key={categoria.id}
-                            color={ filtroCategoria === categoria.id ? 'success' : 'light'}
-                            style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            textAlign: 'center',
-                            
-                        }}>
-                                
-
-                            <CCol lg={4} onClick={() => { setFiltroCategoria(categoria.id); console.log('filtroCategoria:', categoria.id);  console.log('filtroCategoria:', filtroCategoria);}}>
-                            <CCardImage width="fit" orientation="top" src={`data:image/png;base64,${categoria.logoPath}`} />
-                            </CCol>
-                            <CCol>
-                            <CFormCheck
-                                type='radio'
-                                name="categoria"
-                                id={`flexCheckChecked${categoria.id}`}
-                                label={categoria.descricao}
-                                value={categoria.id}
-                                checked={filtroCategoria === categoria.id}
-                                onChange={(e) => {setFiltroCategoria(e.target.value);  console.log('filtroCategoria:', categoria.id); console.log('filtroCategoria:', filtroCategoria);}}
-                            />
-                            </CCol>
-                        </CCol>
-                        );
-                    })}
-                </CRow>
+  {categorias && categorias.records && categorias.records.map((categoria) => (
+    <CCol key={categoria.id} lg={2} md={3} sm={4} xs={6} style={{ marginBottom: 16 }}>
+      <div
+        onClick={() => setFiltroCategoria(categoria.id)}
+        style={{
+          width: 160,
+          height: 200,
+          border: filtroCategoria === categoria.id ? '2px solid #4f8cff' : '2px solid #e0e0e0',
+          borderRadius: 16,
+          boxShadow: '0 2px 8px #0001',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          background: '#fff',
+          transition: 'box-shadow 0.2s, border-color 0.2s',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.boxShadow = '0 4px 16px #0002';
+          e.currentTarget.style.borderColor = '#4f8cff';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.boxShadow = '0 2px 8px #0001';
+          e.currentTarget.style.borderColor = filtroCategoria === categoria.id ? '#4f8cff' : '#e0e0e0';
+        }}
+      >
+        <img src={`data:image/png;base64,${categoria.logoPath}`} alt={categoria.descricao} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: 16, transition: 'transform 0.2s' }} />
+        <div style={{ textAlign: 'center', fontWeight: 600, fontSize: 16 }}>{categoria.descricao}</div>
+      </div>
+    </CCol>
+  ))}
+</CRow>
 
                 <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }} >
                     <CCol>
@@ -668,8 +672,8 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                               <CButton color="secondary" variant="outline" style={{ width: '100%', marginBottom: 8 }} onClick={() => handleOpenDetailsModal(estoqueInsumo)}>
                                 Verificar consumo do estoque
                               </CButton>
-                              <CButton color="primary" variant="outline" style={{ width: '100%' }} onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, 'atualizar')}>
-                                Editar especificações
+                              <CButton color="primary" variant="outline" style={{ width: '100%' }} onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, hasEspecificacoes ? 'atualizar' : 'cadastrar')}>
+                                {hasEspecificacoes ? 'Editar especificações' : 'Cadastrar Especificações'}
                               </CButton>
                             </CCardBody>
                           </CCard>
@@ -742,14 +746,14 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                     </CCol>
                 </CRow>
                 <CRow className="mb-3">
-                    <CFormLabel htmlFor="producao_estimada_por_bandeja" className="col-sm-8 col-form-label">Produção por bandeja</CFormLabel>
+                    <CFormLabel htmlFor="quantidade_bandeja" className="col-sm-8 col-form-label">Produção por bandeja</CFormLabel>
                     <CCol xs={4}>
                         <CFormInput
-                            id="producao_estimada_por_bandeja"
+                            id="quantidade_bandeja"
                             type="number"
                             aria-describedby="basic-addon3"
-                            value={editedInsumo.producao_estimada_por_bandeja || ''} // Bind ao estado
-                            onChange={(e) => setEditedInsumo({...editedInsumo, producao_estimada_por_bandeja: e.target.value})} // Para controlar as mudanças
+                            value={editedInsumo.quantidade_bandeja || ''} // Bind ao estado
+                            onChange={(e) => setEditedInsumo({...editedInsumo, quantidade_bandeja: e.target.value})} // Para controlar as mudanças
                         />
                     </CCol>
                 </CRow>

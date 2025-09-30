@@ -13,6 +13,7 @@ import OrcamentoArea from './OrcamentoArea'
 import FiltroCategoriaInsumo from './FiltroCategoriaInsumo'
 import AvisoCotacao from './AvisoCotacao'
 import AvisoGerenciarCotacao from './AvisoGerenciarCotacao'
+import AvisoGerenciarEstoque from './AvisoGerenciarEstoque'
 
 export {
   AppBreadcrumb,
@@ -30,4 +31,5 @@ export {
   FiltroCategoriaInsumo,
   AvisoCotacao,
   AvisoGerenciarCotacao,
+  AvisoGerenciarEstoque,
 }
