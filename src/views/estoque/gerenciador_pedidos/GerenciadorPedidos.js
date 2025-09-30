@@ -19,6 +19,7 @@ CCol,
 CRow,
 CFormLabel
 } from '@coreui/react';
+import { AvisoGerenciarCotacao } from '../../../components';
 
 
 const getBadge = (status) => {
@@ -313,7 +314,7 @@ const GerenciadorPlantios = () => {
 
   return (
     <CRow>
-      <AvisoGerenciarEstoque href="components/buttons/" />
+      <AvisoGerenciarCotacao href="components/buttons/" />
       <CSmartTable
         cleaner
         onClean={() => limparFiltro()}
