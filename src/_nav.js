@@ -43,21 +43,12 @@ const _nav = (userRole) => {
           component: CNavItem,
           name: 'Cadastro de Semeadura', // Substitui "Cadastro de Lote" por "Cadastro de Plantio"
           to: '/lotes/cadastro',
-          icon: <CIcon icon={cilPlus} customClassName="nav-icon" />,
-          roles: ['admin'],
-        },
-        {
-          component: CNavItem,
-          name: 'Cronograma de Atividades',
-          to: '/configuracao/tarefas',
-          icon: <CIcon icon={cilListNumbered} customClassName="nav-icon" />,
           roles: ['admin'],
         },
         {
           component: CNavItem,
           name: 'Acompanhamento de Atividades',
           to: '/configuracao/tarefas',
-          icon: <CIcon icon={cilListNumbered} customClassName="nav-icon" />,
           roles: ['admin'],
         },
       ],
@@ -71,14 +62,12 @@ const _nav = (userRole) => {
       component: CNavItem,
       name: 'Tarefas do Dia',
       to: '/tarefas/dia', // Nova rota sugerida para a página específica do operador
-      icon: <CIcon icon={cilClipboard} customClassName="nav-icon" />, // Ícone mais sugestivo para "tarefas"
       roles: ['operador'],
     },
     {
       component: CNavItem,
       name: 'Histórico de Execução', // Se houver necessidade de ver tarefas passadas
       to: '/tarefas/historico',
-      icon: <CIcon icon={cilCalendarCheck} customClassName="nav-icon" />,
       roles: ['operador'],
     },   
     {
