@@ -325,6 +325,7 @@ const GerenciadorPlantios = () => {
         itemsPerPageSelect
         itemsPerPage={5}
         pagination
+        noItemsLabel="Nenhuma cotação encontrada."
         onTableFilterChange={(value) => {
           if (value === "") {
             limparFiltro();

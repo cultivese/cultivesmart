@@ -588,99 +588,104 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
 
                 <DocsExample href="components/card/#background-and-color">
                 <CRow xs={{ gutterY: 3}} className="justify-content-between">
-                    {
-                        estoquesInsumos.records && estoquesInsumos.records.map((estoqueInsumo) => {
-                        
-                        const hasEspecificacoes = estoqueInsumo.insumo.especificacoes && estoqueInsumo.insumo.especificacoes.length > 0; // Para relacionamento hasMany
+  {estoquesInsumos.records && estoquesInsumos.records.length > 0 ? (
+    estoquesInsumos.records.map((estoqueInsumo) => {
+      const hasEspecificacoes = estoqueInsumo.insumo.especificacoes && estoqueInsumo.insumo.especificacoes.length > 0; // Para relacionamento hasMany
 
-                        // --- INÍCIO DO CÓDIGO AJUSTADO ---
-                        // Validação e cálculo dos valores para a barra de progresso
-                        const quantidadeTotalDisponivel = estoqueInsumo.quantidade_total; // Quantidade de insumo em gramas
-                        const quantidadePorSaco = estoqueInsumo.insumo.quantidade; // Capacidade de um saco em gramas
-                        const quantidadeTotalSacos = estoqueInsumo.cotacao_insumos.quantidade; // Quantidade de sacos comprados
-                        
-                        // Calcula a capacidade máxima total do estoque (em gramas)
-                        const capacidadeMaximaTotal = parseFloat(quantidadeTotalSacos) * parseFloat(quantidadePorSaco);
-                        
-                        // Calcula a porcentagem de ocupação do estoque
-                        let percentualEmEstoque = 0;
-                        if (capacidadeMaximaTotal > 0) {
-                            percentualEmEstoque = (parseFloat(quantidadeTotalDisponivel) / capacidadeMaximaTotal) * 100;
-                        }
+      // --- INÍCIO DO CÓDIGO AJUSTADO ---
+      // Validação e cálculo dos valores para a barra de progresso
+      const quantidadeTotalDisponivel = estoqueInsumo.quantidade_total; // Quantidade de insumo em gramas
+      const quantidadePorSaco = estoqueInsumo.insumo.quantidade; // Capacidade de um saco em gramas
+      const quantidadeTotalSacos = estoqueInsumo.cotacao_insumos.quantidade; // Quantidade de sacos comprados
 
-                        // Arredonda o valor para a barra de progresso
-                        const valorBarraProgresso = Math.round(percentualEmEstoque);
+      // Calcula a capacidade máxima total do estoque (em gramas)
+      const capacidadeMaximaTotal = parseFloat(quantidadeTotalSacos) * parseFloat(quantidadePorSaco);
 
-                        // Define a cor da barra de progresso com base no valor
-                        let corBarraProgresso = 'success';
-                        if (valorBarraProgresso < 30) {
-                            corBarraProgresso = 'danger';
-                        } else if (valorBarraProgresso < 60) {
-                            corBarraProgresso = 'warning';
-                        }
-                        
-                        // --- FIM DO CÓDIGO AJUSTADO ---
+      // Calcula a porcentagem de ocupação do estoque
+      let percentualEmEstoque = 0;
+      if (capacidadeMaximaTotal > 0) {
+        percentualEmEstoque = (parseFloat(quantidadeTotalDisponivel) / capacidadeMaximaTotal) * 100;
+      }
 
-                        const totalLiquido = estoqueInsumo?.cotacao_insumos?.total_liquido;
-                        const quantidade = estoqueInsumo?.cotacao_insumos?.quantidade * estoqueInsumo?.insumo?.quantidade;
+      // Arredonda o valor para a barra de progresso
+      const valorBarraProgresso = Math.round(percentualEmEstoque);
 
-                        return (
-                          <CCard style={{ width: '28%', minWidth: 320, borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} key={estoqueInsumo.id} className="mb-4">
-                            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', marginTop: 16 }}>
-                              <CCardImage src={`data:image/png;base64,${estoqueInsumo.insumo.logoPath}`} style={{ width: 100, height: 120, objectFit: 'contain', marginRight: 16 }} />
-                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
-                                <CCardTitle style={{ fontSize: 28, fontWeight: 700, textAlign: 'left', marginBottom: 0 }}>{estoqueInsumo.insumo.nome}</CCardTitle>
-                                <CCardSubtitle style={{ fontSize: 20, fontWeight: 400, textAlign: 'left', marginBottom: 0 }}>{estoqueInsumo.insumo.variedade}</CCardSubtitle>
-                                <CCardText style={{ fontSize: 16, textAlign: 'left', marginBottom: 0 }}>{(() => {
-                                  const fornecedorObj = fornecedores && fornecedores.records && fornecedores.records.find(f => f.id === estoqueInsumo.insumo.fornecedor_id);
-                                  return fornecedorObj ? fornecedorObj.nome : estoqueInsumo.insumo.fornecedor_id;
-                                })()}</CCardText>
-                                <CCardText style={{ fontSize: 16, textAlign: 'left', marginBottom: 0 }}>NF {estoqueInsumo.insumo.nota_fiscal || '-'}</CCardText>
-                              </div>
-                            </div>
-                            <CCardBody style={{ paddingTop: 0 }}>
-                              <div style={{ fontWeight: 700, fontSize: 22, marginTop: 8, marginBottom: 8 }}>Especificações</div>
-                              <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
-                                <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                  <span style={{ fontSize: 22 }}>🌱</span> Semeadura:
-                                </CCol>
-                                <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.gramas_para_plantio || '-'} g/bandeja</CCol>
-                              </CRow>
-                              <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
-                                <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                  <span style={{ fontSize: 22 }}>🗄️</span> Dias em pilha:
-                                </CCol>
-                                <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.dias_pilha || '-'}</CCol>
-                              </CRow>
-                              <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
-                                <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                  <span style={{ fontSize: 22 }}>🌑</span> Dias de blackout:
-                                </CCol>
-                                <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.dias_blackout || '-'}</CCol>
-                              </CRow>
-                              <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
-                                <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                  <span style={{ fontSize: 22 }}>⏳</span> Dias até a colheita:
-                                </CCol>
-                                <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.dias_colheita || '-'}</CCol>
-                              </CRow>
-                              <CProgress height={8} style={{ margin: '16px 0' }}>
-                                <CProgressBar color={corBarraProgresso} value={valorBarraProgresso}></CProgressBar>
-                              </CProgress>
-                              <div style={{ fontSize: 16, marginBottom: 4 }}>Estoque atual: <b>{parseInt(estoqueInsumo.cotacao_insumos.quantidade)} sacos</b></div>
-                              <div style={{ fontSize: 16, marginBottom: 12 }}>Custo do grão: <b>R$ {formatarCustoGrao(totalLiquido, quantidade)} /g</b></div>
-                              <CButton color="secondary" variant="outline" style={{ width: '100%', marginBottom: 8 }} onClick={() => handleOpenDetailsModal(estoqueInsumo)}>
-                                Verificar consumo do estoque
-                              </CButton>
-                              <CButton color="primary" variant="outline" style={{ width: '100%' }} onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, hasEspecificacoes ? 'atualizar' : 'cadastrar')}>
-                                {hasEspecificacoes ? 'Editar especificações' : 'Cadastrar Especificações'}
-                              </CButton>
-                            </CCardBody>
-                          </CCard>
-                        )
-                        })
-                    }
-                </CRow>
+      // Define a cor da barra de progresso com base no valor
+      let corBarraProgresso = 'success';
+      if (valorBarraProgresso < 30) {
+        corBarraProgresso = 'danger';
+      } else if (valorBarraProgresso < 60) {
+        corBarraProgresso = 'warning';
+      }
+
+      // --- FIM DO CÓDIGO AJUSTADO ---
+
+      const totalLiquido = estoqueInsumo?.cotacao_insumos?.total_liquido;
+      const quantidade = estoqueInsumo?.cotacao_insumos?.quantidade * estoqueInsumo?.insumo?.quantidade;
+
+      return (
+        <CCard style={{ width: '28%', minWidth: 320, borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} key={estoqueInsumo.id} className="mb-4">
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', marginTop: 16 }}>
+            <CCardImage src={`data:image/png;base64,${estoqueInsumo.insumo.logoPath}`} style={{ width: 100, height: 120, objectFit: 'contain', marginRight: 16 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+              <CCardTitle style={{ fontSize: 28, fontWeight: 700, textAlign: 'left', marginBottom: 0 }}>{estoqueInsumo.insumo.nome}</CCardTitle>
+              <CCardSubtitle style={{ fontSize: 20, fontWeight: 400, textAlign: 'left', marginBottom: 0 }}>{estoqueInsumo.insumo.variedade}</CCardSubtitle>
+              <CCardText style={{ fontSize: 16, textAlign: 'left', marginBottom: 0 }}>{(() => {
+                const fornecedorObj = fornecedores && fornecedores.records && fornecedores.records.find(f => f.id === estoqueInsumo.insumo.fornecedor_id);
+                return fornecedorObj ? fornecedorObj.nome : estoqueInsumo.insumo.fornecedor_id;
+              })()}</CCardText>
+              <CCardText style={{ fontSize: 16, textAlign: 'left', marginBottom: 0 }}>NF {estoqueInsumo.insumo.nota_fiscal || '-'}</CCardText>
+            </div>
+          </div>
+          <CCardBody style={{ paddingTop: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: 22, marginTop: 8, marginBottom: 8 }}>Especificações</div>
+            <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
+              <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 22 }}>🌱</span> Semeadura:
+              </CCol>
+              <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.gramas_para_plantio || '-'} g/bandeja</CCol>
+            </CRow>
+            <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
+              <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 22 }}>🗄️</span> Dias em pilha:
+              </CCol>
+              <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.dias_pilha || '-'}</CCol>
+            </CRow>
+            <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
+              <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 22 }}>🌑</span> Dias de blackout:
+              </CCol>
+              <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.dias_blackout || '-'}</CCol>
+            </CRow>
+            <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
+              <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 22 }}>⏳</span> Dias até a colheita:
+              </CCol>
+              <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.dias_colheita || '-'}</CCol>
+            </CRow>
+            <CProgress height={8} style={{ margin: '16px 0' }}>
+              <CProgressBar color={corBarraProgresso} value={valorBarraProgresso}></CProgressBar>
+            </CProgress>
+            <div style={{ fontSize: 16, marginBottom: 4 }}>Estoque atual: <b>{parseInt(estoqueInsumo.cotacao_insumos.quantidade)} sacos</b></div>
+            <div style={{ fontSize: 16, marginBottom: 12 }}>Custo do grão: <b>R$ {formatarCustoGrao(totalLiquido, quantidade)} /g</b></div>
+            <CButton color="secondary" variant="outline" style={{ width: '100%', marginBottom: 8 }} onClick={() => handleOpenDetailsModal(estoqueInsumo)}>
+              Verificar consumo do estoque
+            </CButton>
+            <CButton color="primary" variant="outline" style={{ width: '100%' }} onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, hasEspecificacoes ? 'atualizar' : 'cadastrar')}>
+              {hasEspecificacoes ? 'Editar especificações' : 'Cadastrar Especificações'}
+            </CButton>
+          </CCardBody>
+        </CCard>
+      )
+    })
+  ) : (
+    <CCol xs={12} className="text-center mt-5">
+      <CAlert color="info" className="py-4">
+        Não existem produtos em estoque adquirido.
+      </CAlert>
+    </CCol>
+  )}
+</CRow>
                 </DocsExample>
             </CCardBody>
             </CCard>

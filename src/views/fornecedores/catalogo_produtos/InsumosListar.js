@@ -26,6 +26,7 @@ import {
   CCardTitle,
   CCardText,
   CCardSubtitle,
+  CAlert,
 } from '@coreui/react';
 
 import CIcon from '@coreui/icons-react'
@@ -419,46 +420,54 @@ const handleBack = (e) => {
                     }
                   `}</style>
                   <DocsExample href="components/card/#background-and-color">
-                    <CRow xs={{ gutterY: 3}} className="justify-content-between">
-                        {
-                          filtrarInsumos().map((insumo) => {
-                            return (
-                                <CCard style={{width: '32%'}}>
-                                  <CRow>
-                                    <CCol xs={3} md={4} style={{marginTop:20}}>
-                                      <CCardImage src={`data:image/png;base64,${insumo.logoPath}`} />
-                                    </CCol>
-                                    <CCol xs={7} md={7}>
-                                      <CCardBody>
-                                        <CCardTitle>{insumo.nome}</CCardTitle>
-                                        <CCardSubtitle>Variedade: {insumo.variedade}</CCardSubtitle>
-                                        <CCardText>Fornecedor: {(() => {
-                                          const fornecedor = fornecedores && fornecedores.records && fornecedores.records.length > 0
-                                            ? fornecedores.records.find(f => f.id === insumo.fornecedor_id)
-                                            : null;
-                                          return fornecedor ? fornecedor.nome : insumo.fornecedor_id;
-                                        })()}</CCardText>
-                                        <CCardText>Preço: {formatarPreco(insumo.preco)}</CCardText>
-                                        <CCardText>Quantidade: <small className="text-body-secondary">{insumo.quantidade}{getUnidadeMedidaDescricao(insumo.unidade_medida)} por und.</small></CCardText>
-                                      </CCardBody>
-                                    </CCol>
-                                    <CCol xs={12} style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: 12 }}>
-                                      <CButton size="sm" color="info" variant="outline" onClick={() => handleOpenAdditionalFieldsModal(insumo, 'visualizar')}>
-                                        Visualizar
-                                      </CButton>
-                                      <CButton size="sm" color="warning" variant="outline" onClick={() => handleOpenAdditionalFieldsModal(insumo, 'editar')}>
-                                        Atualizar
-                                      </CButton>
-                                      <CButton size="sm" color="danger" variant="outline" onClick={() => handleDeleteInsumoById(insumo.id)}>
-                                        Excluir
-                                      </CButton>
-                                    </CCol>
-                                  </CRow>
-                                </CCard>
-                            )
-                          })
-                        }
-                    </CRow>
+                    {filtrarInsumos().length > 0 ? (
+                      <CRow xs={{ gutterY: 3}} className="justify-content-between">
+                        {filtrarInsumos().map((insumo) => {
+                          return (
+                              <CCard style={{width: '32%'}}>
+                                <CRow>
+                                  <CCol xs={3} md={4} style={{marginTop:20}}>
+                                    <CCardImage src={`data:image/png;base64,${insumo.logoPath}`} />
+                                  </CCol>
+                                  <CCol xs={7} md={7}>
+                                    <CCardBody>
+                                      <CCardTitle>{insumo.nome}</CCardTitle>
+                                      <CCardSubtitle>Variedade: {insumo.variedade}</CCardSubtitle>
+                                      <CCardText>Fornecedor: {(() => {
+                                        const fornecedor = fornecedores && fornecedores.records && fornecedores.records.length > 0
+                                          ? fornecedores.records.find(f => f.id === insumo.fornecedor_id)
+                                          : null;
+                                        return fornecedor ? fornecedor.nome : insumo.fornecedor_id;
+                                      })()}</CCardText>
+                                      <CCardText>Preço: {formatarPreco(insumo.preco)}</CCardText>
+                                      <CCardText>Quantidade: <small className="text-body-secondary">{insumo.quantidade}{getUnidadeMedidaDescricao(insumo.unidade_medida)} por und.</small></CCardText>
+                                    </CCardBody>
+                                  </CCol>
+                                  <CCol xs={12} style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: 12 }}>
+                                    <CButton size="sm" color="info" variant="outline" onClick={() => handleOpenAdditionalFieldsModal(insumo, 'visualizar')}>
+                                      Visualizar
+                                    </CButton>
+                                    <CButton size="sm" color="warning" variant="outline" onClick={() => handleOpenAdditionalFieldsModal(insumo, 'editar')}>
+                                      Atualizar
+                                    </CButton>
+                                    <CButton size="sm" color="danger" variant="outline" onClick={() => handleDeleteInsumoById(insumo.id)}>
+                                      Excluir
+                                    </CButton>
+                                  </CCol>
+                                </CRow>
+                              </CCard>
+                          )
+                        })}
+                      </CRow>
+                    ) : (
+                      <CRow>
+                        <CCol xs={12} className="text-center mt-5">
+                          <CAlert color="info" className="py-4">
+                            Não existem produtos cadastrados no catálogo.
+                          </CAlert>
+                        </CCol>
+                      </CRow>
+                    )}
                   </DocsExample>
                 </CCardBody>
               </CCard>
