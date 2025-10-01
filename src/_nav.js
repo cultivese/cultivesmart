@@ -51,6 +51,12 @@ const _nav = (userRole) => {
           to: '/configuracao/tarefas',
           roles: ['admin'],
         },
+        {
+          component: CNavItem,
+          name: 'Cronograma',
+          to: '/producao/cronograma', // Nova rota
+          roles: ['admin', 'operador'], // Visível para admin e operador
+        }  
       ],
     },
     {
