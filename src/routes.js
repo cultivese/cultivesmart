@@ -15,6 +15,7 @@ const HistoricoTarefa  = React.lazy(() => import('./views/tarefas/historico/Hist
 // Plantio
 const SimularPlantio  = React.lazy(() => import('./views/plantio/simular_plantio/SimularPlantio'))
 const GerenciadorPlantios  = React.lazy(() => import('./views/plantio/gerenciador_plantios/GerenciadorPlantios'))
+const CadastroSemeaduraBerta = React.lazy(() => import('./views/plantio/CadastroSemeaduraBerta'))
 
 
 // Estoque
@@ -86,6 +87,7 @@ const routes = [
   { path: '/plantio/simular_cotacao', name: 'Simular Cotação', element: SimularCotacao },
   { path: '/plantio/simular_plantio/', name: 'Simular Plantio', element: SimularPlantio },
   { path: '/plantio/gerenciador_plantios', name: 'Gerenciador de Plantios', element: GerenciadorPlantios },
+  { path: '/plantio/cadastro_semeadura_berta', name: 'Cadastro de Semeadura Berta', element: CadastroSemeaduraBerta },
 
   // Estoque
   { path: '/estoque', name: 'Estoque', element: Cards, exact: true },

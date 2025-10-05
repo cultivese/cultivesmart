@@ -8,7 +8,7 @@ const OrcamentoArea = (props) => {
   const { children, href, tabContentClassName } = props;
 
   return (
-      <CCol xs={4} md={7}>
+      <CCol xs={4} md={5}>
         <div className="example">
           <CTabContent className={`rounded-bottom ${tabContentClassName ? tabContentClassName : ''}`}>
             <CTabPane className="p-3 preview" visible>

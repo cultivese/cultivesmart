@@ -47,6 +47,12 @@ const _nav = (userRole) => {
         },
         {
           component: CNavItem,
+          name: 'Cadastro de Semeadura Berta',
+          to: '/plantio/cadastro_semeadura_berta',
+          roles: ['admin'],
+        },
+        {
+          component: CNavItem,
           name: 'Acompanhamento de Atividades',
           to: '/configuracao/tarefas',
           roles: ['admin'],

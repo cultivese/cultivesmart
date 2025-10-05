@@ -296,60 +296,50 @@ const handleOpenDetailsModal = async  (estoqueInsumo) => {
 };
 
 const handleSaveAdditionalFields = async () => {
-
   if (!insumoSelecionado) {
     console.error('Nenhum insumo selecionado para atualizar.');
     return;
   }
 
-  const insumo_id = insumoSelecionado.insumo.id;
-
-  const payload = {
-    insumo_id: insumo_id,
+  // Monta o payload base (sem insumo_id)
+  const payloadBase = {
     dias_pilha: editedInsumo.dias_pilha ? parseInt(editedInsumo.dias_pilha) : null,
     dias_blackout: editedInsumo.dias_blackout ? parseInt(editedInsumo.dias_blackout) : null,
     dias_colheita: editedInsumo.dias_colheita ? parseInt(editedInsumo.dias_colheita) : null,
-    gramas_para_plantio: editedInsumo.gramas_para_plantio ? parseInt(editedInsumo.gramas_para_plantio) : null,
     quantidade_bandeja: editedInsumo.quantidade_bandeja ? parseInt(editedInsumo.quantidade_bandeja) : null,
-    hidratacao: editedInsumo.hidratacao || null,
-    colocar_peso: editedInsumo.colocar_peso || false,
-    estoque_minimo: 1,
-    cobertura_substrato: editedInsumo.cobertura_substrato  || false
   };
-
-  const apiUrl =
-    modalMode === 'cadastrar'
-      ? 'https://backend.cultivesmart.com.br/api/especificacao_insumos'
-      : `https://backend.cultivesmart.com.br/api/insumos/${insumo_id}`; // Mantém a lógica de update existente
-
-  const method = modalMode === 'cadastrar' ? 'POST' : 'PUT';
 
   setIsProcessing(true);
 
   try {
-    setIsProcessing(true);
-
-    const response = await fetch(apiUrl, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    let response;
+    if (modalMode === 'cadastrar') {
+      // Cadastro: POST para endpoint padrão, inclui insumo_id
+      const payload = { ...payloadBase, insumo_id: insumoSelecionado.insumo.id };
+      response = await fetch('https://backend.cultivesmart.com.br/api/especificacao_insumos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      // Atualização: PUT para endpoint com id do insumo_estoque, NÃO inclui insumo_id
+      const idEstoque = insumoSelecionado.insumo.especificacoes[0].id;
+      response = await fetch(`https://backend.cultivesmart.com.br/api/especificacao_insumos/${idEstoque}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadBase),
+      });
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
     setIsProcessing(false);
-  
   } catch (err) {
-    console.error("Erro ao atualizar cotação:", err);
+    console.error('Erro ao salvar/atualizar especificação:', err);
     setIsProcessing(false);
   }
-
   window.location.reload();
-
 };
 
 const handleCategorySelect = (category) => {
@@ -640,10 +630,10 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
           <CCardBody style={{ paddingTop: 0 }}>
             <div style={{ fontWeight: 700, fontSize: 22, marginTop: 8, marginBottom: 8 }}>Especificações</div>
             <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
-              <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <CCol xs={4} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 22 }}>🌱</span> Semeadura:
               </CCol>
-              <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.gramas_para_plantio || '-'} g/bandeja</CCol>
+              <CCol xs={8} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.quantidade_bandeja || '-'} g/bandeja</CCol>
             </CRow>
             <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
               <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -671,8 +661,11 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
             <CButton color="secondary" variant="outline" style={{ width: '100%', marginBottom: 8 }} onClick={() => handleOpenDetailsModal(estoqueInsumo)}>
               Verificar consumo do estoque
             </CButton>
-            <CButton color="primary" variant="outline" style={{ width: '100%' }} onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, hasEspecificacoes ? 'atualizar' : 'cadastrar')}>
+            <CButton color="primary" variant="outline" style={{ width: '100%', marginBottom: 8 }} onClick={() => handleOpenAdditionalFieldsModal(estoqueInsumo, hasEspecificacoes ? 'atualizar' : 'cadastrar')}>
               {hasEspecificacoes ? 'Editar especificações' : 'Cadastrar Especificações'}
+            </CButton>
+            <CButton color="danger" variant="outline" style={{ width: '100%' }} onClick={() => handleRetiradaEstoqueModal(estoqueInsumo)}>
+              Perda ou Retirada
             </CButton>
           </CCardBody>
         </CCard>
@@ -739,19 +732,7 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                 </CRow>
                 <hr />
                 <CRow className="mb-3">
-                    <CFormLabel htmlFor="plantio" className="col-sm-8 col-form-label">Gramas para plantio</CFormLabel>
-                    <CCol xs={4}>
-                        <CFormInput
-                            id="plantio"
-                            type="number"
-                            aria-describedby="basic-addon3"
-                            value={editedInsumo.gramas_para_plantio || ''} // Bind ao estado
-                            onChange={(e) => setEditedInsumo({...editedInsumo, gramas_para_plantio: e.target.value})} // Para controlar as mudanças
-                        />
-                    </CCol>
-                </CRow>
-                <CRow className="mb-3">
-                    <CFormLabel htmlFor="quantidade_bandeja" className="col-sm-8 col-form-label">Produção por bandeja</CFormLabel>
+                    <CFormLabel htmlFor="quantidade_bandeja" className="col-sm-8 col-form-label">Gramas para plantio</CFormLabel>
                     <CCol xs={4}>
                         <CFormInput
                             id="quantidade_bandeja"
@@ -762,45 +743,7 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                         />
                     </CCol>
                 </CRow>
-                <hr />
-                <CRow className="mb-3">
-                    <CFormLabel htmlFor="hidratacao" className="col-sm-4 col-form-label">Hidratação</CFormLabel>
-                    <CCol xs={8}>
-                        <CFormSelect
-                            id="hidratacao"
-                            value={editedInsumo.hidratacao || ''} // Bind ao estado
-                            onChange={(e) => setEditedInsumo({...editedInsumo, hidratacao: e.target.value})} // Para controlar as mudanças
-                        >
-                            <option value="">Selecione...</option>
-                            <option value="Irrigação">Irrigação</option>
-                            <option value="Aspersão">Aspersão</option>
-                        </CFormSelect>
-                    </CCol>
-                </CRow>
-
-            <CRow className="row mb-3 align-items-center">
-                <CFormLabel htmlFor="peso" className="col-sm-8 col-form-label">Colocar peso?</CFormLabel>
-                <CCol xs={4}>
-                    <CFormSwitch
-                        id="peso"
-                        defaultChecked={editedInsumo.colocar_peso}
-                        onChange={(e) => setEditedInsumo({...editedInsumo, colocar_peso: e.target.checked})} // Para controlar as mudanças
-                    />
-                </CCol>
-            </CRow>
-
-            <CRow className="row mb-3 align-items-center">
-                <CFormLabel htmlFor="cobertura_substrato" className="col-sm-8 col-form-label">Cobertura substrato?</CFormLabel>
-                <CCol xs={4}>
-                    <CFormSwitch
-                        id="cobertura_substrato"
-                        defaultChecked={editedInsumo.cobertura_substrato}
-                        onChange={(e) => setEditedInsumo({...editedInsumo, cobertura_substrato: e.target.checked})} // Para controlar as mudanças
-                    />
-                </CCol>
-            </CRow>
-
-            <CButton color="success" variant="outline" onClick={handleSaveAdditionalFields}>
+                <CButton color="success" variant="outline" onClick={handleSaveAdditionalFields}>
               { isProcessing ? <CSpinner as="span" className="me-2" size="sm" aria-hidden="true" /> : null  }
               {modalMode === 'cadastrar' ? 'Cadastrar' : 'Atualizar'}
             </CButton>
