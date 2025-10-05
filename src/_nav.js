@@ -41,13 +41,7 @@ const _nav = (userRole) => {
       items: [
         {
           component: CNavItem,
-          name: 'Cadastro de Semeadura', // Substitui "Cadastro de Lote" por "Cadastro de Plantio"
-          to: '/lotes/cadastro',
-          roles: ['admin'],
-        },
-        {
-          component: CNavItem,
-          name: 'Cadastro de Semeadura Berta',
+          name: 'Cadastro de Semeadura',
           to: '/plantio/cadastro_semeadura_berta',
           roles: ['admin'],
         },
