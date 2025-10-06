@@ -172,7 +172,7 @@ const FornecedoresCadastro = () => {
       {!categoria && (
         <>
           <h4 className="mb-4 text-center">Selecione a Categoria do Fornecedor</h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '2rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem' }}>
             {categorias.map((cat) => (
               <div
                 key={cat.id}
