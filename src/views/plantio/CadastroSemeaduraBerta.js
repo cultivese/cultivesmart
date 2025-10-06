@@ -410,7 +410,7 @@ const handlerSalvarCotacao = () => {
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
                                 <div style={{ fontSize: 15, color: '#888' }}>Bandejas para plantio:</div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                  <CButton size="sm" color="danger" style={{ minWidth: 32 }} onClick={() => decrementar(insumo)} disabled={!(insumosCotacao.find(item => item.id === estoque.insumo.id)?.quantidade_estoque > 0)}>-</CButton>
+                                  <CButton size="sm" color="danger" style={{ minWidth: 32 }} onClick={() => decrementar(estoque.insumo)} disabled={!(insumosCotacao.find(item => item.id === estoque.insumo.id)?.quantidade_estoque > 0)}>-</CButton>
                                   <CFormInput
                                     type="number"
                                     value={insumosCotacao.find(item => item.id === estoque.insumo.id)?.quantidade_estoque || 0}
