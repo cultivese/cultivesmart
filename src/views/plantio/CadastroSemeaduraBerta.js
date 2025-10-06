@@ -1,22 +1,47 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import CIcon from '@coreui/icons-react';
 import { AvisoCotacao } from 'src/components';
 import {
   CButton,
   CCard,
   CCardBody,
   CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
   CCardHeader,
   CCol,
   CContainer,
   CFormInput,
   CFormSelect,
+  CModalBody,
+  CModalHeader,
+  CModalTitle,
+  CModal,
+  CModalFooter,
   CRow,
   CCardTitle,
   CCardText,
   CCardSubtitle,
   CCardImage,
   CForm,
+  CSpinner,
 } from '@coreui/react';
+import {
+  cilCaretTop,
+  cilCaretBottom,
+  cilCart,
+  cilPrint,
+  cilSave,
+  cilWarning,
+  cilCalendar,
+  cilLeaf,
+  cilMoon,
+  cilBasket,
+  cilListNumbered
+} from '@coreui/icons'
 import { DocsExample, EstoqueArea } from 'src/components';
 import { OrcamentoArea } from '../../components';
 
@@ -24,8 +49,9 @@ const CadastroSemeaduraBerta = () => {
   const [insumos, setInsumos] = useState([]);
   const [insumosCotacao, setInsumosCotacao] = useState([]);
   const [fornecedores, setFornecedores] = useState([]);
-  const [categorias, setCategorias] = useState([]);
+  const [visible, setVisible] = useState(false)
   const [filtroCategoria, setFiltroCategoria] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false)
   const [unidadesMedida, setUnidadesMedida] = useState([]);
   const [filtroNome, setFiltroNome] = useState('');
   const [filtroFornecedor, setFiltroFornecedor] = useState('');
@@ -48,6 +74,66 @@ const CadastroSemeaduraBerta = () => {
       return [...prevInsumosCotacao, novoInsumo];
     });
   };
+
+  const handleGerarPlantio = () => {
+    setVisible(true);
+    };
+
+    const getUnidadeMedidaDescricao = (id) => {
+        const unidade = unidadesMedida && unidadesMedida.length > 0
+        && unidadesMedida.find((u) => u.id === parseInt(id));
+        return unidade ? unidade.sigla : '';
+    };
+
+const handlerSalvarCotacao = () => {
+
+  const dataAtual = new Date();  
+  const fornecedorId = insumosCotacao.length > 0 ? insumosCotacao[0].fornecedor_id : null;
+
+  const imposto = 0; // Substitua pelo valor correto do imposto, se disponível
+  const desconto = 0; // Substitua pelo valor correto do desconto, se disponível
+
+  const insumosFormatados = insumosCotacao.map(insumo => ({
+      insumo_id: insumo.id,
+      quantidade: insumo.quantidade_estoque,
+      preco_unitario: insumo.preco,
+      imposto: insumo.imposto,
+      desconto: insumo.desconto,
+  }));
+
+  const bodyJson = JSON.stringify({
+      fornecedor_id: fornecedorId,
+      insumos: insumosFormatados,
+  });
+
+  console.log(bodyJson);
+
+  setIsProcessing(true);
+  fetch('https://backend.cultivesmart.com.br/api/cotacao', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: bodyJson,
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Erro ao salvar cotação');
+    }
+    return response.json();
+})
+.then(data => {
+    console.log('Cotação salva com sucesso:', data);
+    setIsProcessing(false)
+    setVisible(false);
+    window.location.href = '/estoque/gerenciador_pedidos'; 
+})
+.catch(error => {
+    console.error('Erro ao salvar cotação:', error);
+    setIsProcessing(false)
+    setVisible(false);
+});
+}
 
   const formatarPreco = (valor) => {
     if (typeof valor === 'number') {
@@ -181,6 +267,53 @@ const CadastroSemeaduraBerta = () => {
     { key: 'preco_total', label: 'Custo Total' },
   ];
 
+  // Função utilitária para gerar tarefas do plantio para cada insumo
+  const gerarTarefasPlantio = (insumo, quantidadeBandejas, dataBase = new Date()) => {
+    const espec = insumo.especificacoes && insumo.especificacoes[0];
+    if (!espec) return [];
+    const tarefas = [];
+    const dataPlantio = new Date(dataBase);
+    tarefas.push({
+      tipo: 'plantio',
+      descricao: `Plantio de ${quantidadeBandejas} bandejas (${espec.gramas_para_plantio || espec.quantidade_bandeja || '-'}g/bandeja)`,
+      data: dataPlantio,
+      icone: cilLeaf,
+      cor: 'success',
+    });
+    let dataAtual = new Date(dataPlantio);
+    if (espec.dias_pilha && espec.dias_pilha > 0) {
+      dataAtual.setDate(dataAtual.getDate() + parseInt(espec.dias_pilha));
+      tarefas.push({
+        tipo: 'desempilhamento',
+        descricao: `Desempilhar após ${espec.dias_pilha} dias em pilha`,
+        data: new Date(dataAtual),
+        icone: cilListNumbered,
+        cor: 'info',
+      });
+    }
+    if (espec.dias_blackout && espec.dias_blackout > 0) {
+      dataAtual.setDate(dataAtual.getDate() + parseInt(espec.dias_blackout));
+      tarefas.push({
+        tipo: 'blackout',
+        descricao: `Blackout por ${espec.dias_blackout} dias`,
+        data: new Date(dataAtual),
+        icone: cilMoon,
+        cor: 'dark',
+      });
+    }
+    if (espec.dias_colheita && espec.dias_colheita > 0) {
+      dataAtual.setDate(dataAtual.getDate() + parseInt(espec.dias_colheita));
+      tarefas.push({
+        tipo: 'colheita',
+        descricao: `Colheita após ${espec.dias_colheita} dias`,
+        data: new Date(dataAtual),
+        icone: cilBasket,
+        cor: 'warning',
+      });
+    }
+    return tarefas;
+  };
+
   return (
     <CContainer>
       <AvisoCotacao href="components/buttons/" />
@@ -193,42 +326,6 @@ const CadastroSemeaduraBerta = () => {
             </CCardHeader>
             <CCardBody>
               <DocsExample href="components/card/#background-and-color">
-                <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }}>
-                  {categorias && categorias.records && categorias.records.map((categoria) => (
-                    <CCol key={categoria.id} lg={2} md={3} sm={4} xs={6} style={{ marginBottom: 16 }}>
-                      <div
-                        onClick={() => setFiltroCategoria(categoria.id)}
-                        style={{
-                          width: 160,
-                          height: 200,
-                          border: filtroCategoria === categoria.id ? '2px solid #4f8cff' : '2px solid #e0e0e0',
-                          borderRadius: 16,
-                          boxShadow: '0 2px 8px #0001',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          background: '#fff',
-                          transition: 'box-shadow 0.2s, border-color 0.2s',
-                          position: 'relative',
-                          overflow: 'hidden',
-                        }}
-                        onMouseEnter={e => {
-                          e.currentTarget.style.boxShadow = '0 4px 16px #0002';
-                          e.currentTarget.style.borderColor = '#4f8cff';
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.boxShadow = '0 2px 8px #0001';
-                          e.currentTarget.style.borderColor = filtroCategoria === categoria.id ? '#4f8cff' : '#e0e0e0';
-                        }}
-                      >
-                        <img src={`data:image/png;base64,${categoria.logoPath}`} alt={categoria.descricao} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: 16, transition: 'transform 0.2s' }} />
-                        <div style={{ textAlign: 'center', fontWeight: 600, fontSize: 16 }}>{categoria.descricao}</div>
-                      </div>
-                    </CCol>
-                  ))}
-                </CRow>
                 <CRow className="align-items-center justify-content-center mb-4" xs={{ gutterY: 5 }}>
                   <CCol>
                     <CFormInput
@@ -355,16 +452,99 @@ const CadastroSemeaduraBerta = () => {
                     color={insumosCotacao.length <= 0 ? 'default' : 'success'}
                     className="rounded-0"
                     disabled={insumosCotacao.length <= 0}
+                     onClick={() =>
+                        handleGerarPlantio()
+                      }
                   >
-                    Gerar Cotação
+                    Gerar Plantio
                   </CButton>
                 </div>
               </CRow>
             </CCardBody>
           </CCard>
         </CCol>
+
+        <CModal
+            alignment="center"
+            size="xl"
+            visible={visible}
+            onClose={() => setVisible(false)}
+            aria-labelledby="VerticallyCenteredExample"
+            >
+            <CModalHeader>
+                <CModalTitle id="VerticallyCenteredExample">Simular Plantio</CModalTitle>
+            </CModalHeader>
+            <CModalBody>            
+                <CRow>
+                  {insumosCotacao.map((insumo, idx) => {
+                    // Busca insumo completo para pegar especificação
+                    const insumoCompleto = insumos.records && insumos.records.find(i => i.id === insumo.id);
+                    const tarefas = gerarTarefasPlantio(insumoCompleto || insumo, insumo.quantidade_estoque, new Date());
+                    const custoPorBandeja = calcularCustoPorBandeja(insumoCompleto || insumo);
+                    const custoTotal = custoPorBandeja * (insumo.quantidade_estoque || 0);
+                    return (
+                      <CCol md={6} key={insumo.id} className="mb-4">
+                        <CCard>
+                          <CCardHeader className="d-flex align-items-center gap-2">
+                            <CIcon icon={cilLeaf} className="me-2 text-success" />
+                            <span style={{fontWeight:600, fontSize:18}}>{insumo.nome} <small style={{fontWeight:400}}>{insumo.variedade}</small></span>
+                          </CCardHeader>
+                          <CCardBody>
+                            <div style={{marginBottom:8}}>
+                              <strong>Bandejas:</strong> {insumo.quantidade_estoque} &nbsp;|
+                              <strong> Gramas/bandeja:</strong> {insumoCompleto?.especificacoes?.[0]?.gramas_para_plantio || insumoCompleto?.especificacoes?.[0]?.quantidade_bandeja || '-'}g
+                            </div>
+                            <div style={{marginBottom:8, color:'#4f8cff'}}>
+                              <strong>Custo por bandeja:</strong> {formatarPreco(custoPorBandeja)} &nbsp;|
+                              <strong>Custo total:</strong> {formatarPreco(custoTotal)}
+                            </div>
+                            <ul style={{listStyle:'none', padding:0, margin:0}}>
+                              {tarefas.map((tarefa, i) => (
+                                <li key={i} style={{marginBottom:10, display:'flex', alignItems:'center', gap:10}}>
+                                  <CIcon icon={tarefa.icone} className={`text-${tarefa.cor}`} size="lg" />
+                                  <div>
+                                    <span style={{fontWeight:500}}>{tarefa.tipo.charAt(0).toUpperCase() + tarefa.tipo.slice(1)}</span>: {tarefa.descricao}<br/>
+                                    <span style={{color:'#888', fontSize:14}}><CIcon icon={cilCalendar} /> {tarefa.data.toLocaleDateString('pt-BR')}</span>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                    );
+                  })}
+                </CRow>
+                {/* Resumo do plantio */}
+                <div className="mt-4">
+                  <CCard>
+                    <CCardHeader>
+                      <CIcon icon={cilBasket} className="me-2" /> Resumo do Plantio
+                    </CCardHeader>
+                    <CCardBody>
+                      <div style={{fontSize:16, marginBottom:12}}>
+                        <strong>Total de bandejas utilizadas:</strong> {insumosCotacao.reduce((acc, i) => acc + (i.quantidade_estoque || 0), 0)}<br/>
+                        <strong>Soma de todos os custos:</strong> {formatarPreco(insumosCotacao.reduce((acc, i) => {
+                          const insumoCompleto = insumos.records && insumos.records.find(x => x.id === i.id);
+                          const custoPorBandeja = calcularCustoPorBandeja(insumoCompleto || i);
+                          return acc + custoPorBandeja * (i.quantidade_estoque || 0);
+                        }, 0))}
+                      </div>
+                      {/* ...tabela de orçamento já existente... */}
+                    </CCardBody>
+                  </CCard>
+                </div>
+            </CModalBody>
+            <CModalFooter>
+                
+            </CModalFooter>
+        </CModal>
+
       </CForm>
     </CContainer>
+
+
+
   );
 };
 
