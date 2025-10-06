@@ -107,7 +107,7 @@ const routes = [
   
   // Fornecedores
   { path: '/fornecedores', name: 'Fornecedores', element: FornecedoresListar, exact: true },
-  { path: '/fornecedores/cadastro', name: 'Cadastro de Fornecedores', element: FornecedoresCadastro },
+  { path: '/fornecedores/cadastro', name: 'Cadastro', element: FornecedoresCadastro },
   { path: '/fornecedores/listar', name: 'Lista de Fornecedores', element: FornecedoresListar },
   { path: '/fornecedores/catalogo_produtos', name: 'Catálogo de Produtos dos Fornececores', element: InsumosListar },
   { path: '/fornecedores/especificacao', name: 'Especificação de Produtos dos Fornececores', element: InsumosEspecificacao },

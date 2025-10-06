@@ -34,7 +34,7 @@ const FornecedoresListar = () => {
       )}
       <CRow className="g-4">
         {fornecedores.map((fornecedor) => (
-          <CCol xs={12} sm={6} md={4} lg={3} key={fornecedor.id}>
+          <CCol xs={6} sm={6} md={4} lg={3} key={fornecedor.id}>
             <CCard style={{borderRadius: 16, boxShadow: '0 2px 8px #0001', minHeight: 310, display: 'flex', flexDirection: 'column', height: '100%'}}>
               {/* Foto do fornecedor */}
               {fornecedor.logoPath ? (
