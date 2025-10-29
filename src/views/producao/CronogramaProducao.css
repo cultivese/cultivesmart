@@ -59,3 +59,108 @@
   background-color: var(--cui-info-bg-rgb, #e6f7ff);
   color: var(--cui-info-text-rgb, #001f3f);
 }
+
+/* Estilos para o Modal de Lotes */
+.lote-section {
+  transition: all 0.3s ease;
+}
+
+.lote-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.lote-header {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+.lote-body {
+  background: #fff;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.info-item {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  background: #f8f9fa;
+  transition: all 0.2s ease;
+}
+
+.info-item:hover {
+  background: #e9ecef;
+  transform: translateY(-1px);
+}
+
+.info-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.info-value {
+  font-size: 0.95rem;
+  color: #212529;
+}
+
+.tarefas-hoje-section {
+  background: rgba(13, 110, 253, 0.05) !important;
+  border-left: 4px solid #0d6efd;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 1rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #dee2e6;
+}
+
+.timeline-item {
+  position: relative;
+}
+
+.timeline-dot {
+  position: relative;
+  z-index: 1;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.empty-state {
+  color: #6c757d;
+}
+
+.empty-state svg {
+  opacity: 0.5;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .info-item {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .lote-header h5 {
+    font-size: 1.1rem;
+  }
+  
+  .timeline {
+    padding-left: 0.75rem;
+  }
+}

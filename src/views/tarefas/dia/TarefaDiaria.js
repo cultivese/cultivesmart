@@ -11,160 +11,195 @@ import {
   CListGroup,
   CListGroupItem,
   CBadge,
+  CButton,
+  CModal,
+  CModalHeader,
+  CModalTitle,
+  CModalBody,
+  CModalFooter,
+  CForm,
+  CFormInput,
+  CFormLabel,
+  CInputGroup,
+  CInputGroupText,
+  CSpinner,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilCheckCircle, cilBan } from '@coreui/icons';
+
+// Função para buscar tarefas reais da API
+const fetchTarefas = async () => {
+  try {
+    const response = await fetch('https://backend.cultivesmart.com.br/api/tarefas');
+    const data = await response.json();
+    return data.records || data || [];
+  } catch (error) {
+    console.error('Erro ao buscar tarefas:', error);
+    return [];
+  }
+};
 
 // Função para buscar plantios reais da API
 const fetchPlantios = async () => {
   try {
     const response = await fetch('https://backend.cultivesmart.com.br/api/plantios');
     const data = await response.json();
-    return data;
+    return data.records || data || [];
   } catch (error) {
     console.error('Erro ao buscar plantios:', error);
     return [];
   }
 };
 
-// Função para buscar insumos reais da API
-const fetchInsumosEspecificacoes = async () => {
-  try {
-    const response = await fetch('https://backend.cultivesmart.com.br/api/insumos');
-    const data = await response.json();
-    return data.records || [];
-  } catch (error) {
-    console.error('Erro ao buscar especificações dos insumos:', error);
-    return [];
-  }
-};
-
-// Função para gerar tarefas agendadas para cada plantio
-const gerarTarefasPorPlantio = (plantios, insumos, dataHoje) => {
-  const tarefas = [];
-  plantios.forEach(plantio => {
-    const insumo = insumos.find(i => i.id === plantio.insumo_id);
-    const espec = insumo && insumo.especificacoes && insumo.especificacoes[0];
-    if (!espec) return;
-    const dataPlantio = plantio.data_plantio ? new Date(plantio.data_plantio) : null;
-    // Plantio
-    if (dataPlantio &&
-      dataPlantio.getFullYear() === dataHoje.getFullYear() &&
-      dataPlantio.getMonth() === dataHoje.getMonth() &&
-      dataPlantio.getDate() === dataHoje.getDate()) {
-      tarefas.push({
-        id: `plantio-${plantio.id}`,
-        description: `Plantio do plantio ${plantio.id} - ${plantio.nome} (${plantio.variedade})`,
-        type: 'plantio',
-        status: 'pending',
-        plantioId: plantio.id,
-        details: `Utilizar especificação: ${espec.gramas_para_plantio || ''}g por bandeja.`
-      });
-    }
-    // Desempilhamento
-    if (espec.dias_pilha && espec.dias_pilha > 0 && dataPlantio) {
-      const dataDesempilhamento = new Date(dataPlantio);
-      dataDesempilhamento.setDate(dataDesempilhamento.getDate() + espec.dias_pilha);
-      if (dataDesempilhamento.getFullYear() === dataHoje.getFullYear() &&
-        dataDesempilhamento.getMonth() === dataHoje.getMonth() &&
-        dataDesempilhamento.getDate() === dataHoje.getDate()) {
-        tarefas.push({
-          id: `desempilhamento-${plantio.id}`,
-          description: `Desempilhamento do plantio ${plantio.id} - ${plantio.nome} (${plantio.variedade})`,
-          type: 'desempilhamento',
-          status: 'pending',
-          plantioId: plantio.id,
-          details: `Após ${espec.dias_pilha} dias do plantio.`
-        });
+// Função para filtrar tarefas do dia
+const filtrarTarefasDoDia = (tarefas, plantios, dataHoje) => {
+  const dataHojeStr = dataHoje.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+  
+  console.log('Filtrando tarefas para a data:', dataHojeStr);
+  console.log('Total de tarefas recebidas:', tarefas.length);
+  
+  const tarefasFiltradas = tarefas
+    .filter(tarefa => {
+      // Filtrar tarefas agendadas para hoje
+      if (!tarefa.data_agendada) {
+        console.log('Tarefa sem data_agendada:', tarefa);
+        return false;
       }
-    }
-    // Blackout
-    if (espec.dias_blackout && espec.dias_blackout > 0 && dataPlantio) {
-      // Blackout simples
-      const dataBlackout = new Date(dataPlantio);
-      dataBlackout.setDate(dataBlackout.getDate() + espec.dias_blackout);
-      if (dataBlackout.getFullYear() === dataHoje.getFullYear() &&
-        dataBlackout.getMonth() === dataHoje.getMonth() &&
-        dataBlackout.getDate() === dataHoje.getDate()) {
-        tarefas.push({
-          id: `blackout-${plantio.id}`,
-          description: `Iniciar blackout do plantio ${plantio.id} - ${plantio.nome} (${plantio.variedade})`,
-          type: 'blackout',
-          status: 'pending',
-          plantioId: plantio.id,
-          details: `Após ${espec.dias_blackout} dias do plantio.`
-        });
+      
+      // Normalizar formato da data (pode vir como '2025-10-23' ou '2025-10-23T00:00:00')
+      const dataTarefa = tarefa.data_agendada.split('T')[0];
+      const isToday = dataTarefa === dataHojeStr;
+      
+      if (isToday) {
+        console.log('Tarefa encontrada para hoje:', tarefa);
       }
-      // Blackout após desempilhamento
-      if (espec.dias_pilha) {
-        const dataBlackout2 = new Date(dataPlantio);
-        dataBlackout2.setDate(dataBlackout2.getDate() + espec.dias_pilha + espec.dias_blackout);
-        if (dataBlackout2.getFullYear() === dataHoje.getFullYear() &&
-          dataBlackout2.getMonth() === dataHoje.getMonth() &&
-          dataBlackout2.getDate() === dataHoje.getDate()) {
-          tarefas.push({
-            id: `blackout2-${plantio.id}`,
-            description: `Blackout após desempilhamento do plantio ${plantio.id} - ${plantio.nome} (${plantio.variedade})`,
-            type: 'blackout',
-            status: 'pending',
-            plantioId: plantio.id,
-            details: `Após desempilhamento + ${espec.dias_blackout} dias.`
-          });
-        }
-      }
-    }
-    // Colheita
-    if (espec.dias_colheita && espec.dias_colheita > 0 && dataPlantio) {
-      // Colheita simples
-      const dataColheita = new Date(dataPlantio);
-      dataColheita.setDate(dataColheita.getDate() + espec.dias_colheita);
-      if (dataColheita.getFullYear() === dataHoje.getFullYear() &&
-        dataColheita.getMonth() === dataHoje.getMonth() &&
-        dataColheita.getDate() === dataHoje.getDate()) {
-        tarefas.push({
-          id: `colheita-${plantio.id}`,
-          description: `Colheita do plantio ${plantio.id} - ${plantio.nome} (${plantio.variedade})`,
-          type: 'colheita',
-          status: 'pending',
-          plantioId: plantio.id,
-          details: `Após ${espec.dias_colheita} dias do plantio.`
-        });
-      }
-      // Colheita após desempilhamento + blackout + colheita
-      if (espec.dias_pilha && espec.dias_blackout) {
-        const dataColheita2 = new Date(dataPlantio);
-        dataColheita2.setDate(dataColheita2.getDate() + espec.dias_pilha + espec.dias_blackout + espec.dias_colheita);
-        if (dataColheita2.getFullYear() === dataHoje.getFullYear() &&
-          dataColheita2.getMonth() === dataHoje.getMonth() &&
-          dataColheita2.getDate() === dataHoje.getDate()) {
-          tarefas.push({
-            id: `colheita2-${plantio.id}`,
-            description: `Colheita do plantio ${plantio.id} - ${plantio.nome} (${plantio.variedade})`,
-            type: 'colheita',
-            status: 'pending',
-            plantioId: plantio.id,
-            details: `Após desempilhamento + blackout + ${espec.dias_colheita} dias.`
-          });
-        }
-      }
-    }
-  });
-  return tarefas;
+      
+      return isToday;
+    })
+    .map(tarefa => {
+      // Buscar informações do plantio relacionado
+      const plantio = plantios.find(p => p.id === tarefa.lote_id);
+      
+      return {
+        id: tarefa.id,
+        description: tarefa.descricao || `${tarefa.tipo} - ${plantio?.nome || 'Plantio'}`,
+        type: tarefa.tipo,
+        status: tarefa.status || 'pending',
+        plantioId: tarefa.lote_id,
+        details: `${plantio?.nome || 'Plantio'} | Data: ${new Date(tarefa.data_agendada).toLocaleDateString('pt-BR')} | Status: ${tarefa.status || 'pendente'}`
+      };
+    });
+    
+  console.log('Tarefas filtradas para hoje:', tarefasFiltradas);
+  return tarefasFiltradas;
 };
 
 const TarefaDiaria = () => {
   const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [debug, setDebug] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [tarefaSelecionada, setTarefaSelecionada] = useState(null);
+  const [gramasSementes, setGramasSementes] = useState('');
+  const [observacoes, setObservacoes] = useState('');
+  const [processando, setProcessando] = useState(false);
 
   useEffect(() => {
     const carregarTarefas = async () => {
-      const plantios = await fetchPlantios(); // API ainda retorna lotes, mas tratamos como plantios
-      const insumos = await fetchInsumosEspecificacoes();
-      const hoje = new Date();
-      const tarefasHoje = gerarTarefasPorPlantio(plantios, insumos, hoje);
-      setTasks(tarefasHoje);
+      setLoading(true);
+      try {
+        const [tarefas, plantios] = await Promise.all([
+          fetchTarefas(),
+          fetchPlantios()
+        ]);
+        
+        console.log('Tarefas carregadas:', tarefas);
+        console.log('Plantios carregados:', plantios);
+        
+        const hoje = new Date();
+        const tarefasHoje = filtrarTarefasDoDia(tarefas, plantios, hoje);
+        
+        console.log('Tarefas do dia:', tarefasHoje);
+        setTasks(tarefasHoje);
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        setTasks([]);
+      } finally {
+        setLoading(false);
+      }
     };
     carregarTarefas();
   }, []);
+
+  const handleIniciarTarefa = (tarefa) => {
+    if (tarefa.type === 'plantio') {
+      setTarefaSelecionada(tarefa);
+      setModalVisible(true);
+    } else {
+      // Para outros tipos de tarefa, marcar como concluída diretamente
+      concluirTarefa(tarefa.id, {});
+    }
+  };
+
+  const handleConcluirPlantio = async () => {
+    if (!gramasSementes || parseFloat(gramasSementes) <= 0) {
+      alert('Por favor, informe a quantidade de gramas de sementes utilizada.');
+      return;
+    }
+
+    setProcessando(true);
+    try {
+      await concluirTarefa(tarefaSelecionada.id, {
+        gramas_sementes_utilizadas: parseFloat(gramasSementes),
+        observacoes: observacoes.trim() || 'Plantio realizado com sucesso'
+      });
+      
+      // Fechar modal e limpar dados
+      setModalVisible(false);
+      setTarefaSelecionada(null);
+      setGramasSementes('');
+      setObservacoes('');
+      
+      // Recarregar tarefas
+      const [tarefas, plantios] = await Promise.all([
+        fetchTarefas(),
+        fetchPlantios()
+      ]);
+      const hoje = new Date();
+      const tarefasHoje = filtrarTarefasDoDia(tarefas, plantios, hoje);
+      setTasks(tarefasHoje);
+      
+    } catch (error) {
+      console.error('Erro ao concluir tarefa:', error);
+      alert('Erro ao concluir tarefa: ' + error.message);
+    } finally {
+      setProcessando(false);
+    }
+  };
+
+  const concluirTarefa = async (tarefaId, dadosAdicionais = {}) => {
+    try {
+      const response = await fetch(`https://backend.cultivesmart.com.br/api/tarefas/${tarefaId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'completed',
+          data_conclusao: new Date().toISOString().split('T')[0],
+          ...dadosAdicionais
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar tarefa');
+      }
+
+      console.log('Tarefa concluída com sucesso');
+    } catch (error) {
+      throw error;
+    }
+  };
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -205,8 +240,29 @@ const TarefaDiaria = () => {
               <span style={{fontWeight: 'bold', fontSize: '1.2em'}}>Tarefas do Dia - {new Date().toLocaleDateString('pt-BR', {weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'})}</span>
             </CCardHeader>
             <CCardBody>
-              {tasks.length === 0 ? (
-                <p style={{color: '#888'}}>Nenhuma tarefa agendada para hoje.</p>
+              {loading ? (
+                <p style={{color: '#888'}}>Carregando tarefas...</p>
+              ) : tasks.length === 0 ? (
+                <div>
+                  <p style={{color: '#888'}}>Nenhuma tarefa agendada para hoje.</p>
+                  <button 
+                    onClick={() => setDebug(!debug)}
+                    style={{fontSize: '12px', color: '#007bff', background: 'none', border: 'none', cursor: 'pointer'}}
+                  >
+                    {debug ? 'Ocultar debug' : 'Mostrar debug'}
+                  </button>
+                  {debug && (
+                    <div style={{marginTop: '10px', fontSize: '12px', color: '#666', backgroundColor: '#f8f9fa', padding: '10px', borderRadius: '4px'}}>
+                      <p><strong>Data atual:</strong> {new Date().toISOString().split('T')[0]}</p>
+                      <p><strong>APIs chamadas:</strong></p>
+                      <ul>
+                        <li>GET /api/tarefas</li>
+                        <li>GET /api/plantios</li>
+                      </ul>
+                      <p>Verifique o console (F12) para mais detalhes.</p>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <CListGroup>
                   {tasks.map((task) => (
@@ -225,6 +281,21 @@ const TarefaDiaria = () => {
                       </div>
                       <div className="d-flex align-items-center">
                         {getStatusBadge(task.status)}
+                        {task.status === 'pending' && (
+                          <CButton
+                            color="primary"
+                            size="sm"
+                            className="ms-3"
+                            onClick={() => handleIniciarTarefa(task)}
+                          >
+                            {task.type === 'plantio' ? 'Realizar Plantio' : 'Concluir'}
+                          </CButton>
+                        )}
+                        {task.status === 'completed' && (
+                          <span className="ms-3 text-success" style={{fontSize: '0.9em'}}>
+                            ✓ Concluída
+                          </span>
+                        )}
                       </div>
                     </CListGroupItem>
                   ))}
@@ -234,6 +305,70 @@ const TarefaDiaria = () => {
           </CCard>
         </CCol>
       </CRow>
+
+      {/* Modal para plantio */}
+      <CModal visible={modalVisible} onClose={() => setModalVisible(false)} size="lg">
+        <CModalHeader>
+          <CModalTitle>Registrar Plantio</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          {tarefaSelecionada && (
+            <div>
+              <h6 className="mb-3">{tarefaSelecionada.description}</h6>
+              <CForm>
+                <CRow className="mb-3">
+                  <CCol md={6}>
+                    <CFormLabel htmlFor="gramasSementes">Gramas de sementes utilizadas *</CFormLabel>
+                    <CInputGroup>
+                      <CFormInput
+                        type="number"
+                        id="gramasSementes"
+                        value={gramasSementes}
+                        onChange={(e) => setGramasSementes(e.target.value)}
+                        placeholder="Ex: 250"
+                        min="0"
+                        step="0.01"
+                        required
+                      />
+                      <CInputGroupText>gramas</CInputGroupText>
+                    </CInputGroup>
+                  </CCol>
+                </CRow>
+                <CRow className="mb-3">
+                  <CCol md={12}>
+                    <CFormLabel htmlFor="observacoes">Observações (opcional)</CFormLabel>
+                    <CFormInput
+                      as="textarea"
+                      id="observacoes"
+                      value={observacoes}
+                      onChange={(e) => setObservacoes(e.target.value)}
+                      placeholder="Adicione observações sobre o plantio..."
+                      rows="3"
+                    />
+                  </CCol>
+                </CRow>
+              </CForm>
+            </div>
+          )}
+        </CModalBody>
+        <CModalFooter>
+          <CButton 
+            color="secondary" 
+            onClick={() => setModalVisible(false)}
+            disabled={processando}
+          >
+            Cancelar
+          </CButton>
+          <CButton 
+            color="success" 
+            onClick={handleConcluirPlantio}
+            disabled={processando}
+          >
+            {processando && <CSpinner as="span" size="sm" className="me-2" />}
+            {processando ? 'Concluindo...' : 'Concluir Plantio'}
+          </CButton>
+        </CModalFooter>
+      </CModal>
     </CContainer>
   );
 };

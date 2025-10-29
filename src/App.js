@@ -37,7 +37,7 @@ const App = () => {
 
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Suspense
           fallback={
             <div className="pt-3 text-center">

@@ -28,6 +28,10 @@ import {
   CCardImage,
   CForm,
   CSpinner,
+  CProgress,
+  CProgressBar,
+  CInputGroup,
+  CInputGroupText,
 } from '@coreui/react';
 import {
   cilCaretTop,
@@ -47,7 +51,7 @@ import { OrcamentoArea } from '../../components';
 
 const CadastroSemeaduraBerta = () => {
   const [insumos, setInsumos] = useState([]);
-  const [insumosCotacao, setInsumosCotacao] = useState([]);
+  const [insumosPlantio, setInsumosPlantio] = useState([]);
   const [fornecedores, setFornecedores] = useState([]);
   const [visible, setVisible] = useState(false)
   const [filtroCategoria, setFiltroCategoria] = useState('');
@@ -55,9 +59,13 @@ const CadastroSemeaduraBerta = () => {
   const [unidadesMedida, setUnidadesMedida] = useState([]);
   const [filtroNome, setFiltroNome] = useState('');
   const [filtroFornecedor, setFiltroFornecedor] = useState('');
+  const [codigoLote, setCodigoLote] = useState('');
+  const [recorrencia, setRecorrencia] = useState('unico');
+  const [dataPlantio, setDataPlantio] = useState(new Date().toISOString().split('T')[0]);
+  const [tarefasPreview, setTarefasPreview] = useState([]);
 
-  const adicionarInsumoCotacao = (insumo) => {
-    setInsumosCotacao((prevInsumosCotacao) => {
+  const adicionarInsumoPlantio = (insumo) => {
+    setInsumosPlantio((previnsumosPlantio) => {
       const precoString = typeof insumo.preco === 'string' ? insumo.preco : '0';
       const precoNumerico = parseFloat(precoString.replace(/[^\d]/g, '')) / 100 || 0;
       const impostoString = typeof insumo.imposto === 'string' ? insumo.imposto : '0';
@@ -67,17 +75,184 @@ const CadastroSemeaduraBerta = () => {
       const novoInsumo = {
         ...insumo,
         preco: precoNumerico,
-        quantidade_estoque: 1,
+        bandejas_necessarias: 1,
         imposto: impostoNumerico,
         desconto: descontoNumerico,
       };
-      return [...prevInsumosCotacao, novoInsumo];
+      return [...previnsumosPlantio, novoInsumo];
     });
   };
 
   const handleGerarPlantio = () => {
     setVisible(true);
     };
+
+  const handleConfirmarPlantio = async () => {
+    // Validar se o código do lote foi preenchido
+    if (!codigoLote.trim()) {
+      alert('Por favor, informe o código ou nome do lote antes de confirmar o plantio.');
+      return;
+    }
+    
+    setIsProcessing(true);
+    
+    try {
+      // Lógica para recorrência - gerar datas de plantio baseadas na recorrência
+      let datasPlantio = [];
+      const primeiraData = new Date(dataPlantio);
+      let meses = 0;
+      
+      if (recorrencia === '1mes') meses = 1;
+      else if (recorrencia === '3meses') meses = 3;
+      else if (recorrencia === '6meses') meses = 6;
+
+      if (meses > 0) {
+        // Gerar datas para o período de recorrência (semanalmente)
+        const dataAtual = new Date(primeiraData);
+        const dataFinal = new Date(primeiraData);
+        dataFinal.setMonth(dataFinal.getMonth() + meses);
+        
+        // Gerar plantios semanalmente (a cada 7 dias)
+        while (dataAtual <= dataFinal) {
+          datasPlantio.push(new Date(dataAtual));
+          // Avança para a próxima semana (7 dias)
+          dataAtual.setDate(dataAtual.getDate() + 7);
+        }
+      } else {
+        // Plantio único
+        datasPlantio = [primeiraData];
+      }
+
+      // Remove datas duplicadas e ordena
+      datasPlantio = Array.from(new Set(datasPlantio.map(d => d.toISOString().slice(0,10))))
+        .map(d => new Date(d))
+        .sort((a,b) => a-b);
+
+      // Para cada data de plantio, criar plantios e tarefas
+      for (const dataPlantioAtual of datasPlantio) {
+        // Para cada insumo selecionado, criar um plantio
+        for (const insumo of insumosPlantio) {
+          const insumoCompleto = insumos.records && insumos.records.find(i => i.insumo_id === insumo.id);
+          const espec = insumoCompleto.insumo?.especificacoes?.[0];
+          
+          if (!espec) {
+            console.warn(`Especificação não encontrada para o insumo ${insumo.nome}`);
+            continue;
+          }
+
+          // Criar o plantio
+          const plantioData = {
+            data_plantio: formatDateLocal(dataPlantioAtual),
+            nome: `Lote ${codigoLote} - Plantio de ${insumo.nome} ${insumo.variedade || ''}`.trim(),
+            variedade: insumo.variedade || '',
+            bandejas_necessarias: insumo.bandejas_necessarias || 0,
+            status: "planejado",
+            recorrencia: recorrencia,
+            observacoes: `Lote: ${codigoLote} | Recorrência: ${recorrencia === 'unico' ? 'Único' : recorrencia === '1mes' ? '1 Mês' : recorrencia === '3meses' ? '3 Meses' : '6 Meses'} | Plantio de ${insumo.bandejas_necessarias} bandejas - Custo por bandeja: ${formatarPreco(calcularCustoPorBandeja(insumoCompleto || insumo))}`,
+            insumo_id: insumo.id,
+            area_plantio: "Área principal"
+          };
+
+          // Salvar o plantio
+          const plantioResponse = await fetch('https://backend.cultivesmart.com.br/api/plantios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(plantioData)
+          });
+          
+          if (!plantioResponse.ok) {
+            throw new Error(`Erro ao salvar plantio de ${plantioData.nome}`);
+          }
+          
+          const plantioSalvo = await plantioResponse.json();
+          console.log('Plantio salvo com sucesso:', plantioSalvo);
+
+          // Gerar tarefas automáticas baseadas nas especificações
+          const tarefas = [];
+          
+          // Tarefa de Plantio
+          tarefas.push({
+            lote_id: plantioSalvo.id,
+            tipo: 'plantio',
+            descricao: `Plantio de ${insumo.bandejas_necessarias} bandejas - ${insumo.nome} ${insumo.variedade || ''}`,
+            data_agendada: formatDateLocal(dataPlantioAtual),
+            status: 'pending',
+          });
+
+          // Tarefa de Desempilhamento (se especificado)
+          if (espec.dias_pilha && espec.dias_pilha > 0) {
+            const dataDesempilhamento = new Date(dataPlantioAtual);
+            dataDesempilhamento.setDate(dataDesempilhamento.getDate() + parseInt(espec.dias_pilha));
+            tarefas.push({
+              lote_id: plantioSalvo.id,
+              tipo: 'desempilhamento',
+              descricao: `Desempilhar após ${espec.dias_pilha} dias em pilha`,
+              data_agendada: formatDateLocal(dataDesempilhamento),
+              status: 'pending',
+            });
+          }
+
+          // Tarefa de Blackout (se especificado)
+          if (espec.dias_blackout && espec.dias_blackout > 0) {
+            const dataBlackout = new Date(dataPlantioAtual);
+            const diasAntes = (espec.dias_pilha || 0) + parseInt(espec.dias_blackout);
+            dataBlackout.setDate(dataBlackout.getDate() + diasAntes);
+            tarefas.push({
+              lote_id: plantioSalvo.id,
+              tipo: 'blackout',
+              descricao: `Blackout por ${espec.dias_blackout} dias`,
+              data_agendada: formatDateLocal(dataBlackout),
+              status: 'pending',
+            });
+          }
+
+          // Tarefa de Colheita (se especificado)
+          if (espec.dias_colheita && espec.dias_colheita > 0) {
+            const dataColheita = new Date(dataPlantioAtual);
+            const diasAntes = (espec.dias_pilha || 0) + (espec.dias_blackout || 0) + parseInt(espec.dias_colheita);
+            dataColheita.setDate(dataColheita.getDate() + diasAntes);
+            tarefas.push({
+              lote_id: plantioSalvo.id,
+              tipo: 'colheita',
+              descricao: `Colheita após ${espec.dias_colheita} dias`,
+              data_agendada: formatDateLocal(dataColheita),
+              status: 'pending',
+            });
+          }
+
+          // Salvar todas as tarefas
+          for (const tarefa of tarefas) {
+            const tarefaResponse = await fetch('https://backend.cultivesmart.com.br/api/tarefas', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(tarefa),
+            });
+            
+            if (!tarefaResponse.ok) {
+              console.error(`Erro ao salvar tarefa: ${tarefa.descricao}`);
+            } else {
+              console.log(`Tarefa salva: ${tarefa.descricao}`);
+            }
+          }
+        }
+      }
+      
+      setIsProcessing(false);
+      setVisible(false);
+      setInsumosPlantio([]);
+      setCodigoLote('');
+      setRecorrencia('unico');
+      setDataPlantio(new Date().toISOString().split('T')[0]); // Resetar para data atual
+      
+      const totalPlantios = datasPlantio.length * insumosPlantio.length;
+      alert(`${totalPlantios} plantios e suas tarefas foram salvos com sucesso!`);
+        
+    } catch (error) {
+      console.error('Erro ao salvar plantios:', error);
+      setIsProcessing(false);
+      alert('Erro ao salvar plantios: ' + error.message);
+    }
+  };
 
     const getUnidadeMedidaDescricao = (id) => {
         const unidade = unidadesMedida && unidadesMedida.length > 0
@@ -88,12 +263,12 @@ const CadastroSemeaduraBerta = () => {
 const handlerSalvarCotacao = () => {
 
   const dataAtual = new Date();  
-  const fornecedorId = insumosCotacao.length > 0 ? insumosCotacao[0].fornecedor_id : null;
+  const fornecedorId = insumosPlantio.length > 0 ? insumosPlantio[0].fornecedor_id : null;
 
   const imposto = 0; // Substitua pelo valor correto do imposto, se disponível
   const desconto = 0; // Substitua pelo valor correto do desconto, se disponível
 
-  const insumosFormatados = insumosCotacao.map(insumo => ({
+  const insumosFormatados = insumosPlantio.map(insumo => ({
       insumo_id: insumo.id,
       quantidade: insumo.quantidade_estoque,
       preco_unitario: insumo.preco,
@@ -157,13 +332,6 @@ const handlerSalvarCotacao = () => {
   };
 
   useEffect(() => {
-    fetch('https://backend.cultivesmart.com.br/api/categorias')
-      .then((response) => response.json())
-      .then((data) => setCategorias(data))
-      .catch((error) => console.error('Erro ao buscar categorias:', error));
-  }, []);
-
-  useEffect(() => {
     fetch('https://backend.cultivesmart.com.br/api/estoque')
       .then((response) => response.json())
       .then((data) => setInsumos(data))
@@ -196,7 +364,7 @@ const handlerSalvarCotacao = () => {
   };
 
   const calcularTotal = () => {
-    return insumosCotacao.reduce((total, insumo) => total + insumo.preco * (insumo.quantidade_estoque || 0), 0);
+    return insumosPlantio.reduce((total, insumo) => total + insumo.preco * (insumo.quantidade_estoque || 0), 0);
   };
 
   // Corrige o cálculo do total para somar todos os custos totais dos itens
@@ -219,37 +387,37 @@ const handlerSalvarCotacao = () => {
       acc[fornecedor.id] = fornecedor;
       return acc;
     }, {});
-    return insumosCotacao.map((insumo) => {
+    return insumosPlantio.map((insumo) => {
       const insumoCompleto = insumos.records && insumos.records.find(i => i.id === insumo.id);
       const custoPorBandeja = calcularCustoPorBandeja(insumoCompleto || insumo);
-      const precoTotal = custoPorBandeja * (insumo.quantidade_estoque || 0);
+      const precoTotal = custoPorBandeja * (insumo.bandejas_necessarias || 0);
       const fornecedor = fornecedoresLookup[insumo.fornecedor_id];
       return {
         fornecedor: fornecedor ? fornecedor.nome : 'Fornecedor não encontrado',
         nome: insumo.nome,
         variedade: insumo.variedade,
-        quantidade_estoque: insumo.quantidade_estoque,
+        bandejas_necessarias: insumo.bandejas_necessarias,
         preco: formatarPreco(custoPorBandeja),
         preco_total: formatarPreco(precoTotal),
         _cellProps: { nome: { scope: 'row' } },
       };
     });
-  }, [insumosCotacao, fornecedores, insumos]);
+  }, [insumosPlantio, fornecedores, insumos]);
 
   const incrementar = (insumo) => {
-    setInsumosCotacao((prevInsumos) =>
+    setInsumosPlantio((prevInsumos) =>
       prevInsumos.map((item) =>
-        item.id === insumo.id ? { ...item, quantidade_estoque: (item.quantidade_estoque || 0) + 1 } : item
+        item.id === insumo.id ? { ...item, bandejas_necessarias: (item.bandejas_necessarias || 0) + 1 } : item
       )
     );
   };
 
   const decrementar = (insumo) => {
-    setInsumosCotacao((prevInsumos) =>
+    setInsumosPlantio((prevInsumos) =>
       prevInsumos.reduce((acc, item) => {
         if (item.id === insumo.id) {
-          if ((item.quantidade_estoque || 0) > 1) {
-            acc.push({ ...item, quantidade_estoque: item.quantidade_estoque - 1 });
+          if ((item.bandejas_necessarias || 0) > 1) {
+            acc.push({ ...item, bandejas_necessarias: item.bandejas_necessarias - 1 });
           }
         } else {
           acc.push(item);
@@ -311,11 +479,39 @@ const handlerSalvarCotacao = () => {
         cor: 'warning',
       });
     }
+
     return tarefas;
+  };
+
+  // Função para formatar data no formato local
+  const formatDateLocal = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   return (
     <CContainer>
+      <style>
+        {`
+          /* Estilo para destacar dias válidos no date picker */
+          input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.5);
+          }
+          
+          /* Tooltip para datas válidas */
+          .date-input-container {
+            position: relative;
+          }
+          
+          .date-help-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+          }
+        `}
+      </style>
       <AvisoCotacao href="components/buttons/" />
       <CForm className="row g-3">
         <CCol xs={12}>
@@ -369,12 +565,13 @@ const handlerSalvarCotacao = () => {
                         const nomeMatch = !filtroNome || estoque.insumo.nome.toLowerCase().includes(filtroNome.toLowerCase());
                         const fornecedorMatch = !filtroFornecedor || estoque.insumo.fornecedor_id === parseInt(filtroFornecedor);
                         const categoriaMatch = !filtroCategoria || estoque.insumo.categoria_id === parseInt(filtroCategoria);
-                        return categoriaMatch && nomeMatch && fornecedorMatch;
+                        const temEspecificacao = estoque.insumo.especificacoes && estoque.insumo.especificacoes.length > 0;
+                        return categoriaMatch && nomeMatch && fornecedorMatch && temEspecificacao;
                       })
                       .map((estoque) => {
-                        const quantidadeTotalDisponivel = estoque.insumo.quantidade;
-                        const quantidadePorSaco = estoque.insumo.quantidade;
-                        const quantidadeTotalSacos = 5;
+                        const quantidadeTotalDisponivel = estoque.quantidade_total; // Quantidade de insumo em gramas
+                        const quantidadePorSaco = estoque.insumo.quantidade; // Capacidade de um saco em gramas
+                        const quantidadeTotalSacos = estoque.cotacao_insumos.quantidade; // Quantidade de sacos comprados
                         const capacidadeMaximaTotal = parseFloat(quantidadeTotalSacos) * parseFloat(quantidadePorSaco);
                         let percentualEmEstoque = 0;
                         if (capacidadeMaximaTotal > 0) {
@@ -407,25 +604,55 @@ const handlerSalvarCotacao = () => {
                               </div>
                             </div>
                             <CCardBody style={{ paddingTop: 0 }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
-                                <div style={{ fontSize: 15, color: '#888' }}>Bandejas para plantio:</div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                  <CButton size="sm" color="danger" style={{ minWidth: 32 }} onClick={() => decrementar(estoque.insumo)} disabled={!(insumosCotacao.find(item => item.id === estoque.insumo.id)?.quantidade_estoque > 0)}>-</CButton>
+                              <div style={{ fontSize: 14, color: '#666', marginBottom: 6, fontWeight: 500 }}>
+                                Estoque de sementes disponível:
+                              </div>
+                               <CProgress value={valorBarraProgresso}>
+                                          <CProgressBar className="overflow-visible text-dark px-2" color={corBarraProgresso}>
+                                            {quantidadeTotalDisponivel}g / {capacidadeMaximaTotal}g
+                                          </CProgressBar>
+                                        </CProgress>
+                              <div style={{ marginTop: 12 }}>
+                                <div style={{ fontSize: 15, color: '#888', marginBottom: 8 }}>Bandejas para plantio:</div>
+                                <CInputGroup>
+                                  <CButton 
+                                    color="danger" 
+                                    variant="outline"
+                                    onClick={() => decrementar(estoque.insumo)} 
+                                    disabled={!(insumosPlantio.find(item => item.id === estoque.insumo.id)?.bandejas_necessarias > 0)}
+                                    style={{ borderRadius: '6px 0 0 6px', zIndex: 1 }}
+                                  >
+                                    −
+                                  </CButton>
                                   <CFormInput
                                     type="number"
-                                    value={insumosCotacao.find(item => item.id === estoque.insumo.id)?.quantidade_estoque || 0}
+                                    value={insumosPlantio.find(item => item.id === estoque.insumo.id)?.bandejas_necessarias || 0}
                                     min={0}
-                                    style={{ width: 50, textAlign: 'center', fontWeight: 600 }}
+                                    style={{ 
+                                      textAlign: 'center', 
+                                      fontWeight: 600, 
+                                      fontSize: 16,
+                                      border: '1px solid #d8dbe0',
+                                      borderLeft: 'none',
+                                      borderRight: 'none'
+                                    }}
                                     readOnly
                                   />
-                                  <CButton size="sm" color="success" style={{ minWidth: 32 }} onClick={() => {
-                                    if (insumosCotacao.some(item => item.id === estoque.insumo.id)) {
-                                      incrementar(estoque.insumo);
-                                    } else {
-                                      adicionarInsumoCotacao(estoque.insumo);
-                                    }
-                                  }}>+</CButton>
-                                </div>
+                                  <CButton 
+                                    color="success" 
+                                    variant="outline"
+                                    onClick={() => {
+                                      if (insumosPlantio.some(item => item.id === estoque.insumo.id)) {
+                                        incrementar(estoque.insumo);
+                                      } else {
+                                        adicionarInsumoPlantio(estoque.insumo);
+                                      }
+                                    }}
+                                    style={{ borderRadius: '0 6px 6px 0', zIndex: 1 }}
+                                  >
+                                    +
+                                  </CButton>
+                                </CInputGroup>
                               </div>
                             </CCardBody>
                           </CCard>
@@ -449,9 +676,9 @@ const handlerSalvarCotacao = () => {
                 </OrcamentoArea>
                 <div style={{ marginTop: '1.5em', display: 'flex', justifyContent: 'flex-end' }}>
                   <CButton
-                    color={insumosCotacao.length <= 0 ? 'default' : 'success'}
+                    color={insumosPlantio.length <= 0 ? 'default' : 'success'}
                     className="rounded-0"
-                    disabled={insumosCotacao.length <= 0}
+                    disabled={insumosPlantio.length <= 0}
                      onClick={() =>
                         handleGerarPlantio()
                       }
@@ -474,14 +701,58 @@ const handlerSalvarCotacao = () => {
             <CModalHeader>
                 <CModalTitle id="VerticallyCenteredExample">Simular Plantio</CModalTitle>
             </CModalHeader>
-            <CModalBody>            
+            <CModalBody>
+                {/* Campo para código/nome do lote */}
+                <div className="mb-4">
+                  <CCard>
+                    <CCardHeader>
+                      <CIcon icon={cilListNumbered} className="me-2" /> Informações do Lote
+                    </CCardHeader>
+                    <CCardBody>
+                      <CRow>
+                        <CCol md={4}>
+                          <CFormInput
+                            type="text"
+                            label="Código/Nome do Lote"
+                            placeholder="Digite o código ou nome do lote..."
+                            value={codigoLote}
+                            onChange={(e) => setCodigoLote(e.target.value)}
+                            required
+                          />
+                        </CCol>
+                        <CCol md={4}>
+                          <CFormInput
+                            type="date"
+                            label="Data do Plantio"
+                            value={dataPlantio}
+                            onChange={(e) => setDataPlantio(e.target.value)}
+                            required
+                          />
+                        </CCol>
+                        <CCol md={4}>
+                          <CFormSelect
+                            label="Recorrência"
+                            value={recorrencia}
+                            onChange={(e) => setRecorrencia(e.target.value)}
+                          >
+                            <option value="unico">Único</option>
+                            <option value="1mes">1 Mês</option>
+                            <option value="3meses">3 Meses</option>
+                            <option value="6meses">6 Meses</option>
+                          </CFormSelect>
+                        </CCol>
+                      </CRow>
+                    </CCardBody>
+                  </CCard>
+                </div>
+                            
                 <CRow>
-                  {insumosCotacao.map((insumo, idx) => {
+                  {insumosPlantio.map((insumo, idx) => {
                     // Busca insumo completo para pegar especificação
-                    const insumoCompleto = insumos.records && insumos.records.find(i => i.id === insumo.id);
-                    const tarefas = gerarTarefasPlantio(insumoCompleto || insumo, insumo.quantidade_estoque, new Date());
+                    const insumoCompleto = insumos.records && insumos.records.find(i => i.insumo_id === insumo.id);
+                    const tarefas = gerarTarefasPlantio(insumoCompleto || insumo, insumo.bandejas_necessarias, new Date());
                     const custoPorBandeja = calcularCustoPorBandeja(insumoCompleto || insumo);
-                    const custoTotal = custoPorBandeja * (insumo.quantidade_estoque || 0);
+                    const custoTotal = custoPorBandeja * (insumo.bandejas_necessarias || 0);
                     return (
                       <CCol md={6} key={insumo.id} className="mb-4">
                         <CCard>
@@ -523,11 +794,11 @@ const handlerSalvarCotacao = () => {
                     </CCardHeader>
                     <CCardBody>
                       <div style={{fontSize:16, marginBottom:12}}>
-                        <strong>Total de bandejas utilizadas:</strong> {insumosCotacao.reduce((acc, i) => acc + (i.quantidade_estoque || 0), 0)}<br/>
-                        <strong>Soma de todos os custos:</strong> {formatarPreco(insumosCotacao.reduce((acc, i) => {
+                        <strong>Total de bandejas utilizadas:</strong> {insumosPlantio.reduce((acc, i) => acc + (i.bandejas_necessarias || 0), 0)}<br/>
+                        <strong>Soma de todos os custos:</strong> {formatarPreco(insumosPlantio.reduce((acc, i) => {
                           const insumoCompleto = insumos.records && insumos.records.find(x => x.id === i.id);
                           const custoPorBandeja = calcularCustoPorBandeja(insumoCompleto || i);
-                          return acc + custoPorBandeja * (i.quantidade_estoque || 0);
+                          return acc + custoPorBandeja * (i.bandejas_necessarias || 0);
                         }, 0))}
                       </div>
                       {/* ...tabela de orçamento já existente... */}
@@ -536,7 +807,13 @@ const handlerSalvarCotacao = () => {
                 </div>
             </CModalBody>
             <CModalFooter>
-                
+                <CButton color="secondary" onClick={() => setVisible(false)} disabled={isProcessing}>
+                    Cancelar
+                </CButton>
+                <CButton color="success" onClick={handleConfirmarPlantio} disabled={isProcessing || !codigoLote.trim()}>
+                    {isProcessing && <CSpinner as="span" size="sm" className="me-2" />}
+                    {isProcessing ? 'Processando...' : 'Confirmar Plantio'}
+                </CButton>
             </CModalFooter>
         </CModal>
 

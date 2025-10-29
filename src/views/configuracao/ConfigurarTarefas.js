@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  CContainer, CRow, CCol, CCard, CCardHeader, CCardBody, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CBreadcrumb, CBreadcrumbItem
+  CContainer, CRow, CCol, CCard, CCardHeader, CCardBody, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CBreadcrumb, CBreadcrumbItem, CAlert
 } from '@coreui/react';
 
 const tiposTarefa = [
@@ -82,64 +82,76 @@ const ConfigurarTarefas = () => {
                       <strong> Sementes:</strong> {lote?.sementes_necessarias || '-'}
                     </CCardHeader>
                     <CCardBody>
-                      <CTable striped bordered>
-                        <CTableHead>
-                          <CTableRow>
-                            <CTableHeaderCell>Tipo</CTableHeaderCell>
-                            <CTableHeaderCell>Descrição</CTableHeaderCell>
-                            <CTableHeaderCell>Data</CTableHeaderCell>
-                            <CTableHeaderCell>Status</CTableHeaderCell>
-                          </CTableRow>
-                        </CTableHead>
-                        <CTableBody>
-                          {tarefasFiltradas.map((tarefa) => (
-                            <CTableRow key={tarefa.id}>
-                              <CTableDataCell>{tarefa.tipo}</CTableDataCell>
-                              <CTableDataCell>{tarefa.descricao}</CTableDataCell>
-                              <CTableDataCell>{tarefa.data_agendada}</CTableDataCell>
-                              <CTableDataCell>{getStatusLabel(tarefa.status)}</CTableDataCell>
+                      {tarefasFiltradas.length > 0 ? (
+                        <CTable striped bordered>
+                          <CTableHead>
+                            <CTableRow>
+                              <CTableHeaderCell>Tipo</CTableHeaderCell>
+                              <CTableHeaderCell>Descrição</CTableHeaderCell>
+                              <CTableHeaderCell>Data</CTableHeaderCell>
+                              <CTableHeaderCell>Status</CTableHeaderCell>
                             </CTableRow>
-                          ))}
-                        </CTableBody>
-                      </CTable>
+                          </CTableHead>
+                          <CTableBody>
+                            {tarefasFiltradas.map((tarefa) => (
+                              <CTableRow key={tarefa.id}>
+                                <CTableDataCell>{tarefa.tipo}</CTableDataCell>
+                                <CTableDataCell>{tarefa.descricao}</CTableDataCell>
+                                <CTableDataCell>{tarefa.data_agendada}</CTableDataCell>
+                                <CTableDataCell>{getStatusLabel(tarefa.status)}</CTableDataCell>
+                              </CTableRow>
+                            ))}
+                          </CTableBody>
+                        </CTable>
+                      ) : (
+                        <CAlert color="info" className="text-center">
+                          Não existem tarefas cadastradas!
+                        </CAlert>
+                      )}
                     </CCardBody>
                   </CCard>
                 );
               })()}
               {!loteSelecionado && (
-                <CTable striped bordered>
-                  <CTableHead>
-                    <CTableRow>
-                      <CTableHeaderCell>Lote</CTableHeaderCell>
-                      <CTableHeaderCell>Insumo</CTableHeaderCell>
-                      <CTableHeaderCell>Variedade</CTableHeaderCell>
-                      <CTableHeaderCell>Bandejas</CTableHeaderCell>
-                      <CTableHeaderCell>Sementes</CTableHeaderCell>
-                      <CTableHeaderCell>Tipo</CTableHeaderCell>
-                      <CTableHeaderCell>Descrição</CTableHeaderCell>
-                      <CTableHeaderCell>Data</CTableHeaderCell>
-                      <CTableHeaderCell>Status</CTableHeaderCell>
-                    </CTableRow>
-                  </CTableHead>
-                  <CTableBody>
-                    {tarefasFiltradas.map((tarefa) => {
-                      const lote = tarefa.lote || {};
-                      return (
-                        <CTableRow key={tarefa.id}>
-                          <CTableDataCell>{lote.nome || tarefa.lote_id}</CTableDataCell>
-                          <CTableDataCell>{lote.insumo_nome || lote.insumo || '-'}</CTableDataCell>
-                          <CTableDataCell>{lote.variedade || '-'}</CTableDataCell>
-                          <CTableDataCell>{lote.bandejas_necessarias || '-'}</CTableDataCell>
-                          <CTableDataCell>{lote.sementes_necessarias || '-'}</CTableDataCell>
-                          <CTableDataCell>{tarefa.tipo}</CTableDataCell>
-                          <CTableDataCell>{tarefa.descricao}</CTableDataCell>
-                          <CTableDataCell>{tarefa.data_agendada}</CTableDataCell>
-                          <CTableDataCell>{getStatusLabel(tarefa.status)}</CTableDataCell>
-                        </CTableRow>
-                      );
-                    })}
-                  </CTableBody>
-                </CTable>
+                tarefasFiltradas.length > 0 ? (
+                  <CTable striped bordered>
+                    <CTableHead>
+                      <CTableRow>
+                        <CTableHeaderCell>Lote</CTableHeaderCell>
+                        <CTableHeaderCell>Insumo</CTableHeaderCell>
+                        <CTableHeaderCell>Variedade</CTableHeaderCell>
+                        <CTableHeaderCell>Bandejas</CTableHeaderCell>
+                        <CTableHeaderCell>Sementes</CTableHeaderCell>
+                        <CTableHeaderCell>Tipo</CTableHeaderCell>
+                        <CTableHeaderCell>Descrição</CTableHeaderCell>
+                        <CTableHeaderCell>Data</CTableHeaderCell>
+                        <CTableHeaderCell>Status</CTableHeaderCell>
+                      </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+                      {tarefasFiltradas.map((tarefa) => {
+                        const lote = tarefa.lote || {};
+                        return (
+                          <CTableRow key={tarefa.id}>
+                            <CTableDataCell>{lote.nome || tarefa.lote_id}</CTableDataCell>
+                            <CTableDataCell>{lote.insumo_nome || lote.insumo || '-'}</CTableDataCell>
+                            <CTableDataCell>{lote.variedade || '-'}</CTableDataCell>
+                            <CTableDataCell>{lote.bandejas_necessarias || '-'}</CTableDataCell>
+                            <CTableDataCell>{lote.sementes_necessarias || '-'}</CTableDataCell>
+                            <CTableDataCell>{tarefa.tipo}</CTableDataCell>
+                            <CTableDataCell>{tarefa.descricao}</CTableDataCell>
+                            <CTableDataCell>{tarefa.data_agendada}</CTableDataCell>
+                            <CTableDataCell>{getStatusLabel(tarefa.status)}</CTableDataCell>
+                          </CTableRow>
+                        );
+                      })}
+                    </CTableBody>
+                  </CTable>
+                ) : (
+                  <CAlert color="info" className="text-center">
+                    Não existem tarefas cadastradas!
+                  </CAlert>
+                )
               )}
             </CCardBody>
           </CCard>

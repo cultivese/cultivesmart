@@ -51,9 +51,6 @@ const InsumosEspecificacao = React.lazy(() => import('./views/fornecedores/espec
 
 const ProducaoCadastro = React.lazy(() => import('./views/producao/cadastro/ProducaoCadastro'))
 
-const Cards = React.lazy(() => import('./views/base/cards/Cards'))
-const Fornecedores = React.lazy(() => import('./views/base/cards/Cards'))
-
 import ConfigurarTarefas from './views/configuracao/ConfigurarTarefas';
 
 const CadastroLote = React.lazy(() => import('./views/lotes/CadastroLote'));
@@ -70,7 +67,7 @@ const routes = [
   
 
   // TarefaDiaria
-  { path: '/tarefas', name: 'Minhas Tarefas Diária', element: Cards, exact: true },
+  { path: '/tarefas', name: 'Minhas Tarefas Diária', element: TarefaDiaria, exact: true },
   { path: '/tarefas/dia', name: 'Tarefas Diária', element: TarefaDiaria },
   { path: '/tarefas/historico', name: 'Histórico de Tarefas', element: HistoricoTarefa },
 
@@ -83,14 +80,14 @@ const routes = [
   { path: '/producao/encerrar-lote', name: 'Encerrar Lote', element: EncerrarLote },
   
   // Plantio
-  { path: '/plantio', name: 'Plantio', element: Cards, exact: true },
+  { path: '/plantio', name: 'Plantio', element: SimularCotacao, exact: true },
   { path: '/plantio/simular_cotacao', name: 'Simular Cotação', element: SimularCotacao },
   { path: '/plantio/simular_plantio/', name: 'Simular Plantio', element: SimularPlantio },
   { path: '/plantio/gerenciador_plantios', name: 'Gerenciador de Plantios', element: GerenciadorPlantios },
   { path: '/plantio/cadastro_semeadura_berta', name: 'Cadastro de Semeadura Berta', element: CadastroSemeaduraBerta },
 
   // Estoque
-  { path: '/estoque', name: 'Estoque', element: Cards, exact: true },
+  { path: '/estoque', name: 'Estoque', element: EstoqueVisaoGeral, exact: true },
   { path: '/estoque/visao_geral', name: 'Visão Geral', element: EstoqueVisaoGeral },
   //{ path: '/estoque/registrar', name: 'Registrar', element: EstoqueRegistrar },
   { path: '/estoque/retirada', name: 'Retirada', element: RetiradaEstoque },
@@ -101,7 +98,7 @@ const routes = [
 
   
   // Produtos
-  { path: '/produtos', name: 'Produtos', element: Cards, exact: true },
+  { path: '/produtos', name: 'Produtos', element: ProdutosListar, exact: true },
   { path: '/produtos/listar', name: 'Listar', element: ProdutosListar },  
   { path: '/produtos/cadastrar', name: 'Cadastrar', element: ProdutosCadastro },
   
@@ -120,7 +117,7 @@ const routes = [
   
 
   // Fornecedores
-  { path: '/planejamento', name: 'Planejamento', element: Cards, exact: true },
+  { path: '/planejamento', name: 'Planejamento', element: ProducaoCadastro, exact: true },
   { path: '/planejamento/producao', name: 'Produção', element: ProducaoCadastro },
   { path: '/configuracao/tarefas', name: 'Configuração de Tarefas', element: ConfigurarTarefas },
   { path: '/lotes/cadastro', name: 'Cadastro de Lote', element: CadastroLote },

@@ -47,7 +47,9 @@ const InsumosCadastro = () => {
   const [filtroNome, setFiltroNome] = useState('');
   const [filtroFornecedor, setFiltroFornecedor] = useState('');
   const [showAdditionalFieldsModal, setShowAdditionalFieldsModal] = useState(false); // Estado para controlar o modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // Estado para controlar o modal de confirmação de exclusão
   const [insumoSelecionado, setInsumoSelecionado] = useState(null);
+  const [insumoParaExcluir, setInsumoParaExcluir] = useState(null); // Estado para armazenar o insumo que será excluído
   const [editingField, setEditingField] = useState(null);
   const [modalMode, setModalMode] = useState('visualizar'); // Novo estado para controlar o modo do modal
 
@@ -196,6 +198,24 @@ const handleDeleteInsumoById = (id) => {
       }
     })
     .catch(error => console.error('Erro ao excluir insumo:', error));
+};
+
+const handleOpenDeleteModal = (insumo) => {
+  setInsumoParaExcluir(insumo);
+  setShowDeleteModal(true);
+};
+
+const handleConfirmDelete = () => {
+  if (insumoParaExcluir) {
+    handleDeleteInsumoById(insumoParaExcluir.id);
+    setShowDeleteModal(false);
+    setInsumoParaExcluir(null);
+  }
+};
+
+const handleCloseDeleteModal = () => {
+  setShowDeleteModal(false);
+  setInsumoParaExcluir(null);
 };
 
 const removerInsumo = (idParaRemover) => {
@@ -450,7 +470,7 @@ const handleBack = (e) => {
                                     <CButton size="sm" color="warning" variant="outline" onClick={() => handleOpenAdditionalFieldsModal(insumo, 'editar')}>
                                       Atualizar
                                     </CButton>
-                                    <CButton size="sm" color="danger" variant="outline" onClick={() => handleDeleteInsumoById(insumo.id)}>
+                                    <CButton size="sm" color="danger" variant="outline" onClick={() => handleOpenDeleteModal(insumo)}>
                                       Excluir
                                     </CButton>
                                   </CCol>
@@ -573,6 +593,33 @@ const handleBack = (e) => {
             </CButton>
           )}
         </CModalFooter>
+    </CModal>
+
+    {/* Modal de Confirmação de Exclusão */}
+    <CModal
+      alignment="center"
+      visible={showDeleteModal}
+      onClose={handleCloseDeleteModal}
+    >
+      <CModalHeader closeButton>
+        <strong>Confirmar Exclusão</strong>
+      </CModalHeader>
+      <CModalBody>
+        {insumoParaExcluir && (
+          <div>
+            <p>Tem certeza que deseja excluir o produto <strong>"{insumoParaExcluir.nome}"</strong>?</p>
+            <p className="text-muted">Esta ação não pode ser desfeita.</p>
+          </div>
+        )}
+      </CModalBody>
+      <CModalFooter>
+        <CButton color="secondary" onClick={handleCloseDeleteModal}>
+          Cancelar
+        </CButton>
+        <CButton color="danger" onClick={handleConfirmDelete}>
+          Confirmar Exclusão
+        </CButton>
+      </CModalFooter>
     </CModal>
      
     </CContainer>

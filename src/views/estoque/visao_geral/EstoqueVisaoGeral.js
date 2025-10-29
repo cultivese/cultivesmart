@@ -633,29 +633,39 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
               <CCol xs={4} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 22 }}>🌱</span> Semeadura:
               </CCol>
-              <CCol xs={8} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.quantidade_bandeja || '-'} g/bandeja</CCol>
+              <CCol xs={8} style={{ textAlign: 'right', color: estoqueInsumo.insumo.especificacoes?.[0]?.quantidade_bandeja ? 'inherit' : '#888' }}>
+                {estoqueInsumo.insumo.especificacoes?.[0]?.quantidade_bandeja ? `${estoqueInsumo.insumo.especificacoes[0].quantidade_bandeja} g/bandeja` : 'sem espec.'}
+              </CCol>
             </CRow>
             <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
               <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 22 }}>🗄️</span> Dias em pilha:
               </CCol>
-              <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.dias_pilha || '-'}</CCol>
+              <CCol xs={4} style={{ textAlign: 'right', color: estoqueInsumo.insumo.especificacoes?.[0]?.dias_pilha ? 'inherit' : '#888' }}>
+                {estoqueInsumo.insumo.especificacoes?.[0]?.dias_pilha || 'sem espec.'}
+              </CCol>
             </CRow>
             <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
               <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 22 }}>🌑</span> Dias de blackout:
               </CCol>
-              <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.dias_blackout || '-'}</CCol>
+              <CCol xs={4} style={{ textAlign: 'right', color: estoqueInsumo.insumo.especificacoes?.[0]?.dias_blackout ? 'inherit' : '#888' }}>
+                {estoqueInsumo.insumo.especificacoes?.[0]?.dias_blackout || 'sem espec.'}
+              </CCol>
             </CRow>
             <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
               <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 22 }}>⏳</span> Dias até a colheita:
               </CCol>
-              <CCol xs={4} style={{ textAlign: 'right' }}>{estoqueInsumo.insumo.especificacoes[0]?.dias_colheita || '-'}</CCol>
+              <CCol xs={4} style={{ textAlign: 'right', color: estoqueInsumo.insumo.especificacoes?.[0]?.dias_colheita ? 'inherit' : '#888' }}>
+                {estoqueInsumo.insumo.especificacoes?.[0]?.dias_colheita || 'sem espec.'}
+              </CCol>
             </CRow>
-            <CProgress height={8} style={{ margin: '16px 0' }}>
-              <CProgressBar color={corBarraProgresso} value={valorBarraProgresso}></CProgressBar>
-            </CProgress>
+            
+             <CProgress value={valorBarraProgresso}>
+            <CProgressBar className="overflow-visible text-dark px-2" color={corBarraProgresso}>
+            </CProgressBar>
+          </CProgress>
             <div style={{ fontSize: 16, marginBottom: 4 }}>Estoque atual: <b>{parseInt(estoqueInsumo.cotacao_insumos.quantidade)} sacos</b></div>
             <div style={{ fontSize: 16, marginBottom: 12 }}>Custo do grão: <b>R$ {formatarCustoGrao(totalLiquido, quantidade)} /g</b></div>
             <CButton color="secondary" variant="outline" style={{ width: '100%', marginBottom: 8 }} onClick={() => handleOpenDetailsModal(estoqueInsumo)}>
