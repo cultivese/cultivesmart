@@ -74,7 +74,40 @@ const InsumosCadastro = () => {
         currency: 'BRL',
     });
     return valorFormatado;
-};
+  };
+
+  // Função para formatar valor monetário durante a digitação
+  const formatarPrecoInput = (valor) => {
+    if (!valor) return '';
+    
+    // Remove tudo que não for dígito
+    const apenasNumeros = valor.replace(/[^\d]/g, '');
+    
+    // Se não há números, retorna vazio
+    if (!apenasNumeros) return '';
+    
+    // Converte para número e divide por 100 para ter centavos
+    const numeroFormatado = parseFloat(apenasNumeros) / 100;
+    
+    // Formata como moeda brasileira
+    return numeroFormatado.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
+
+  // Função para converter valor formatado para número (para enviar à API)
+  const converterPrecoParaAPI = (valorFormatado) => {
+    if (!valorFormatado) return '';
+    
+    // Remove símbolos de moeda e espaços, substitui vírgula por ponto
+    const valorLimpo = valorFormatado
+      .replace(/[R$\s]/g, '')
+      .replace(/\./g, '')
+      .replace(',', '.');
+    
+    return valorLimpo;
+  };
 
   const getUnidadeMedidaDescricao = (id) => {
     const unidade = unidadesMedida && unidadesMedida.length > 0
@@ -171,7 +204,7 @@ const handleOpenAdditionalFieldsModal = (insumo, mode) => {
       quantidade: insumo.quantidade,
       desconto: insumo.desconto,
       imposto: insumo.imposto,
-      preco: insumo.preco,
+      preco: insumo.preco ? formatarPrecoInput(insumo.preco.toString().replace('.', '').replace(',', '')) : '',
   });
   setModalMode(mode); // Define o modo do modal
   setShowAdditionalFieldsModal(true);
@@ -226,6 +259,12 @@ const handleCloseAdditionalFieldsModal = () => {
   setShowAdditionalFieldsModal(false);
 };
 
+const handlePrecoChange = (e) => {
+  const valorDigitado = e.target.value;
+  const valorFormatado = formatarPrecoInput(valorDigitado);
+  setEditedInsumo({ ...editedInsumo, preco: valorFormatado });
+};
+
 const handleSaveAdditionalFields = () => {
 
   if (!insumoSelecionado) {
@@ -243,12 +282,18 @@ const handleSaveAdditionalFields = () => {
 
   const { id } = insumoSelecionado;
 
+  // Converte o preço formatado para o formato da API
+  const dadosParaEnviar = {
+    ...editedInsumo,
+    preco: converterPrecoParaAPI(editedInsumo.preco)
+  };
+
   fetch(`https://backend.cultivesmart.com.br/api/insumos/${id}`, {
     method: 'PUT', // Adicione o método DELETE aqui
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(editedInsumo),
+    body: JSON.stringify(dadosParaEnviar),
   })
   .then(response => {
     if (response.ok) {
@@ -258,7 +303,7 @@ const handleSaveAdditionalFields = () => {
       setInsumos(prevInsumos => {
         const updatedInsumos = prevInsumos.records.map(insumo => {
           if (insumo.id === id) {
-            return { ...insumo, ...editedInsumo }; // Atualiza o insumo com os dados editados
+            return { ...insumo, ...dadosParaEnviar }; // Atualiza o insumo com os dados editados
           }
           return insumo;
         });
@@ -575,10 +620,9 @@ const handleBack = (e) => {
                     label="Preço"
                     value={editedInsumo.preco}
                     onFocus={() => setEditingField('preco')}
-                    onChange={(e) =>
-                      setEditedInsumo({ ...editedInsumo, preco: e.target.value })
-                    }
-                    disabled={modalMode === 'visualizar'}/>
+                    onChange={handlePrecoChange}
+                    disabled={modalMode === 'visualizar'}
+                    placeholder="R$ 0,00"/>
                 </CCol>
               </CRow>
           )}
