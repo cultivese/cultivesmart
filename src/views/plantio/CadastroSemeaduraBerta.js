@@ -9,6 +9,11 @@ import {
   CTableHead,
   CTableRow,
   CTableHeaderCell,
+  CTab,
+  CTabs,
+  CTabList,
+  CTabContent,
+  CTabPanel,
   CTableBody,
   CTableDataCell,
   CCardHeader,
@@ -62,7 +67,37 @@ const CadastroSemeaduraBerta = () => {
   const [codigoLote, setCodigoLote] = useState('');
   const [recorrencia, setRecorrencia] = useState('unico');
   const [dataPlantio, setDataPlantio] = useState(new Date().toISOString().split('T')[0]);
+  const [bandejasUtilizadas, setBandejasUtilizadas] = useState(0);
   const [tarefasPreview, setTarefasPreview] = useState([]);
+
+  // Função para atualizar preview das tarefas quando data do plantio muda
+  useEffect(() => {
+    if (dataPlantio && insumosPlantio.length > 0) {
+      const novaDataPlantio = createLocalDate(dataPlantio);
+      const todasTarefas = [];
+      
+      insumosPlantio.forEach(insumo => {
+        const insumoCompleto = insumos.records && insumos.records.find(i => i.id === insumo.id);
+        const tarefasInsumo = gerarTarefasPlantio(insumoCompleto || insumo, insumo.bandejas_necessarias, novaDataPlantio);
+        todasTarefas.push(...tarefasInsumo.map(tarefa => ({
+          ...tarefa,
+          insumo: insumo.nome + (insumo.variedade ? ` ${insumo.variedade}` : '')
+        })));
+      });
+      
+      // Ordena tarefas por data
+      todasTarefas.sort((a, b) => a.data - b.data);
+      setTarefasPreview(todasTarefas);
+    } else {
+      setTarefasPreview([]);
+    }
+  }, [dataPlantio, insumosPlantio, insumos]);
+
+  // Atualizar automaticamente o total de bandejas quando insumos mudarem
+  useEffect(() => {
+    const totalBandejas = insumosPlantio.reduce((total, insumo) => total + (insumo.bandejas_necessarias || 0), 0);
+    setBandejasUtilizadas(totalBandejas);
+  }, [insumosPlantio]);
 
   const adicionarInsumoPlantio = (insumo) => {
     setInsumosPlantio((previnsumosPlantio) => {
@@ -99,7 +134,7 @@ const CadastroSemeaduraBerta = () => {
     try {
       // Lógica para recorrência - gerar datas de plantio baseadas na recorrência
       let datasPlantio = [];
-      const primeiraData = new Date(dataPlantio);
+      const primeiraData = createLocalDate(dataPlantio);
       let meses = 0;
       
       if (recorrencia === '1mes') meses = 1;
@@ -444,12 +479,13 @@ const handlerSalvarCotacao = () => {
     tarefas.push({
       tipo: 'plantio',
       descricao: `Plantio de ${quantidadeBandejas} bandejas (${espec.gramas_para_plantio || espec.quantidade_bandeja || '-'}g/bandeja)`,
-      data: dataPlantio,
+      data: new Date(dataPlantio),
       icone: cilLeaf,
       cor: 'success',
     });
     let dataAtual = new Date(dataPlantio);
     if (espec.dias_pilha && espec.dias_pilha > 0) {
+      dataAtual = new Date(dataAtual);
       dataAtual.setDate(dataAtual.getDate() + parseInt(espec.dias_pilha));
       tarefas.push({
         tipo: 'desempilhamento',
@@ -460,6 +496,7 @@ const handlerSalvarCotacao = () => {
       });
     }
     if (espec.dias_blackout && espec.dias_blackout > 0) {
+      dataAtual = new Date(dataAtual);
       dataAtual.setDate(dataAtual.getDate() + parseInt(espec.dias_blackout));
       tarefas.push({
         tipo: 'blackout',
@@ -470,6 +507,7 @@ const handlerSalvarCotacao = () => {
       });
     }
     if (espec.dias_colheita && espec.dias_colheita > 0) {
+      dataAtual = new Date(dataAtual);
       dataAtual.setDate(dataAtual.getDate() + parseInt(espec.dias_colheita));
       tarefas.push({
         tipo: 'colheita',
@@ -489,6 +527,12 @@ const handlerSalvarCotacao = () => {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+
+  // Função para criar data local sem conversão de timezone
+  const createLocalDate = (dateString) => {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
   };
 
   return (
@@ -710,7 +754,7 @@ const handlerSalvarCotacao = () => {
                     </CCardHeader>
                     <CCardBody>
                       <CRow>
-                        <CCol md={4}>
+                        <CCol md={6}>
                           <CFormInput
                             type="text"
                             label="Código/Nome do Lote"
@@ -720,7 +764,7 @@ const handlerSalvarCotacao = () => {
                             required
                           />
                         </CCol>
-                        <CCol md={4}>
+                        <CCol md={3}>
                           <CFormInput
                             type="date"
                             label="Data do Plantio"
@@ -729,7 +773,8 @@ const handlerSalvarCotacao = () => {
                             required
                           />
                         </CCol>
-                        <CCol md={4}>
+                        
+                        <CCol md={3}>
                           <CFormSelect
                             label="Recorrência"
                             value={recorrencia}
@@ -745,47 +790,90 @@ const handlerSalvarCotacao = () => {
                     </CCardBody>
                   </CCard>
                 </div>
+
+                {/* Preview das tarefas agendadas */}
+                {tarefasPreview.length > 0 && (
+                  <div className="mb-4">
+                    <CCard>
+                      <CCardHeader>
+                        <CIcon icon={cilCalendar} className="me-2" /> Cronograma de Tarefas
+                      </CCardHeader>
+                      <CCardBody>
+                        <div className="mb-3">
+                          <small className="text-muted">
+                            Tarefas que serão criadas automaticamente baseadas na data de plantio selecionada
+                          </small>
+                        </div>
+                        
+                        {/* CTabs para agrupar tarefas por insumo */}
+                        <CTabs activeItemKey={1}>
+                          <CTabList variant="underline">
+                            {insumosPlantio.map((insumo, index) => (
+                              <CTab 
+                                key={insumo.id} 
+                                aria-controls={`insumo-tab-${insumo.id}`} 
+                                itemKey={index + 1}
+                              >
+                                <CIcon icon={cilLeaf} className="me-2" />
+                                {insumo.nome} {insumo.variedade && `- ${insumo.variedade}`}
+                              </CTab>
+                            ))}
+                          </CTabList>
+                          <CTabContent>
+                            {insumosPlantio.map((insumo, index) => {
+                              const tarefasDoInsumo = tarefasPreview.filter(tarefa => 
+                                tarefa.insumo === insumo.nome + (insumo.variedade ? ` ${insumo.variedade}` : '')
+                              );
+                              
+                              return (
+                                <CTabPanel 
+                                  key={insumo.id}
+                                  className="p-3" 
+                                  aria-labelledby={`insumo-tab-${insumo.id}`} 
+                                  itemKey={index + 1}
+                                >
+                                  {tarefasDoInsumo.length > 0 ? (
+                                    <CTable responsive striped hover>
+                                      <CTableHead>
+                                        <CTableRow>
+                                          <CTableHeaderCell>Data</CTableHeaderCell>
+                                          <CTableHeaderCell>Tarefa</CTableHeaderCell>
+                                          <CTableHeaderCell>Descrição</CTableHeaderCell>
+                                        </CTableRow>
+                                      </CTableHead>
+                                      <CTableBody>
+                                        {tarefasDoInsumo.map((tarefa, tarefaIndex) => (
+                                          <CTableRow key={tarefaIndex}>
+                                            <CTableDataCell>
+                                              <strong>{tarefa.data.toLocaleDateString('pt-BR')}</strong>
+                                            </CTableDataCell>
+                                            <CTableDataCell>
+                                              <CIcon icon={tarefa.icone} className={`text-${tarefa.cor} me-2`} />
+                                              {tarefa.tipo.charAt(0).toUpperCase() + tarefa.tipo.slice(1)}
+                                            </CTableDataCell>
+                                            <CTableDataCell>
+                                              {tarefa.descricao}
+                                            </CTableDataCell>
+                                          </CTableRow>
+                                        ))}
+                                      </CTableBody>
+                                    </CTable>
+                                  ) : (
+                                    <div className="text-center py-4">
+                                      <p className="text-muted">Nenhuma tarefa encontrada para este insumo.</p>
+                                    </div>
+                                  )}
+                                </CTabPanel>
+                              );
+                            })}
+                          </CTabContent>
+                        </CTabs>
+                      </CCardBody>
+                    </CCard>
+                  </div>
+                )}
                             
-                <CRow>
-                  {insumosPlantio.map((insumo, idx) => {
-                    // Busca insumo completo para pegar especificação
-                    const insumoCompleto = insumos.records && insumos.records.find(i => i.insumo_id === insumo.id);
-                    const tarefas = gerarTarefasPlantio(insumoCompleto || insumo, insumo.bandejas_necessarias, new Date());
-                    const custoPorBandeja = calcularCustoPorBandeja(insumoCompleto || insumo);
-                    const custoTotal = custoPorBandeja * (insumo.bandejas_necessarias || 0);
-                    return (
-                      <CCol md={6} key={insumo.id} className="mb-4">
-                        <CCard>
-                          <CCardHeader className="d-flex align-items-center gap-2">
-                            <CIcon icon={cilLeaf} className="me-2 text-success" />
-                            <span style={{fontWeight:600, fontSize:18}}>{insumo.nome} <small style={{fontWeight:400}}>{insumo.variedade}</small></span>
-                          </CCardHeader>
-                          <CCardBody>
-                            <div style={{marginBottom:8}}>
-                              <strong>Bandejas:</strong> {insumo.quantidade_estoque} &nbsp;|
-                              <strong> Gramas/bandeja:</strong> {insumoCompleto?.especificacoes?.[0]?.gramas_para_plantio || insumoCompleto?.especificacoes?.[0]?.quantidade_bandeja || '-'}g
-                            </div>
-                            <div style={{marginBottom:8, color:'#4f8cff'}}>
-                              <strong>Custo por bandeja:</strong> {formatarPreco(custoPorBandeja)} &nbsp;|
-                              <strong>Custo total:</strong> {formatarPreco(custoTotal)}
-                            </div>
-                            <ul style={{listStyle:'none', padding:0, margin:0}}>
-                              {tarefas.map((tarefa, i) => (
-                                <li key={i} style={{marginBottom:10, display:'flex', alignItems:'center', gap:10}}>
-                                  <CIcon icon={tarefa.icone} className={`text-${tarefa.cor}`} size="lg" />
-                                  <div>
-                                    <span style={{fontWeight:500}}>{tarefa.tipo.charAt(0).toUpperCase() + tarefa.tipo.slice(1)}</span>: {tarefa.descricao}<br/>
-                                    <span style={{color:'#888', fontSize:14}}><CIcon icon={cilCalendar} /> {tarefa.data.toLocaleDateString('pt-BR')}</span>
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                    );
-                  })}
-                </CRow>
+                
                 {/* Resumo do plantio */}
                 <div className="mt-4">
                   <CCard>
@@ -793,15 +881,169 @@ const handlerSalvarCotacao = () => {
                       <CIcon icon={cilBasket} className="me-2" /> Resumo do Plantio
                     </CCardHeader>
                     <CCardBody>
-                      <div style={{fontSize:16, marginBottom:12}}>
-                        <strong>Total de bandejas utilizadas:</strong> {insumosPlantio.reduce((acc, i) => acc + (i.bandejas_necessarias || 0), 0)}<br/>
-                        <strong>Soma de todos os custos:</strong> {formatarPreco(insumosPlantio.reduce((acc, i) => {
-                          const insumoCompleto = insumos.records && insumos.records.find(x => x.id === i.id);
-                          const custoPorBandeja = calcularCustoPorBandeja(insumoCompleto || i);
-                          return acc + custoPorBandeja * (i.bandejas_necessarias || 0);
-                        }, 0))}
-                      </div>
-                      {/* ...tabela de orçamento já existente... */}
+                      {/* CTabs para resumo por insumo e geral */}
+                      <CTabs activeItemKey="geral">
+                        <CTabList variant="underline">
+                          <CTab 
+                            aria-controls="resumo-geral-tab" 
+                            itemKey="geral"
+                          >
+                            <CIcon icon={cilBasket} className="me-2" />
+                            Resumo Geral
+                          </CTab>
+                          {insumosPlantio.map((insumo, index) => (
+                            <CTab 
+                              key={insumo.id} 
+                              aria-controls={`resumo-insumo-tab-${insumo.id}`} 
+                              itemKey={`insumo-${insumo.id}`}
+                            >
+                              <CIcon icon={cilLeaf} className="me-2" />
+                              {insumo.nome} {insumo.variedade && `- ${insumo.variedade}`}
+                            </CTab>
+                          ))}
+                        </CTabList>
+                        <CTabContent>
+                          {/* Tab Resumo Geral */}
+                          <CTabPanel 
+                            className="p-3" 
+                            aria-labelledby="resumo-geral-tab" 
+                            itemKey="geral"
+                          >
+                            <div style={{fontSize: 16, marginBottom: 20}}>
+                              <div className="row">
+                                <div className="col-md-6">
+                                  <div className="mb-3">
+                                    <strong>Total de bandejas utilizadas:</strong> {bandejasUtilizadas}
+                                  </div>
+                                  <div className="mb-3">
+                                    <strong>Custo total do plantio:</strong> {formatarPreco(insumosPlantio.reduce((acc, i) => {
+                                      const insumoCompleto = insumos.records && insumos.records.find(x => x.id === i.id);
+                                      const custoPorBandeja = calcularCustoPorBandeja(insumoCompleto || i);
+                                      return acc + custoPorBandeja * (i.bandejas_necessarias || 0);
+                                    }, 0))}
+                                  </div>
+                                </div>
+                                <div className="col-md-6">
+                                  <div className="mb-3">
+                                    <strong>Data de plantio:</strong> {createLocalDate(dataPlantio).toLocaleDateString('pt-BR')}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Tabela resumo geral */}
+                            <CTable responsive striped hover>
+                              <CTableHead>
+                                <CTableRow>
+                                  <CTableHeaderCell>Insumo</CTableHeaderCell>
+                                  <CTableHeaderCell>Variedade</CTableHeaderCell>
+                                  <CTableHeaderCell>Bandejas</CTableHeaderCell>
+                                  <CTableHeaderCell>Custo por Bandeja</CTableHeaderCell>
+                                  <CTableHeaderCell>Custo Total</CTableHeaderCell>
+                                </CTableRow>
+                              </CTableHead>
+                              <CTableBody>
+                                {insumosPlantio.map((insumo) => {
+                                  const insumoCompleto = insumos.records && insumos.records.find(i => i.id === insumo.id);
+                                  const custoPorBandeja = calcularCustoPorBandeja(insumoCompleto || insumo);
+                                  const custoTotal = custoPorBandeja * (insumo.bandejas_necessarias || 0);
+                                  return (
+                                    <CTableRow key={insumo.id}>
+                                      <CTableDataCell>{insumo.nome}</CTableDataCell>
+                                      <CTableDataCell>{insumo.variedade || '-'}</CTableDataCell>
+                                      <CTableDataCell><strong>{insumo.bandejas_necessarias}</strong></CTableDataCell>
+                                      <CTableDataCell>{formatarPreco(custoPorBandeja)}</CTableDataCell>
+                                      <CTableDataCell><strong>{formatarPreco(custoTotal)}</strong></CTableDataCell>
+                                    </CTableRow>
+                                  );
+                                })}
+                              </CTableBody>
+                            </CTable>
+                          </CTabPanel>
+
+                          {/* Tabs para cada insumo */}
+                          {insumosPlantio.map((insumo) => {
+                            const insumoCompleto = insumos.records && insumos.records.find(i => i.id === insumo.id);
+                            const especificacao = insumoCompleto?.especificacoes?.[0];
+                            const custoPorBandeja = calcularCustoPorBandeja(insumoCompleto || insumo);
+                            const custoTotal = custoPorBandeja * (insumo.bandejas_necessarias || 0);
+                            
+                            // Calcula data de colheita para este insumo específico
+                            const diasTotais = (especificacao?.dias_pilha || 0) + 
+                                             (especificacao?.dias_blackout || 0) + 
+                                             (especificacao?.dias_colheita || 0);
+                            const dataColheita = new Date(createLocalDate(dataPlantio));
+                            dataColheita.setDate(dataColheita.getDate() + diasTotais);
+                            
+                            return (
+                              <CTabPanel 
+                                key={insumo.id}
+                                className="p-3" 
+                                aria-labelledby={`resumo-insumo-tab-${insumo.id}`} 
+                                itemKey={`insumo-${insumo.id}`}
+                              >
+                                <div style={{fontSize: 16, marginBottom: 20}}>
+                                  <div className="row">
+                                    <div className="col-md-6">
+                                      <div className="mb-3">
+                                        <strong>Nome:</strong> {insumo.nome}
+                                      </div>
+                                      <div className="mb-3">
+                                        <strong>Variedade:</strong> {insumo.variedade || 'Não especificada'}
+                                      </div>
+                                      <div className="mb-3">
+                                        <strong>Total de bandejas:</strong> {insumo.bandejas_necessarias}
+                                      </div>
+                                    </div>
+                                    <div className="col-md-6">
+                                      <div className="mb-3">
+                                        <strong>Custo por bandeja:</strong> {formatarPreco(custoPorBandeja)}
+                                      </div>
+                                      <div className="mb-3">
+                                        <strong>Custo total do insumo:</strong> {formatarPreco(custoTotal)}
+                                      </div>
+                                      <div className="mb-3">
+                                        <strong>Data de colheita estimada:</strong> {dataColheita.toLocaleDateString('pt-BR')}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Informações técnicas do insumo */}
+                                {especificacao && (
+                                  <div className="mt-3">
+                                    <h6 className="mb-3">Especificações Técnicas:</h6>
+                                    <div className="row">
+                                      <div className="col-md-4">
+                                        <small className="text-muted">Gramas por bandeja:</small><br/>
+                                        <strong>{especificacao.gramas_para_plantio || especificacao.quantidade_bandeja || 'Não especificado'}</strong>
+                                      </div>
+                                      <div className="col-md-4">
+                                        <small className="text-muted">Dias em pilha:</small><br/>
+                                        <strong>{especificacao.dias_pilha || 0} dias</strong>
+                                      </div>
+                                      <div className="col-md-4">
+                                        <small className="text-muted">Dias de blackout:</small><br/>
+                                        <strong>{especificacao.dias_blackout || 0} dias</strong>
+                                      </div>
+                                    </div>
+                                    <div className="row mt-2">
+                                      <div className="col-md-4">
+                                        <small className="text-muted">Dias para colheita:</small><br/>
+                                        <strong>{especificacao.dias_colheita || 0} dias</strong>
+                                      </div>
+                                      <div className="col-md-4">
+                                        <small className="text-muted">Ciclo total:</small><br/>
+                                        <strong>{diasTotais} dias</strong>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </CTabPanel>
+                            );
+                          })}
+                        </CTabContent>
+                      </CTabs>
                     </CCardBody>
                   </CCard>
                 </div>
