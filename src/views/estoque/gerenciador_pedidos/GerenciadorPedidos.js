@@ -54,6 +54,7 @@ const GerenciadorPlantios = () => {
   const [error, setError] = useState(null);
   const [insumoValues, setInsumoValues] = useState({});
   const [notaFiscalValues, setNotaFiscalValues] = useState({}); // Novo estado para nota_fiscal
+  const [dataEmissaoValues, setDataEmissaoValues] = useState({}); // Novo estado para data_emissao
   const [insumoQuantidades, setInsumoQuantidades] = useState({}); // Estado para armazenar as quantidades dos insumos
   const [isProcessing, setIsProcessing] = useState(false)
   const [totalDescontoValues, setTotalDescontoValues] = useState({}); // Novo estado para o total de desconto da cotação
@@ -110,6 +111,7 @@ const GerenciadorPlantios = () => {
               id: item.id,
               nota_fiscal: item.nota_fiscal,
               data_validade: item.data_validade,
+              data_emissao: item.data_emissao,              
               total_bruto: item.total_bruto,
               icms: item.icms,
               desconto: item.desconto,
@@ -234,6 +236,7 @@ const GerenciadorPlantios = () => {
 
       const payload = JSON.stringify({
           nota_fiscal: notaFiscalValues[item.id],
+          data_emissao: dataEmissaoValues[item.id],
           approved: true,          
           finalized: false,
           insumos: insumosAtualizados,
@@ -428,15 +431,15 @@ const GerenciadorPlantios = () => {
                 {/* Seção de Informações da Cotação */}
                 <h5 className="mb-3">Informações da Cotação</h5>
                 <CRow className="align-items-end">
-                    <CCol md={4}>
+                    <CCol md={3}>
                         <strong>Data de Validade:</strong>
                         <p className="text-body-secondary">{item.data_validade}</p>
                     </CCol>
-                    <CCol md={4}>
+                    <CCol md={3}>
                         <strong>Solicitado por:</strong>
                         <p className="text-body-secondary">{item.criado_por || 'Não informado'}</p>
                     </CCol>
-                    <CCol md={4}>
+                    <CCol md={3}>
                         <CFormLabel htmlFor={`notaFiscal-${item.id}`}><strong>Nota Fiscal:</strong></CFormLabel>
                         <CFormInput
                             type="text"
@@ -445,11 +448,24 @@ const GerenciadorPlantios = () => {
                             onChange={(e) => setNotaFiscalValues({ ...notaFiscalValues, [item.id]: e.target.value })}
                             disabled={item.status.id === 3}
                         />
+                    </CCol>
+                    <CCol md={3}>
+                        <CFormLabel htmlFor={`dataEmissao-${item.id}`}><strong>Data de Emissão:</strong></CFormLabel>
+                        <CFormInput
+                            type="date"
+                            id={`dataEmissao-${item.id}`}
+                            value={dataEmissaoValues[item.id] || item.data_emissao || ''}
+                            onChange={(e) => setDataEmissaoValues({ ...dataEmissaoValues, [item.id]: e.target.value })}
+                            disabled={item.status.id === 3}
+                        />
+                    </CCol>
+                </CRow>
+                <CRow className="mt-3">
+                    <CCol md={12}>
                         {item.status.nome === 'aguardando pedido' && (
                           <CButton
                             size="sm"
                             color="success"
-                            className="ms-2 mt-2"
                             onClick={async () => {
                               setIsProcessing(true);
                               try {
@@ -468,6 +484,7 @@ const GerenciadorPlantios = () => {
                                 });
                                 const payload = JSON.stringify({
                                   nota_fiscal: notaFiscalValues[item.id],
+                                  data_emissao: dataEmissaoValues[item.id],
                                   approved: true,
                                   finalized: true,
                                   insumos: insumosAtualizados,
@@ -485,7 +502,7 @@ const GerenciadorPlantios = () => {
                                 setIsProcessing(false);
                               }
                             }}
-                            disabled={isProcessing || !(notaFiscalValues[item.id])}
+                            disabled={isProcessing || !(notaFiscalValues[item.id] && dataEmissaoValues[item.id])}
                           >
                             {isProcessing ? <CSpinner as="span" className="me-2" size="sm" aria-hidden="true" /> : null}
                             Finalizar Pedido
@@ -508,7 +525,7 @@ const GerenciadorPlantios = () => {
                         <CTableHeaderCell scope="col" style={{width:'6%'}}>Valor Unitário</CTableHeaderCell>
                         <CTableHeaderCell scope="col" style={{width:'6%'}}>ICMS</CTableHeaderCell> {/* Alterado de "Desconto (R$)" para "ICMS" */}
                         <CTableHeaderCell scope="col" style={{width:'6%'}}>Desconto</CTableHeaderCell> {/* Alterado de "ICMS" para "Desconto (R$)" */}
-                        <CTableHeaderCell scope="col" style={{width:'7%'}}>Valor Total Liq.</CTableHeaderCell>
+                        <CTableHeaderCell scope="col" style={{width:'7%'}}>Valor Final</CTableHeaderCell>
                       </CTableRow>
                     </CTableHead>
                     <CTableBody>
@@ -556,15 +573,15 @@ const GerenciadorPlantios = () => {
                             </CTableDataCell>
                             <CTableDataCell>
                               <CInputGroup className="mb-3">
-                                <CInputGroupText>R$</CInputGroupText>
                                 <CFormInput
                                 type="number" // Alterado para number
                                 value={insumoValues[`${item.id}-${insumo.insumo_id}-desconto`] !== undefined 
-                                         ? insumoValues[`${item.id}-${insumo.insumo_id}-desconto`] 
-                                         : insumo.desconto}
-                                onChange={(e) => handleInputChange(item, insumo, 'desconto', e.target.value)}
-                                disabled={item.status.id !== 1}
-                              />
+                                  ? insumoValues[`${item.id}-${insumo.insumo_id}-desconto`] 
+                                  : insumo.desconto}
+                                  onChange={(e) => handleInputChange(item, insumo, 'desconto', e.target.value)}
+                                  disabled={item.status.id !== 1}
+                                  />
+                                  <CInputGroupText>%</CInputGroupText>
                               </CInputGroup>
                             </CTableDataCell>
                             <CTableDataCell>
