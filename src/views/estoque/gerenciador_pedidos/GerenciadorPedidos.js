@@ -64,11 +64,11 @@ const GerenciadorPlantios = () => {
     { key: 'id', _style: { width: '8%' }, label: 'Id' },
     { key: 'nota_fiscal', _style: { width: '15%' }, label: 'Nota Fiscal'},
     { key: 'nome_fornecedor', _style: { width: '20%' }, label: 'Fornecedor'},
-    { key: 'data_validade', _style: { width: '14%' }, label: 'Data Validade' },
-    { key: 'total_bruto', _style: { width: '14%' }, label: 'Total Bruto' },
-    { key: 'icms', _style: { width: '10%' }, label: 'ICMS' },
-    { key: 'desconto', _style: { width: '12%' }, label: 'Desconto' },
-    { key: 'total_liquido', _style: { width: '20%' }, label: 'Total Líq.' },
+    { key: 'data_emissao', _style: { width: '14%' }, label: 'Data Emissão' },
+    { key: 'total_bruto', _style: { width: '14%' }, label: 'Total Bruto(R$)' },
+    { key: 'icms', _style: { width: '10%' }, label: 'ICMS(R$)' },
+    { key: 'desconto', _style: { width: '12%' }, label: 'Desconto(%)' },
+    { key: 'total_liquido', _style: { width: '20%' }, label: 'Valor Final (R$)' },
     { key: 'status', _style: { width: '20%' }, label: 'Status'},
     { key: 'show_details', label: '', _style: { width: '1%' }, filter: false, sorter: false },
   ]
@@ -235,8 +235,8 @@ const GerenciadorPlantios = () => {
       setIsProcessing(true);
 
       const payload = JSON.stringify({
-          nota_fiscal: notaFiscalValues[item.id],
-          data_emissao: dataEmissaoValues[item.id],
+          nota_fiscal: notaFiscalValues[item.id] || item.nota_fiscal,
+          data_emissao: dataEmissaoValues[item.id] || item.data_emissao,
           approved: true,          
           finalized: false,
           insumos: insumosAtualizados,
@@ -313,6 +313,13 @@ const GerenciadorPlantios = () => {
       ...prevValues,
       [`${item.id}-${insumo.insumo_id}-valorTotalLiquido`]: newValorTotalLiquido
     }));
+  };
+
+  // Função para verificar se os campos obrigatórios estão preenchidos
+  const isFinalizarPedidoEnabled = (item) => {
+    const notaFiscal = notaFiscalValues[item.id] || item.nota_fiscal;
+    const dataEmissao = dataEmissaoValues[item.id] || item.data_emissao;
+    return notaFiscal && notaFiscal.trim() !== '' && dataEmissao && dataEmissao.trim() !== '';
   };
 
   return (
@@ -483,8 +490,8 @@ const GerenciadorPlantios = () => {
                                   };
                                 });
                                 const payload = JSON.stringify({
-                                  nota_fiscal: notaFiscalValues[item.id],
-                                  data_emissao: dataEmissaoValues[item.id],
+                                  nota_fiscal: notaFiscalValues[item.id] || item.nota_fiscal,
+                                  data_emissao: dataEmissaoValues[item.id] || item.data_emissao,
                                   approved: true,
                                   finalized: true,
                                   insumos: insumosAtualizados,
@@ -502,7 +509,7 @@ const GerenciadorPlantios = () => {
                                 setIsProcessing(false);
                               }
                             }}
-                            disabled={isProcessing || !(notaFiscalValues[item.id] && dataEmissaoValues[item.id])}
+                            disabled={isProcessing || !isFinalizarPedidoEnabled(item)}
                           >
                             {isProcessing ? <CSpinner as="span" className="me-2" size="sm" aria-hidden="true" /> : null}
                             Finalizar Pedido

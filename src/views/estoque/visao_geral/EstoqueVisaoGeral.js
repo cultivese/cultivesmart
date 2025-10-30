@@ -624,7 +624,7 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                 const fornecedorObj = fornecedores && fornecedores.records && fornecedores.records.find(f => f.id === estoqueInsumo.insumo.fornecedor_id);
                 return fornecedorObj ? fornecedorObj.nome : estoqueInsumo.insumo.fornecedor_id;
               })()}</CCardText>
-              <CCardText style={{ fontSize: 16, textAlign: 'left', marginBottom: 0 }}>NF {estoqueInsumo.insumo.nota_fiscal || '-'}</CCardText>
+              <CCardText style={{ fontSize: 16, textAlign: 'left', marginBottom: 0 }}>NF {estoqueInsumo.cotacao.nota_fiscal || '-'}</CCardText>
             </div>
           </div>
           <CCardBody style={{ paddingTop: 0 }}>
