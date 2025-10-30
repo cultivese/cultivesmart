@@ -31,6 +31,7 @@ const InsumosCadastro = () => {
   
   const [selectedFornecedor, setSelectedFornecedor] = useState(null);
   const [stepErrors, setStepErrors] = useState([false, false, false, false, false]); // Array to track errors for each step
+  const [fileError, setFileError] = useState(''); // Estado para erros de arquivo
   const hiddenFileInput = useRef(null);
   const [caracteresRestantes, setCaracteresRestantes] = useState(255); // Inicializa com o limite máximo
 
@@ -123,15 +124,34 @@ const InsumosCadastro = () => {
 
   const handleLogoChange = (event) => {
     const file = event.target.files[0];
+    setFileError(''); // Limpar erro anterior
 
     if (file) {
+      // Validar extensão do arquivo
+      const allowedExtensions = ['png', 'jpg', 'jpeg'];
+      const fileExtension = file.name.split('.').pop().toLowerCase();
+      
+      if (!allowedExtensions.includes(fileExtension)) {
+        setFileError(`Formato não permitido. Use apenas: ${allowedExtensions.join(', ').toUpperCase()}`);
+        // Limpar o input
+        event.target.value = '';
+        return;
+      }
+
+      // Validar tamanho do arquivo (opcional - máximo 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB em bytes
+      if (file.size > maxSize) {
+        setFileError('Arquivo muito grande. Tamanho máximo: 5MB');
+        event.target.value = '';
+        return;
+      }
+
       setFormData((prevData) => ({
           ...prevData,
           logo: file,
           logoUrl: URL.createObjectURL(file),
       }));
     }
-
   };
 
   const formatarPreco = (valor) => {
@@ -203,10 +223,18 @@ const handleChange1 = (event) => {
         hasErrors = true;
         newStepErrors[activeStep] = true;
     }
+    
+    // Verificar se há erro de arquivo
+    if (activeStep === 2 && fileError) {
+        hasErrors = true;
+        newStepErrors[activeStep] = true;
+    }
+    
     setStepErrors(newStepErrors);
 
     if (!hasErrors) {
         setActiveStep(prevStep => prevStep + 1);
+        setFileError(''); // Limpar erro de arquivo ao avançar
     }
 };
 
@@ -352,9 +380,8 @@ const handleBack = (e) => {
                             <CCol lg={4} key={categoria.id}>
                               <CCard color={ selectedCategory === categoria.id ? 'success' : 'light'}
                                       textColor={ selectedCategory === categoria.id ? 'white' : ''}
-                                      className="h-100"
                                       onClick={() => handleCategorySelect(categoria.id)}
-                                      style={{cursor: 'pointer'}}>
+                                      style={{cursor: 'pointer', height: '400px'}}>
                                 <CCardImage orientation="top" src={`data:image/png;base64,${categoria.logoPath}`} />
                                 <CCardBody>
                                   <CCardTitle>{categoria.descricao}</CCardTitle>
@@ -375,30 +402,39 @@ const handleBack = (e) => {
 
           {activeStep === 1 && (
             <CCol xs={12}>
-              <CCard className="mb-4">
+              <CCard className="h-60">
                 <CCardHeader>
                   <strong>{stepLabels[activeStep].title} - </strong>
                   <small>{stepLabels[activeStep].subtitle}</small>
                 </CCardHeader>
                 <CCardBody>
                   <DocsExample href="components/card/#background-and-color">
-                    <CRow>
+                    <CRow xs={{ gutterY: 5 }} >
                         {fornecedores.records.map((fornecedor) => {
                           return (
                           <CCol lg={4} key={fornecedor.id}>
                             <CCard key={fornecedor.id}
                               color={ selectedFornecedor === fornecedor.id ? 'success' : 'light'}
                               textColor={ selectedFornecedor === fornecedor.id ? 'white' : ''}
-                              className="mb-3"
+                              className="mb-3 h-60"
                               onClick={() => handleFornecedorSelect (fornecedor.id)}
-                              style={{cursor: 'pointer'}}>
-                              <CCardHeader>{fornecedor.nome}</CCardHeader>
-                              <CCardImage
-                                src={`data:image/png;base64,${fornecedor.logoPath}`}
-                                style={{cursor: 'pointer', maxHeight: '20em', width: '100%', height: '100%', objectFit: 'cover'}}
-                                onError={(e) => console.error('Erro ao carregar imagem:', e.target.src, e)}
-
-                              />
+                              style={{cursor: 'pointer', height: '300px', display: 'flex', flexDirection: 'column', backgroundColor: 'white'}}>
+                              <CCardHeader style={{flexShrink: 0}}>{fornecedor.nome}</CCardHeader>
+                              <div style={{flex: 1, backgroundColor: 'white', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                <CCardImage 
+                                  src={`data:image/png;base64,${fornecedor.logoPath}`}
+                                  style={{
+                                    cursor: 'pointer', 
+                                    maxWidth: '100%', 
+                                    maxHeight: '100%', 
+                                    width: 'auto',
+                                    height: 'auto',
+                                    backgroundColor: '#ffffffff',
+                                    objectFit: 'contain'
+                                  }}
+                                  onError={(e) => console.error('Erro ao carregar imagem:', e.target.src, e)}
+                                />
+                              </div>
                             </CCard>
                           </CCol>);
                         })}
@@ -412,7 +448,7 @@ const handleBack = (e) => {
           {activeStep === 2 && (
               <CRow>
                 <CCol md={8} xs={8}>
-                  <CCard className="mb-4" style={{cursor: 'pointer'}}>
+                  <CCard className="mb-4">
                     <CCardHeader>
                       <strong>{stepLabels[2].title} - </strong>
                       <small>{stepLabels[2].subtitle}</small>
@@ -432,9 +468,26 @@ const handleBack = (e) => {
                             ref={hiddenFileInput}
                             onChange={handleLogoChange}
                             style={{ display: 'none' }}
-                            accept="image/*"
+                            accept=".png,.jpg,.jpeg"
+                            />
                             
-                          />
+                            {/* Mensagem informativa */}
+                            <div className="mt-2">
+                              <small className="text-muted">
+                                📸 Clique na imagem para fazer upload<br/>
+                                <strong>Formatos aceitos:</strong> PNG, JPG, JPEG<br/>
+                                <strong>Tamanho máximo:</strong> 5MB
+                              </small>
+                            </div>
+                            
+                            {/* Mensagem de erro */}
+                            {fileError && (
+                              <div className="mt-2">
+                                <small className="text-danger">
+                                  ⚠️ {fileError}
+                                </small>
+                              </div>
+                            )}
                         </CCol>
                         <CCol md={7} xs={9}>
                           <CRow>
@@ -488,7 +541,7 @@ const handleBack = (e) => {
                 </CCol>
 
                 <CCol md={4} xs={4}>
-                  <CCard className="mb-4" style={{cursor: 'pointer'}}>
+                  <CCard className="mb-4" color="white" style={{cursor: 'pointer'}}>
                       <CCardHeader>
                         <strong>Especificações do Produto</strong>
                       </CCardHeader>
@@ -628,14 +681,24 @@ const handleBack = (e) => {
                   <CCardBody>
                     <div>
                       <h2 className="text-xl font-bold">Resumo</h2>
-                      <p><strong>Categoria:</strong> {categoryNames[formData.categoria_id]}</p>
-                      <p><strong>Fornecedor:</strong> {fornecedores.records[0].nome}</p>
+                      <p><strong>Categoria:</strong> {
+                        categorias?.records?.find(c => c.id === formData.categoria_id)?.descricao || 'Categoria não encontrada'
+                      }</p>
+                      <p><strong>Fornecedor:</strong> {
+                        fornecedores.records?.find(f => f.id === formData.fornecedor_id)?.nome || 'Fornecedor não encontrado'
+                      }</p>
                       <p><strong>Nome:</strong> {formData.nome}</p>
                       <p><strong>Variedade:</strong> {formData.variedade}</p>
                       <p><strong>Descrição:</strong> {formData.descricao}</p>
+                      <p><strong>Tipo de Medida:</strong> {
+                        tiposMedida?.find(t => t.id == formData.tipo_medida)?.descricao || 'Não informado'
+                      }</p>
+                      <p><strong>Unidade de Medida:</strong> {
+                        unidadesMedida?.find(u => u.id == formData.unidade_medida)?.descricao || 'Não informado'
+                      }</p>
                       <p><strong>Quantidade:</strong> {formData.quantidade}</p>
                       <p><strong>Preço:</strong> {formatarPreco(formData.preco)}</p>
-                      <p><strong>Alíquota:</strong> {formData.aliquota}</p>
+                      {/* <p><strong>Alíquota:</strong> {formData.aliquota}</p> */}
                     </div>
                   </CCardBody>
                 </CCard>
