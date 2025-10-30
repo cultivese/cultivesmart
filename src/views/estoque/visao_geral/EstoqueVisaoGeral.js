@@ -768,6 +768,7 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
             visible={showDetailsModal}
             onClose={() => setShowDetailsModal(false)}
             aria-labelledby="InsumoDetalhesModalLabel"
+            backdrop="static"
         >
             <CModalHeader>
             <CModalTitle id="InsumoDetalhesModalLabel">Detalhes do Insumo</CModalTitle>
@@ -776,9 +777,27 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                 {insumoSelecionado && (
                     <CTabs key={insumoSelecionado.id} activeItemKey={1}>
                         <CTabList variant="underline">
-                            <CTab aria-controls="home-tab-pane" itemKey={1}>Dados Gerais</CTab>
-                            <CTab aria-controls="profile-tab-pane" itemKey={2}>Evolução estoque</CTab>
-                            <CTab aria-controls="contact-tab-pane" itemKey={3}>Histórico de Retiradas</CTab>
+                            <CTab 
+                                aria-controls="home-tab-pane" 
+                                itemKey={1}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                Dados Gerais
+                            </CTab>
+                            <CTab 
+                                aria-controls="profile-tab-pane" 
+                                itemKey={2}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                Evolução estoque
+                            </CTab>
+                            <CTab 
+                                aria-controls="contact-tab-pane" 
+                                itemKey={3}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                Histórico de Retiradas
+                            </CTab>
                         </CTabList>
                         <CTabContent>
                             <CTabPanel className="p-3" aria-labelledby="home-tab-pane" itemKey={1}>
