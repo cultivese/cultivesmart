@@ -17,6 +17,9 @@ import {
   CListGroup,
   CListGroupItem,
   CBadge,
+  CFormInput,
+  CFormLabel,
+  CSpinner,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilCheckCircle, cilBan } from '@coreui/icons';
@@ -47,25 +50,30 @@ const fetchPlantios = async () => {
 
 // Função para filtrar tarefas do dia
 const filtrarTarefasDoDia = (tarefas, plantios, dataHoje) => {
-  const dataHojeStr = dataHoje.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+  // Usar formatação local segura em vez de toISOString que pode causar problemas de timezone
+  const dataHojeStr = `${dataHoje.getFullYear()}-${String(dataHoje.getMonth() + 1).padStart(2, '0')}-${String(dataHoje.getDate()).padStart(2, '0')}`;
   
-  return tarefas
+  const tarefasFiltradas = tarefas
     .filter(tarefa => {
       if (!tarefa.data_agendada) return false;
       const dataTarefa = tarefa.data_agendada.split('T')[0];
       return dataTarefa === dataHojeStr;
     })
     .map(tarefa => {
-      const plantio = plantios.find(p => p.id === tarefa.lote_id);
+      // O plantio já vem aninhado na tarefa da API
+      const plantio = tarefa.plantio;
       return {
         id: tarefa.id,
         description: tarefa.descricao || `${tarefa.tipo} - ${plantio?.nome || 'Plantio'}`,
         type: tarefa.tipo,
         status: tarefa.status || 'pending',
-        plantioId: tarefa.lote_id,
+        plantioId: tarefa.plantio_id,
+        plantio: plantio, // Incluir o plantio completo
         details: `${plantio?.nome || 'Plantio'} | Data: ${createLocalDate(tarefa.data_agendada).toLocaleDateString('pt-BR')} | Status: ${tarefa.status || 'pendente'}`
       };
     });
+    
+  return tarefasFiltradas;
 };
 
 const getEventColor = (type) => {
@@ -130,6 +138,14 @@ const CronogramaProducao = () => {
   const [loadingTarefas, setLoadingTarefas] = useState(true);
   const [plantios, setPlantios] = useState([]);
   const [tarefas, setTarefas] = useState([]);
+  const [debugInfo, setDebugInfo] = useState('');
+  
+  // Estados para o modal de plantio
+  const [plantioModalVisible, setPlantioModalVisible] = useState(false);
+  const [tarefaSelecionada, setTarefaSelecionada] = useState(null);
+  const [bandejasUtilizadas, setBandejasUtilizadas] = useState('');
+  const [gramasUtilizadas, setGramasUtilizadas] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -178,6 +194,10 @@ const CronogramaProducao = () => {
         const tarefasHoje = filtrarTarefasDoDia(tarefasData, plantiosData, hoje);
         setTarefasDoDia(tarefasHoje);
         
+        // Definir informações de debug
+        const dataAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+        setDebugInfo(`Quantidade de tarefas para hoje: ${tarefasHoje.length}`);
+        
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
         setEvents([]);
@@ -188,6 +208,17 @@ const CronogramaProducao = () => {
     };
     fetchData();
   }, []);
+
+  // Calcular gramas automaticamente quando bandejas ou especificação mudarem
+  useEffect(() => {
+    if (tarefaSelecionada?.especificacao && bandejasUtilizadas) {
+      const quantidadeBandeja = tarefaSelecionada.especificacao.quantidade_bandeja || 0;
+      const gramasCalculadas = (parseFloat(bandejasUtilizadas) || 0) * quantidadeBandeja;
+      setGramasUtilizadas(gramasCalculadas.toString());
+    } else if (!bandejasUtilizadas) {
+      setGramasUtilizadas('');
+    }
+  }, [bandejasUtilizadas, tarefaSelecionada]);
 
   // Handler para abrir o modal ao clicar no evento
   const handleEventClick = (info) => {
@@ -261,6 +292,90 @@ const CronogramaProducao = () => {
     setPlantiosDaData(plantiosDetalhados);
   };
 
+  // Função para abrir modal de plantio
+  const handlePlantioClick = async (task) => {
+    setTarefaSelecionada(task);
+    
+    // As especificações já vêm na tarefa através do plantio.insumo.especificacoes
+    const especificacao = task.plantio?.insumo?.especificacoes?.[0] || null;
+    
+    if (especificacao) {
+      setTarefaSelecionada({
+        ...task,
+        especificacao
+      });
+    }
+    
+    setBandejasUtilizadas(task.plantio?.bandejas_necessarias?.toString() || '');
+    
+    // Calcular gramas iniciais
+    if (especificacao && task.plantio?.bandejas_necessarias) {
+      const gramasIniciais = task.plantio.bandejas_necessarias * (especificacao.quantidade_bandeja || 0);
+      setGramasUtilizadas(gramasIniciais.toString());
+    } else {
+      setGramasUtilizadas('');
+    }
+    
+    setPlantioModalVisible(true);
+  };
+
+  // Função para calcular gramas utilizadas
+  const calcularGramasUtilizadas = (bandejas, quantidadeBandeja) => {
+    const numBandejas = parseFloat(bandejas) || 0;
+    const gramasPorBandeja = parseFloat(quantidadeBandeja) || 0;
+    return numBandejas * gramasPorBandeja;
+  };
+
+  // Função para confirmar plantio
+  const handleConfirmarPlantio = async () => {
+    if (!bandejasUtilizadas || parseFloat(bandejasUtilizadas) <= 0) {
+      alert('Por favor, informe uma quantidade válida de bandejas utilizadas.');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      // Usar o valor editável das gramas em vez do calculado
+      const gramasParaEnviar = parseFloat(gramasUtilizadas) || 0;
+      
+      // Atualizar o status da tarefa para concluída
+      const response = await fetch(`https://backend.cultivesmart.com.br/api/tarefas/${tarefaSelecionada.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'completed',
+          bandejas_utilizadas: parseFloat(bandejasUtilizadas),
+          gramas_utilizadas: gramasParaEnviar,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar tarefa');
+      }
+
+      // Atualizar o estado local
+      setTarefasDoDia(prevTarefas =>
+        prevTarefas.map(tarefa =>
+          tarefa.id === tarefaSelecionada.id
+            ? { ...tarefa, status: 'completed' }
+            : tarefa
+        )
+      );
+
+      setPlantioModalVisible(false);
+      alert(`Plantio confirmado! Utilizadas ${bandejasUtilizadas} bandejas (${gramasParaEnviar}g)`);
+
+    } catch (error) {
+      console.error('Erro ao confirmar plantio:', error);
+      alert('Erro ao confirmar plantio: ' + error.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending':
@@ -326,6 +441,11 @@ const CronogramaProducao = () => {
               <h5 style={{fontWeight: 'bold', fontSize: '1.2em'}}>
                 Tarefas do Dia - {new Date().toLocaleDateString('pt-BR', {weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'})}
               </h5>
+              {debugInfo && (
+                <small className="text-muted d-block mt-1">
+                  {debugInfo}
+                </small>
+              )}
             </CCardHeader>
             <CCardBody>
               {loadingTarefas ? (
@@ -350,6 +470,16 @@ const CronogramaProducao = () => {
                       </div>
                       <div className="d-flex align-items-center">
                         {getStatusBadge(task.status)}
+                        {task.type === 'plantio' && task.status === 'pending' && (
+                          <CButton 
+                            color="success" 
+                            size="sm" 
+                            className="ms-2"
+                            onClick={() => handlePlantioClick(task)}
+                          >
+                            Executar Plantio
+                          </CButton>
+                        )}
                         {task.status === 'completed' && (
                           <span className="ms-3 text-success" style={{fontSize: '0.9em'}}>
                             ✓ Concluída
@@ -591,6 +721,154 @@ const CronogramaProducao = () => {
               <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
             Fechar
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* Modal de Plantio */}
+      <CModal visible={plantioModalVisible} onClose={() => setPlantioModalVisible(false)} size="lg">
+        <CModalHeader closeButton>
+          <h4 className="modal-title">Executar Plantio</h4>
+        </CModalHeader>
+        <CModalBody>
+          {tarefaSelecionada && (
+            <div>
+              <div className="mb-3">
+                <h5>{tarefaSelecionada.description}</h5>
+                <p className="text-muted">{tarefaSelecionada.details}</p>
+              </div>
+
+              {tarefaSelecionada.especificacao && (
+                <div className="mb-4 p-3 bg-light rounded">
+                  <h6 className="mb-3">Especificações do Insumo:</h6>
+                  <div className="row">
+                    <div className="col-md-4">
+                      <strong>Insumo:</strong>
+                      <div>{tarefaSelecionada.plantio?.insumo?.nome} {tarefaSelecionada.plantio?.variedade}</div>
+                    </div>
+                    <div className="col-md-4">
+                      <strong>Gramas por bandeja:</strong>
+                      <div>{tarefaSelecionada.especificacao.quantidade_bandeja || 'Não especificado'}g</div>
+                    </div>
+                    <div className="col-md-4">
+                      <strong>Bandejas planejadas:</strong>
+                      <div>{tarefaSelecionada.plantio?.bandejas_necessarias || 'N/A'} bandejas</div>
+                    </div>
+                  </div>
+                  <div className="row mt-2">
+                    <div className="col-md-12">
+                      <strong>Total de gramas planejado:</strong>
+                      <div className="text-primary">
+                        {(tarefaSelecionada.plantio?.bandejas_necessarias || 0) * (tarefaSelecionada.especificacao.quantidade_bandeja || 0)}g
+                        <small className="text-muted ms-2">
+                          ({tarefaSelecionada.plantio?.bandejas_necessarias || 0} bandejas × {tarefaSelecionada.especificacao.quantidade_bandeja || 0}g)
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="row">
+                <div className="col-md-6">
+                  <CFormLabel htmlFor="bandejasUtilizadas">Bandejas Utilizadas *</CFormLabel>
+                  <CFormInput
+                    type="number"
+                    id="bandejasUtilizadas"
+                    value={bandejasUtilizadas}
+                    onChange={(e) => setBandejasUtilizadas(e.target.value)}
+                    placeholder="Digite a quantidade de bandejas"
+                    min="0"
+                    step="1"
+                  />
+                  <small className="text-muted">
+                    Planejado: {tarefaSelecionada.plantio?.bandejas_necessarias || 'N/A'} bandejas
+                    {parseFloat(bandejasUtilizadas) > (tarefaSelecionada.plantio?.bandejas_necessarias || 0) && (
+                      <span className="text-warning ms-2">⚠ Acima do planejado</span>
+                    )}
+                  </small>
+                </div>
+                <div className="col-md-6">
+                  <CFormLabel htmlFor="gramasUtilizadas">Total de Gramas</CFormLabel>
+                  <CFormInput
+                    type="number"
+                    id="gramasUtilizadas"
+                    value={gramasUtilizadas}
+                    onChange={(e) => setGramasUtilizadas(e.target.value)}
+                    placeholder="Gramas utilizadas"
+                    min="0"
+                    step="0.1"
+                  />
+                  <small className="text-muted">
+                    Calculado automaticamente: {parseFloat(bandejasUtilizadas) || 0} bandejas × {
+                      tarefaSelecionada.especificacao?.quantidade_bandeja || 0
+                    }g = {(parseFloat(bandejasUtilizadas) || 0) * (tarefaSelecionada.especificacao?.quantidade_bandeja || 0)}g
+                  </small>
+                </div>
+              </div>
+
+              {/* Resumo Dinâmico */}
+              {bandejasUtilizadas && tarefaSelecionada.especificacao && (
+                <div className="mt-4 p-3 bg-light rounded">
+                  <h6 className="mb-3">Resumo da Execução:</h6>
+                  <div className="row">
+                    <div className="col-md-4">
+                      <strong>Bandejas:</strong>
+                      <div className={parseFloat(bandejasUtilizadas) === (tarefaSelecionada.plantio?.bandejas_necessarias || 0) ? 'text-success' : 
+                                     parseFloat(bandejasUtilizadas) > (tarefaSelecionada.plantio?.bandejas_necessarias || 0) ? 'text-warning' : 'text-info'}>
+                        {bandejasUtilizadas} / {tarefaSelecionada.plantio?.bandejas_necessarias || 0} planejadas
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <strong>Gramas utilizadas:</strong>
+                      <div className="text-primary">
+                        {gramasUtilizadas}g
+                        {parseFloat(gramasUtilizadas) !== ((parseFloat(bandejasUtilizadas) || 0) * (tarefaSelecionada.especificacao?.quantidade_bandeja || 0)) && (
+                          <small className="text-warning ms-2">(Editado manualmente)</small>
+                        )}
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <strong>Diferença do planejado:</strong>
+                      <div className={
+                        (parseFloat(gramasUtilizadas) || 0) - 
+                        ((tarefaSelecionada.plantio?.bandejas_necessarias || 0) * (tarefaSelecionada.especificacao?.quantidade_bandeja || 0)) === 0 
+                        ? 'text-success' : 'text-warning'
+                      }>
+                        {(parseFloat(gramasUtilizadas) || 0) - 
+                         ((tarefaSelecionada.plantio?.bandejas_necessarias || 0) * (tarefaSelecionada.especificacao?.quantidade_bandeja || 0)) > 0 ? '+' : ''}
+                        {(parseFloat(gramasUtilizadas) || 0) - 
+                         ((tarefaSelecionada.plantio?.bandejas_necessarias || 0) * (tarefaSelecionada.especificacao?.quantidade_bandeja || 0))}g
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!tarefaSelecionada.especificacao && (
+                <div className="alert alert-warning mt-3">
+                  <strong>Atenção:</strong> Não foi possível carregar as especificações deste insumo. 
+                  Verifique se o insumo possui especificações cadastradas.
+                </div>
+              )}
+            </div>
+          )}
+        </CModalBody>
+        <CModalFooter>
+          <CButton 
+            color="secondary" 
+            onClick={() => setPlantioModalVisible(false)}
+            disabled={isProcessing}
+          >
+            Cancelar
+          </CButton>
+          <CButton 
+            color="success" 
+            onClick={handleConfirmarPlantio}
+            disabled={isProcessing || !bandejasUtilizadas || !tarefaSelecionada?.especificacao}
+          >
+            {isProcessing && <CSpinner size="sm" className="me-2" />}
+            {isProcessing ? 'Processando...' : 'Confirmar Plantio'}
           </CButton>
         </CModalFooter>
       </CModal>
