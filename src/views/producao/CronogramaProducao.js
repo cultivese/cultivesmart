@@ -63,7 +63,7 @@ const filtrarTarefasDoDia = (tarefas, plantios, dataHoje) => {
         type: tarefa.tipo,
         status: tarefa.status || 'pending',
         plantioId: tarefa.lote_id,
-        details: `${plantio?.nome || 'Plantio'} | Data: ${new Date(tarefa.data_agendada).toLocaleDateString('pt-BR')} | Status: ${tarefa.status || 'pendente'}`
+        details: `${plantio?.nome || 'Plantio'} | Data: ${createLocalDate(tarefa.data_agendada).toLocaleDateString('pt-BR')} | Status: ${tarefa.status || 'pendente'}`
       };
     });
 };
@@ -78,9 +78,17 @@ const getEventColor = (type) => {
   }
 };
 
+// Função para criar data local sem conversão de timezone
+const createLocalDate = (dateString) => {
+  if (!dateString) return new Date();
+  const datePart = dateString.split('T')[0]; // Remove horário se existir
+  const [year, month, day] = datePart.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
 // Função para formatar data sem problemas de fuso horário
 const formatDateFromString = (dateString) => {
-  const [year, month, day] = dateString.split('-').map(Number);
+  const date = createLocalDate(dateString);
   
   const monthNames = [
     'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
@@ -92,19 +100,18 @@ const formatDateFromString = (dateString) => {
     'quinta-feira', 'sexta-feira', 'sábado'
   ];
   
-  const date = new Date(year, month - 1, day);
+  const day = date.getDate();
+  const month = date.getMonth();
+  const year = date.getFullYear();
   const dayOfWeek = date.getDay();
   
-  return `${dayNames[dayOfWeek]}, ${day.toString().padStart(2, '0')} de ${monthNames[month - 1]} de ${year}`;
+  return `${dayNames[dayOfWeek]}, ${day.toString().padStart(2, '0')} de ${monthNames[month]} de ${year}`;
 };
 
 // Função para formatar data de plantio (sem problemas de timezone)
 const formatPlantioDate = (dateString) => {
   if (!dateString) return 'Data não informada';
-  // Remove a parte do horário se existir e pega só a data
-  const datePart = dateString.split('T')[0];
-  const [year, month, day] = datePart.split('-');
-  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  const date = createLocalDate(dateString);
   return date.toLocaleDateString('pt-BR', {
     weekday: 'short',
     day: '2-digit',
@@ -375,7 +382,7 @@ const CronogramaProducao = () => {
                 <CCol md={6}>
                   <div className="info-card p-3 bg-light rounded">
                     <h6 className="text-primary mb-2">📅 Detalhes do Evento</h6>
-                    <p className="mb-1"><strong>Data:</strong> {new Date(selectedEvent.data).toLocaleDateString('pt-BR')}</p>
+                    <p className="mb-1"><strong>Data:</strong> {createLocalDate(selectedEvent.data).toLocaleDateString('pt-BR')}</p>
                     <p className="mb-1"><strong>Tipo:</strong> {selectedEvent.tipo}</p>
                     <p className="mb-0"><strong>Quantidade:</strong> {selectedEvent.lotes.length} lotes</p>
                   </div>
@@ -549,7 +556,7 @@ const CronogramaProducao = () => {
                             </h6>
                             <div className="timeline">
                               {plantio.todasTarefas
-                                .sort((a, b) => new Date(a.data_agendada) - new Date(b.data_agendada))
+                                .sort((a, b) => createLocalDate(a.data_agendada) - createLocalDate(b.data_agendada))
                                 .map((tarefa, idx) => (
                                   <div key={tarefa.id} className="timeline-item d-flex align-items-center py-2">
                                     <div className={`timeline-dot me-3 rounded-circle bg-${

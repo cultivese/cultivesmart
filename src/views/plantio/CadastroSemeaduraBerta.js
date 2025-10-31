@@ -158,10 +158,16 @@ const CadastroSemeaduraBerta = () => {
         datasPlantio = [primeiraData];
       }
 
-      // Remove datas duplicadas e ordena
-      datasPlantio = Array.from(new Set(datasPlantio.map(d => d.toISOString().slice(0,10))))
-        .map(d => new Date(d))
-        .sort((a,b) => a-b);
+      // Remove datas duplicadas e ordena (usando formatação local segura)
+      const datasUnicas = new Set();
+      datasPlantio.forEach(d => {
+        const dataLocal = formatDateLocal(d); // Formato YYYY-MM-DD local
+        datasUnicas.add(dataLocal);
+      });
+      
+      datasPlantio = Array.from(datasUnicas)
+        .map(dateStr => createLocalDate(dateStr)) // Reconverte usando createLocalDate
+        .sort((a, b) => a - b);
 
       // Para cada data de plantio, criar plantios e tarefas
       for (const dataPlantioAtual of datasPlantio) {
@@ -187,6 +193,11 @@ const CadastroSemeaduraBerta = () => {
             insumo_id: insumo.id,
             area_plantio: "Área principal"
           };
+
+          // Debug: verificar data que está sendo enviada
+          console.log('Data selecionada no input:', dataPlantio);
+          console.log('Data processada (dataPlantioAtual):', dataPlantioAtual);
+          console.log('Data formatada para payload:', plantioData.data_plantio);
 
           // Salvar o plantio
           const plantioResponse = await fetch('https://backend.cultivesmart.com.br/api/plantios', {
