@@ -154,6 +154,17 @@ const EstoqueVisaoGeral = () => {
     setFiltroCategoria(''); // Limpa o filtro de categoria
 };
 
+  // Função para recarregar os dados do estoque
+  const recarregarEstoque = async () => {
+    try {
+      const response = await fetch('https://backend.cultivesmart.com.br/api/estoque');
+      const data = await response.json();
+      setEstoqueInsumos(data);
+    } catch (error) {
+      console.error('Erro ao recarregar estoque:', error);
+    }
+  };
+
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -335,11 +346,13 @@ const handleSaveAdditionalFields = async () => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     setIsProcessing(false);
+    setShowAdditionalFieldsModal(false);
+    // Recarregar estoque em vez de recarregar a página inteira
+    await recarregarEstoque();
   } catch (err) {
     console.error('Erro ao salvar/atualizar especificação:', err);
     setIsProcessing(false);
   }
-  window.location.reload();
 };
 
 const handleCategorySelect = (category) => {
@@ -399,6 +412,7 @@ const handleRetiradaEstoqueSubmit = async (e) => {
       setMotivoRetirada('');     // Limpa o campo de motivo
       setShowRetiradaEstoqueModal(false);
       // Recarrega a lista de insumos para refletir a nova quantidade disponível
+      await recarregarEstoque();
 
     } catch (error) {
       console.error('Erro na retirada:', error);
@@ -664,6 +678,7 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
             
              <CProgress value={valorBarraProgresso}>
             <CProgressBar className="overflow-visible text-dark px-2" color={corBarraProgresso}>
+              {quantidadeTotalDisponivel}g / {capacidadeMaximaTotal}g
             </CProgressBar>
           </CProgress>
             <div style={{ fontSize: 16, marginBottom: 4 }}>Estoque atual: <b>{parseInt(estoqueInsumo.cotacao_insumos.quantidade)} sacos</b></div>

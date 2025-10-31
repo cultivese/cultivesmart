@@ -194,11 +194,6 @@ const CadastroSemeaduraBerta = () => {
             area_plantio: "Área principal"
           };
 
-          // Debug: verificar data que está sendo enviada
-          console.log('Data selecionada no input:', dataPlantio);
-          console.log('Data processada (dataPlantioAtual):', dataPlantioAtual);
-          console.log('Data formatada para payload:', plantioData.data_plantio);
-
           // Salvar o plantio
           const plantioResponse = await fetch('https://backend.cultivesmart.com.br/api/plantios', {
             method: 'POST',
