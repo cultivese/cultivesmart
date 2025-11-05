@@ -240,7 +240,7 @@ const CadastroSemeaduraBerta = () => {
             dataBlackout.setDate(dataBlackout.getDate() + diasAntes);
             tarefas.push({
               lote_id: plantioSalvo.id,
-              tipo: 'blackout',
+              tipo: 'retirar do blackout',
               descricao: `Blackout por ${espec.dias_blackout} dias`,
               data_agendada: formatDateLocal(dataBlackout),
               status: 'pending',
@@ -505,7 +505,7 @@ const handlerSalvarCotacao = () => {
       dataAtual = new Date(dataAtual);
       dataAtual.setDate(dataAtual.getDate() + parseInt(espec.dias_blackout));
       tarefas.push({
-        tipo: 'blackout',
+        tipo: 'retirar do blackout',
         descricao: `Blackout por ${espec.dias_blackout} dias`,
         data: new Date(dataAtual),
         icone: cilMoon,

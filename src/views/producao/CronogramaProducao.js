@@ -79,7 +79,7 @@ const filtrarTarefasDoDia = (tarefas, plantios, dataHoje) => {
 const getEventColor = (type) => {
   switch (type) {
     case 'plantio': return '#2ecc40';
-    case 'blackout': return '#222f3e';
+    case 'Retirar blackout': return '#222f3e';
     case 'colheita': return '#e74c3c';
     case 'desempilhamento': return '#f7b731';
     default: return '#b2bec3';
@@ -146,6 +146,10 @@ const CronogramaProducao = () => {
   const [bandejasUtilizadas, setBandejasUtilizadas] = useState('');
   const [gramasUtilizadas, setGramasUtilizadas] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Estados para o modal de blackout
+  const [blackoutModalVisible, setBlackoutModalVisible] = useState(false);
+  const [tarefaBlackout, setTarefaBlackout] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -177,7 +181,7 @@ const CronogramaProducao = () => {
         });
 
         const eventos = Object.values(grouped).map(grupo => ({
-          title: `${grupo.tipo.charAt(0).toUpperCase() + grupo.tipo.slice(1, 10)} (${grupo.lotes.length})`,
+          title: `${grupo.tipo} (${grupo.lotes.length})`,
           start: grupo.data_agendada,
           color: getEventColor(grupo.tipo),
           extendedProps: {
@@ -319,6 +323,51 @@ const CronogramaProducao = () => {
     setPlantioModalVisible(true);
   };
 
+  // Função para abrir modal de confirmação de blackout
+  const handleBlackoutClick = (task) => {
+    setTarefaBlackout(task);
+    setBlackoutModalVisible(true);
+  };
+
+  // Função para confirmar retirada do blackout
+  const handleConfirmarBlackout = async () => {
+    try {
+      setIsProcessing(true);
+
+      const response = await fetch(`https://backend.cultivesmart.com.br/api/tarefas/${tarefaBlackout.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'completed'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar tarefa');
+      }
+
+      // Atualizar o estado local
+      setTarefasDoDia(prevTarefas =>
+        prevTarefas.map(tarefa =>
+          tarefa.id === tarefaBlackout.id
+            ? { ...tarefa, status: 'completed' }
+            : tarefa
+        )
+      );
+
+      setBlackoutModalVisible(false);
+      alert('Blackout retirado com sucesso!');
+
+    } catch (error) {
+      console.error('Erro ao confirmar retirada do blackout:', error);
+      alert('Erro ao confirmar retirada do blackout: ' + error.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   // Função para calcular gramas utilizadas
   const calcularGramasUtilizadas = (bandejas, quantidadeBandeja) => {
     const numBandejas = parseFloat(bandejas) || 0;
@@ -416,7 +465,7 @@ const CronogramaProducao = () => {
             </CCardHeader>
             <CCardBody>
               <CRow className="justify-content-center">
-                <CCol md={10} lg={8}>
+                <CCol md={12} lg={12}>
                   <FullCalendar
                     plugins={[dayGridPlugin, interactionPlugin]}
                     initialView="dayGridMonth"
@@ -480,6 +529,16 @@ const CronogramaProducao = () => {
                             Executar Plantio
                           </CButton>
                         )}
+                        {task.type === 'Retirar blackout' && task.status === 'pending' && (
+                          <CButton 
+                            color="dark" 
+                            size="sm" 
+                            className="ms-2"
+                            onClick={() => handleBlackoutClick(task)}
+                          >
+                            Retirar Blackout
+                          </CButton>
+                        )}
                         {task.status === 'completed' && (
                           <span className="ms-3 text-success" style={{fontSize: '0.9em'}}>
                             ✓ Concluída
@@ -520,13 +579,19 @@ const CronogramaProducao = () => {
                 <CCol md={6}>
                   <div className="info-card p-3 bg-light rounded">
                     <h6 className="text-success mb-2">📦 Lotes Envolvidos</h6>
-                    <p className="mb-0">{selectedEvent.lotes.join(', ')}</p>
+                    <div className="lotes-summary">
+                      {selectedEvent.lotes.map((lote, index) => (
+                        <CBadge key={index} color="success" className="me-1 mb-1">
+                          Lote #{lote}
+                        </CBadge>
+                      ))}
+                    </div>
                   </div>
                 </CCol>
               </CRow>
             </div>
           ) : (
-            // Exibir plantios da data selecionada
+            // Exibir plantios da data selecionada com detalhes completos
             <div className="plantios-container">
               {plantiosDaData.length === 0 ? (
                 <div className="empty-state text-center py-5">
@@ -570,8 +635,104 @@ const CronogramaProducao = () => {
 
                       {/* Conteúdo da Seção do Lote */}
                       <div className="lote-body border border-success border-top-0 rounded-bottom">
-                        {/* Informações Principais */}
+                        
+                        {/* Seção de Insumos e Notas Fiscais */}
+                        <div className="insumos-section p-3 border-bottom bg-light">
+                          <h6 className="text-primary mb-3 d-flex align-items-center">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="me-2">
+                              <path d="M9 11H7V9H9V11ZM13 11H11V9H13V11ZM17 11H15V9H17V11ZM19 4H18V2H16V4H8V2H6V4H5C3.89 4 3.01 4.9 3.01 6L3 20C3 21.1 3.89 22 5 22H19C20.1 22 21 21.1 21 20V6C21 4.9 20.1 4 19 4ZM19 20H5V9H19V20Z"/>
+                            </svg>
+                            Insumos e Origem
+                          </h6>
+                          
+                          {plantio.insumos && plantio.insumos.length > 0 ? (
+                            <div className="insumos-grid">
+                              {plantio.insumos.map((insumo, idx) => (
+                                <div key={idx} className="insumo-card border rounded p-3 mb-3 bg-white">
+                                  <div className="row">
+                                    <div className="col-md-6">
+                                      <div className="insumo-info">
+                                        <h6 className="text-success mb-2 d-flex align-items-center">
+                                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="me-2">
+                                            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                                          </svg>
+                                          {insumo.nome || 'Insumo não identificado'}
+                                        </h6>
+                                        <div className="insumo-details">
+                                          <div className="mb-2">
+                                            <strong className="text-muted small">VARIEDADE:</strong>
+                                            <div>{insumo.variedade || plantio.variedade || 'Não especificado'}</div>
+                                          </div>
+                                          <div className="mb-2">
+                                            <strong className="text-muted small">QUANTIDADE NECESSÁRIA:</strong>
+                                            <div className="text-primary fw-bold">
+                                              {insumo.quantidade_necessaria || (plantio.bandejas_necessarias * (insumo.gramas_por_bandeja || 0))}g
+                                              {insumo.gramas_por_bandeja && (
+                                                <small className="text-muted ms-2">
+                                                  ({plantio.bandejas_necessarias || 0} bandejas × {insumo.gramas_por_bandeja}g)
+                                                </small>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="col-md-6">
+                                      <div className="nota-fiscal-info">
+                                        <h6 className="text-warning mb-2 d-flex align-items-center">
+                                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="me-2">
+                                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                          </svg>
+                                          Nota Fiscal
+                                        </h6>
+                                        <div className="nf-details">
+                                          <div className="mb-1">
+                                            <strong className="text-muted small">NÚMERO:</strong>
+                                            <div>{insumo.nota_fiscal?.numero || 'Não informado'}</div>
+                                          </div>
+                                          <div className="mb-1">
+                                            <strong className="text-muted small">FORNECEDOR:</strong>
+                                            <div>{insumo.nota_fiscal?.fornecedor || insumo.fornecedor || 'Não informado'}</div>
+                                          </div>
+                                          <div className="mb-1">
+                                            <strong className="text-muted small">DATA DE ENTRADA:</strong>
+                                            <div>{insumo.nota_fiscal?.data_entrada ? 
+                                              formatPlantioDate(insumo.nota_fiscal.data_entrada) : 'Não informado'}</div>
+                                          </div>
+                                          <div className="mb-1">
+                                            <strong className="text-muted small">ESTOQUE DISPONÍVEL:</strong>
+                                            <div className={`fw-bold ${(insumo.estoque_disponivel || 0) >= (insumo.quantidade_necessaria || 0) ? 'text-success' : 'text-danger'}`}>
+                                              {insumo.estoque_disponivel || 0}g
+                                              {insumo.quantidade_necessaria && (
+                                                <small className="ms-2">
+                                                  ({(insumo.estoque_disponivel || 0) >= (insumo.quantidade_necessaria || 0) ? '✓' : '⚠'} 
+                                                  {(insumo.estoque_disponivel || 0) >= (insumo.quantidade_necessaria || 0) ? ' Suficiente' : ' Insuficiente'})
+                                                </small>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="alert alert-warning">
+                              <strong>Atenção:</strong> Não foram encontrados insumos cadastrados para este lote.
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Informações Principais do Plantio */}
                         <div className="info-section p-3 border-bottom">
+                          <h6 className="text-info mb-3 d-flex align-items-center">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="me-2">
+                              <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2Z"/>
+                            </svg>
+                            Detalhes do Plantio
+                          </h6>
                           <CRow>
                             <CCol md={4} className="mb-3">
                               <div className="info-item">
@@ -617,34 +778,47 @@ const CronogramaProducao = () => {
                                 </div>
                                 <div className="info-label text-muted small fw-bold">QUANTIDADE</div>
                                 <div className="info-value fw-semibold">
-                                  {plantio.quantidade || plantio.bandejas || 'N/A'} bandejas
+                                  {plantio.quantidade || plantio.bandejas_necessarias || 'N/A'} bandejas
                                 </div>
                               </div>
                             </CCol>
                           </CRow>
                         </div>
 
-                        {/* Detalhes Adicionais */}
-                        <div className="details-section p-3">
+                        {/* Resumo de Quantidades */}
+                        <div className="resumo-section p-3 border-bottom bg-info bg-opacity-10">
+                          <h6 className="text-info mb-3 d-flex align-items-center">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="me-2">
+                              <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,4.89 20.1,3 19,3M19,5V19H5V5H19Z"/>
+                            </svg>
+                            Resumo de Consumo
+                          </h6>
                           <CRow>
-                            {plantio.variedade && (
-                              <CCol md={6} className="mb-2">
-                                <strong className="text-muted small">VARIEDADE:</strong>
-                                <div>{plantio.variedade}</div>
-                              </CCol>
-                            )}
-                            {plantio.area_plantio && (
-                              <CCol md={6} className="mb-2">
-                                <strong className="text-muted small">ÁREA:</strong>
-                                <div>{plantio.area_plantio}</div>
-                              </CCol>
-                            )}
-                            {plantio.observacoes && (
-                              <CCol xs={12} className="mb-2">
-                                <strong className="text-muted small">OBSERVAÇÕES:</strong>
-                                <div className="text-muted">{plantio.observacoes}</div>
-                              </CCol>
-                            )}
+                            <CCol md={4} className="text-center">
+                              <div className="resumo-item">
+                                <div className="resumo-number text-primary fw-bold fs-4">
+                                  {plantio.bandejas_necessarias || 0}
+                                </div>
+                                <div className="resumo-label text-muted small">BANDEJAS PLANEJADAS</div>
+                              </div>
+                            </CCol>
+                            <CCol md={4} className="text-center">
+                              <div className="resumo-item">
+                                <div className="resumo-number text-success fw-bold fs-4">
+                                  {plantio.insumos?.reduce((total, insumo) => 
+                                    total + (insumo.quantidade_necessaria || 0), 0) || 0}g
+                                </div>
+                                <div className="resumo-label text-muted small">TOTAL DE GRAMAS</div>
+                              </div>
+                            </CCol>
+                            <CCol md={4} className="text-center">
+                              <div className="resumo-item">
+                                <div className="resumo-number text-warning fw-bold fs-4">
+                                  {plantio.insumos?.length || 0}
+                                </div>
+                                <div className="resumo-label text-muted small">TIPOS DE INSUMOS</div>
+                              </div>
+                            </CCol>
                           </CRow>
                         </div>
 
@@ -663,7 +837,7 @@ const CronogramaProducao = () => {
                                   key={tarefa.id} 
                                   color={tarefa.tipo === 'plantio' ? 'success' : 
                                          tarefa.tipo === 'colheita' ? 'danger' : 
-                                         tarefa.tipo === 'blackout' ? 'dark' :
+                                         tarefa.tipo === 'Retirar blackout' ? 'dark' :
                                          tarefa.tipo === 'desempilhamento' ? 'warning' : 'info'}
                                   className="px-3 py-2 fs-6"
                                 >
@@ -692,7 +866,7 @@ const CronogramaProducao = () => {
                                     <div className={`timeline-dot me-3 rounded-circle bg-${
                                       tarefa.tipo === 'plantio' ? 'success' : 
                                       tarefa.tipo === 'colheita' ? 'danger' : 
-                                      tarefa.tipo === 'blackout' ? 'dark' :
+                                      tarefa.tipo === 'Retirar blackout' ? 'dark' :
                                       tarefa.tipo === 'desempilhamento' ? 'warning' : 'info'
                                     }`} style={{ width: '8px', height: '8px' }}></div>
                                     <div className="flex-grow-1 d-flex justify-content-between align-items-center">
@@ -869,6 +1043,73 @@ const CronogramaProducao = () => {
           >
             {isProcessing && <CSpinner size="sm" className="me-2" />}
             {isProcessing ? 'Processando...' : 'Confirmar Plantio'}
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* Modal de Confirmação de Blackout */}
+      <CModal visible={blackoutModalVisible} onClose={() => setBlackoutModalVisible(false)}>
+        <CModalHeader closeButton>
+          <h4 className="modal-title">Confirmar Retirada do Blackout</h4>
+        </CModalHeader>
+        <CModalBody>
+          {tarefaBlackout && (
+            <div>
+              <div className="text-center mb-4">
+                <div className="mb-3">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" className="mx-auto text-dark">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M8 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <h5 className="text-dark mb-2">Retirar Blackout</h5>
+                <p className="text-muted mb-3">
+                  Confirma que deseja retirar o blackout do plantio?
+                </p>
+              </div>
+
+              <div className="info-card p-3 bg-light rounded">
+                <h6 className="text-primary mb-2">Detalhes da Tarefa:</h6>
+                <div className="row">
+                  <div className="col-md-6">
+                    <strong className="text-muted small">PLANTIO:</strong>
+                    <div>{tarefaBlackout.description || `Lote #${tarefaBlackout.plantio_id}`}</div>
+                  </div>
+                  <div className="col-md-6">
+                    <strong className="text-muted small">DATA AGENDADA:</strong>
+                    <div>{tarefaBlackout.data_agendada ? 
+                      createLocalDate(tarefaBlackout.data_agendada).toLocaleDateString('pt-BR') : 'Hoje'}</div>
+                  </div>
+                </div>
+                {tarefaBlackout.plantio?.variedade && (
+                  <div className="mt-2">
+                    <strong className="text-muted small">VARIEDADE:</strong>
+                    <div>{tarefaBlackout.plantio.variedade}</div>
+                  </div>
+                )}
+              </div>
+
+              <div className="alert alert-info mt-3">
+                <strong>Atenção:</strong> Esta ação marcará a tarefa como concluída e indicará que o blackout foi retirado do plantio.
+              </div>
+            </div>
+          )}
+        </CModalBody>
+        <CModalFooter>
+          <CButton 
+            color="secondary" 
+            onClick={() => setBlackoutModalVisible(false)}
+            disabled={isProcessing}
+          >
+            Cancelar
+          </CButton>
+          <CButton 
+            color="dark" 
+            onClick={handleConfirmarBlackout}
+            disabled={isProcessing}
+          >
+            {isProcessing && <CSpinner size="sm" className="me-2" />}
+            {isProcessing ? 'Processando...' : 'Confirmar Retirada'}
           </CButton>
         </CModalFooter>
       </CModal>
