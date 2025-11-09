@@ -45,6 +45,16 @@ const InsumosCadastro = React.lazy(() => import('./views/fornecedores/catalogo_p
 const InsumosListar = React.lazy(() => import('./views/fornecedores/catalogo_produtos/InsumosListar'))
 const InsumosEspecificacao = React.lazy(() => import('./views/fornecedores/especificacao/InsumosEspecificacao'))
 
+// Funcionários
+const FuncionariosCadastro = React.lazy(() => import('./views/funcionarios/cadastro/FuncionariosCadastro'))
+const FuncionariosListar = React.lazy(() => import('./views/funcionarios/listar/FuncionariosListar'))
+const FuncionariosPermissoes = React.lazy(() => import('./views/funcionarios/permissoes/FuncionariosPermissoes'))
+
+// Empresas
+const EmpresasCadastro = React.lazy(() => import('./views/empresas/cadastro/EmpresasCadastro'))
+const EmpresasListar = React.lazy(() => import('./views/empresas/listar/EmpresasListar'))
+const EmpresasPlanos = React.lazy(() => import('./views/empresas/planos/EmpresasPlanos'))
+
 // Clientes
 // const ClientesListar = React.lazy(() => import('./views/clientes/listar/ClientesListar'))
 // const ClientesCadastro = React.lazy(() => import('./views/clients/cadastro/ClientesCadastro'))
@@ -109,6 +119,21 @@ const routes = [
   { path: '/fornecedores/catalogo_produtos', name: 'Catálogo de Produtos dos Fornececores', element: InsumosListar },
   { path: '/fornecedores/especificacao', name: 'Especificação de Produtos dos Fornececores', element: InsumosEspecificacao },
   { path: '/fornecedores/cadastrar_catalogo_produtos', name: 'Cadastro de Catálogo de Produtos de Fornecedores', element: InsumosCadastro },
+  
+  // Funcionários
+  { path: '/funcionarios', name: 'Funcionários', element: FuncionariosListar, exact: true },
+  { path: '/funcionarios/cadastro', name: 'Cadastro de Funcionários', element: FuncionariosCadastro },
+  { path: '/funcionarios/listar', name: 'Lista de Funcionários', element: FuncionariosListar },
+  { path: '/funcionarios/permissoes', name: 'Gerenciar Permissões', element: FuncionariosPermissoes },
+  { path: '/funcionarios/permissoes/:id', name: 'Alterar Permissões', element: FuncionariosPermissoes },
+  { path: '/funcionarios/editar/:id', name: 'Editar Funcionário', element: FuncionariosCadastro },
+  
+  // Empresas
+  { path: '/empresas', name: 'Empresas', element: EmpresasListar, exact: true },
+  { path: '/empresas/cadastro', name: 'Cadastro de Empresas', element: EmpresasCadastro },
+  { path: '/empresas/cadastro/:id', name: 'Editar Empresa', element: EmpresasCadastro },
+  { path: '/empresas/listar', name: 'Lista de Empresas', element: EmpresasListar },
+  { path: '/empresas/planos', name: 'Gerenciar Planos', element: EmpresasPlanos },
   
   // Clientes
   // { path: '/clientes', name: 'Clientes', element: Cards, exact: true },

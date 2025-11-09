@@ -19,6 +19,8 @@ import {
   cilCalendar,
   cilCalendarCheck,
   cilSpeedometer,
+  cilPeople,
+  cilBuilding,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -170,6 +172,60 @@ const _nav = (userRole) => {
           name: 'Catálogo de Produtos dos Fornecedores',
           to: '/fornecedores/catalogo_produtos',
           roles: ['admin'],
+        },
+      ],
+    },
+    {
+      component: CNavGroup,
+      name: 'Gestão de Colaboradores',
+      to: '/funcionarios',
+      icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+      roles: ['super-admin'],
+      items: [
+        {
+          component: CNavItem,
+          name: 'Cadastro de Colaboradores',
+          to: '/funcionarios/cadastro',
+          roles: ['admin'],
+        },
+        {
+          component: CNavItem,
+          name: 'Lista de Colaboradores',
+          to: '/funcionarios/listar',
+          roles: ['admin'],
+        },
+        {
+          component: CNavItem,
+          name: 'Gerenciar Permissões',
+          to: '/funcionarios/permissoes',
+          roles: ['admin'],
+        },
+      ],
+    },
+    {
+      component: CNavGroup,
+      name: 'Gestão de Empresas',
+      to: '/empresas',
+      icon: <CIcon icon={cilBuilding} customClassName="nav-icon" />,
+      roles: ['super-admin'],
+      items: [
+        {
+          component: CNavItem,
+          name: 'Cadastro de Empresas',
+          to: '/empresas/cadastro',
+          roles: ['super-admin'],
+        },
+        {
+          component: CNavItem,
+          name: 'Lista de Empresas',
+          to: '/empresas/listar',
+          roles: ['super-admin'],
+        },
+        {
+          component: CNavItem,
+          name: 'Gerenciar Planos',
+          to: '/empresas/planos',
+          roles: ['super-admin'],
         },
       ],
     },

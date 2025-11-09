@@ -20,9 +20,29 @@ import {
   CFormInput,
   CFormLabel,
   CSpinner,
+  CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
+  CTabs,
+  CTabList,
+  CTab,
+  CTabContent,
+  CTabPanel,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCheckCircle, cilBan } from '@coreui/icons';
+import { 
+  cilCheckCircle, 
+  cilBan, 
+  cilLeaf, 
+  cilMoon, 
+  cilBasket, 
+  cilListNumbered,
+  cilClock,
+  cilCheck
+} from '@coreui/icons';
 import './CronogramaProducao.css';
 
 // Funções para buscar dados da API
@@ -80,9 +100,43 @@ const getEventColor = (type) => {
   switch (type) {
     case 'plantio': return '#2ecc40';
     case 'Retirar blackout': return '#222f3e';
-    case 'colheita': return '#e74c3c';
+    case 'colheita': return '#ff6b35'; // Laranja-avermelhado para diferir do vermelho de atraso
     case 'desempilhamento': return '#f7b731';
     default: return '#b2bec3';
+  }
+};
+
+// Função para mapear tipos de tarefa para ícones
+const getTarefaIcon = (type) => {
+  switch (type?.toLowerCase()) {
+    case 'plantio': return cilLeaf;
+    case 'retirar blackout': 
+    case 'retirar do blackout': return cilMoon;
+    case 'colheita': return cilBasket;
+    case 'desempilhamento': return cilListNumbered;
+    default: return cilClock;
+  }
+};
+
+// Função para mapear tipos de tarefa para cores
+const getTarefaCor = (type) => {
+  switch (type?.toLowerCase()) {
+    case 'plantio': return 'success';
+    case 'retirar blackout': 
+    case 'retirar do blackout': return 'dark';
+    case 'colheita': return 'warning';
+    case 'desempilhamento': return 'info';
+    default: return 'secondary';
+  }
+};
+
+// Função para obter emoji de status
+const getStatusEmoji = (status) => {
+  switch (status) {
+    case 'completed': return '✅';
+    case 'pending': return '⏳';
+    case 'overdue': return '⚠️';
+    default: return '⏳';
   }
 };
 
@@ -139,6 +193,7 @@ const CronogramaProducao = () => {
   const [plantios, setPlantios] = useState([]);
   const [tarefas, setTarefas] = useState([]);
   const [debugInfo, setDebugInfo] = useState('');
+  const [activeTab, setActiveTab] = useState(0); // Estado para controlar a aba ativa
   
   // Estados para o modal de plantio
   const [plantioModalVisible, setPlantioModalVisible] = useState(false);
@@ -150,6 +205,96 @@ const CronogramaProducao = () => {
   // Estados para o modal de blackout
   const [blackoutModalVisible, setBlackoutModalVisible] = useState(false);
   const [tarefaBlackout, setTarefaBlackout] = useState(null);
+  
+  // Estados para o modal de desempilhamento
+  const [desempilhamentoModalVisible, setDesempilhamentoModalVisible] = useState(false);
+  const [tarefaDesempilhamento, setTarefaDesempilhamento] = useState(null);
+  
+  // Estados para o modal de colheita
+  const [colheitaModalVisible, setColheitaModalVisible] = useState(false);
+  const [tarefaColheita, setTarefaColheita] = useState(null);
+  const [totalColhido, setTotalColhido] = useState('');
+  const [unidadeColheita, setUnidadeColheita] = useState('kg');
+  const [observacoesColheita, setObservacoesColheita] = useState('');
+
+  // Função para recarregar dados do calendário
+  const recarregarDados = async () => {
+    try {
+      // Buscar tarefas e plantios atualizados
+      const [tarefasData, plantiosData] = await Promise.all([
+        fetchTarefas(),
+        fetchPlantios()
+      ]);
+
+      // Armazenar dados nos estados
+      setTarefas(tarefasData);
+      setPlantios(plantiosData);
+
+      // Processar eventos do calendário - agrupar por tipo e data
+      const grouped = {};
+      tarefasData.forEach(tarefa => {
+        const key = `${tarefa.tipo}_${tarefa.data_agendada}`;
+        if (!grouped[key]) {
+          grouped[key] = {
+            tipo: tarefa.tipo,
+            data_agendada: tarefa.data_agendada,
+            lotes: [],
+            tarefas: []
+          };
+        }
+        grouped[key].lotes.push(tarefa.plantio_id);
+        grouped[key].tarefas.push(tarefa);
+      });
+
+      const eventos = Object.values(grouped).map(grupo => {
+        // Verificar se existem tarefas pendentes ou em atraso para esta data/tipo
+        const tarefasGrupo = grupo.tarefas;
+        
+        const tarefasPendentes = tarefasGrupo.filter(t => t.status === 'pending');
+        const tarefasConcluidas = tarefasGrupo.filter(t => t.status === 'completed');
+        const dataEvento = createLocalDate(grupo.data_agendada);
+        const hoje = new Date();
+        const isOverdue = dataEvento < hoje && tarefasPendentes.length > 0;
+        
+        // Criar título com ícones e status
+        const statusIcon = tarefasConcluidas.length === tarefasGrupo.length ? '✅' : 
+                         isOverdue ? '⚠️' : 
+                         tarefasPendentes.length > 0 ? '⏳' : '✅';
+        
+        return {
+          title: `${statusIcon} ${grupo.tipo} (${grupo.lotes.length})`,
+          start: grupo.data_agendada,
+          color: isOverdue ? '#e74c3c' : 
+                 tarefasConcluidas.length === tarefasGrupo.length ? '#27ae60' : 
+                 getEventColor(grupo.tipo),
+          textColor: '#ffffff',
+          borderColor: isOverdue ? '#c0392b' : 
+                      tarefasConcluidas.length === tarefasGrupo.length ? '#229954' : 
+                      getEventColor(grupo.tipo),
+          extendedProps: {
+            tipo: grupo.tipo,
+            lotes: grupo.lotes,
+            data: grupo.data_agendada,
+            tarefasPendentes: tarefasPendentes.length,
+            tarefasConcluidas: tarefasConcluidas.length,
+            totalTarefas: tarefasGrupo.length,
+            isOverdue: isOverdue,
+            tarefas: tarefasGrupo
+          },
+        };
+      });
+
+      setEvents(eventos);
+
+      // Processar tarefas do dia atual
+      const hoje = new Date();
+      const tarefasHoje = filtrarTarefasDoDia(tarefasData, plantiosData, hoje);
+      setTarefasDoDia(tarefasHoje);
+
+    } catch (error) {
+      console.error('Erro ao recarregar dados:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -166,7 +311,7 @@ const CronogramaProducao = () => {
         setTarefas(tarefasData);
         setPlantios(plantiosData);
 
-        // Processar eventos do calendário
+        // Processar eventos do calendário - agrupar por tipo e data
         const grouped = {};
         tarefasData.forEach(tarefa => {
           const key = `${tarefa.tipo}_${tarefa.data_agendada}`;
@@ -175,21 +320,50 @@ const CronogramaProducao = () => {
               tipo: tarefa.tipo,
               data_agendada: tarefa.data_agendada,
               lotes: [],
+              tarefas: []
             };
           }
-          grouped[key].lotes.push(tarefa.lote_id);
+          grouped[key].lotes.push(tarefa.plantio_id);
+          grouped[key].tarefas.push(tarefa);
         });
 
-        const eventos = Object.values(grouped).map(grupo => ({
-          title: `${grupo.tipo} (${grupo.lotes.length})`,
-          start: grupo.data_agendada,
-          color: getEventColor(grupo.tipo),
-          extendedProps: {
-            tipo: grupo.tipo,
-            lotes: grupo.lotes,
-            data: grupo.data_agendada,
-          },
-        }));
+        const eventos = Object.values(grouped).map(grupo => {
+          // Verificar se existem tarefas pendentes ou em atraso para esta data/tipo
+          const tarefasGrupo = grupo.tarefas;
+          
+          const tarefasPendentes = tarefasGrupo.filter(t => t.status === 'pending');
+          const tarefasConcluidas = tarefasGrupo.filter(t => t.status === 'completed');
+          const dataEvento = createLocalDate(grupo.data_agendada);
+          const hoje = new Date();
+          const isOverdue = dataEvento < hoje && tarefasPendentes.length > 0;
+          
+          // Criar título com ícones e status
+          const statusIcon = tarefasConcluidas.length === tarefasGrupo.length ? '✅' : 
+                           isOverdue ? '⚠️' : 
+                           tarefasPendentes.length > 0 ? '⏳' : '✅';
+          
+          return {
+            title: `${statusIcon} ${grupo.tipo} (${grupo.lotes.length})`,
+            start: grupo.data_agendada,
+            color: isOverdue ? '#e74c3c' : 
+                   tarefasConcluidas.length === tarefasGrupo.length ? '#27ae60' : 
+                   getEventColor(grupo.tipo),
+            textColor: '#ffffff',
+            borderColor: isOverdue ? '#c0392b' : 
+                        tarefasConcluidas.length === tarefasGrupo.length ? '#229954' : 
+                        getEventColor(grupo.tipo),
+            extendedProps: {
+              tipo: grupo.tipo,
+              lotes: grupo.lotes,
+              data: grupo.data_agendada,
+              tarefasPendentes: tarefasPendentes.length,
+              tarefasConcluidas: tarefasConcluidas.length,
+              totalTarefas: tarefasGrupo.length,
+              isOverdue: isOverdue,
+              tarefas: tarefasGrupo
+            },
+          };
+        });
 
         setEvents(eventos);
         
@@ -226,6 +400,8 @@ const CronogramaProducao = () => {
 
   // Handler para abrir o modal ao clicar no evento
   const handleEventClick = (info) => {
+    console.log('Event clicked:', info.event.extendedProps);
+    console.log('Lote ID do evento:', info.event.extendedProps.plantio_id);
     setSelectedEvent(info.event.extendedProps);
     setSelectedDate(info.event.extendedProps.data);
     buscarPlantiosDaData(info.event.extendedProps.data);
@@ -261,17 +437,17 @@ const CronogramaProducao = () => {
 
     // Se não houver plantios na data, buscar por tarefas que acontecem nesta data
     if (plantiosDaData.length === 0 && tarefasDaData.length > 0) {
-      const loteIds = [...new Set(tarefasDaData.map(t => t.lote_id))];
+      const loteIds = [...new Set(tarefasDaData.map(t => t.plantio_id))];
       const plantiosComTarefas = plantios.filter(p => loteIds.includes(p.id));
       
       const plantiosDetalhados = plantiosComTarefas.map(plantio => {
-        const tarefasDoPlantio = tarefas.filter(tarefa => tarefa.lote_id === plantio.id);
+        const tarefasDoPlantio = tarefas.filter(tarefa => tarefa.plantio_id === plantio.id);
         const tarefaColheita = tarefasDoPlantio.find(t => t.tipo === 'colheita');
         
         return {
           ...plantio,
           dataColheita: tarefaColheita ? tarefaColheita.data_agendada : null,
-          tarefasHoje: tarefasDaData.filter(t => t.lote_id === plantio.id),
+          tarefasHoje: tarefasDaData.filter(t => t.plantio_id === plantio.id),
           todasTarefas: tarefasDoPlantio
         };
       });
@@ -282,13 +458,13 @@ const CronogramaProducao = () => {
 
     // Combinar informações para plantios da data
     const plantiosDetalhados = plantiosDaData.map(plantio => {
-      const tarefasDoPlantio = tarefas.filter(tarefa => tarefa.lote_id === plantio.id);
+      const tarefasDoPlantio = tarefas.filter(tarefa => tarefa.plantio_id === plantio.id);
       const tarefaColheita = tarefasDoPlantio.find(t => t.tipo === 'colheita');
       
       return {
         ...plantio,
         dataColheita: tarefaColheita ? tarefaColheita.data_agendada : null,
-        tarefasHoje: tarefasDaData.filter(t => t.lote_id === plantio.id),
+        tarefasHoje: tarefasDaData.filter(t => t.plantio_id === plantio.id),
         todasTarefas: tarefasDoPlantio
       };
     });
@@ -340,7 +516,8 @@ const CronogramaProducao = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          status: 'completed'
+          status: 'completed',
+          fase: 'pronto_para_colheita'
         }),
       });
 
@@ -357,12 +534,137 @@ const CronogramaProducao = () => {
         )
       );
 
+      // Recarregar dados do calendário para atualizar os eventos
+      await recarregarDados();
+
       setBlackoutModalVisible(false);
-      alert('Blackout retirado com sucesso!');
+      alert('Blackout retirado com sucesso! Fase atualizada.');
 
     } catch (error) {
       console.error('Erro ao confirmar retirada do blackout:', error);
       alert('Erro ao confirmar retirada do blackout: ' + error.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Função para abrir modal de confirmação de desempilhamento
+  const handleDesempilhamentoClick = (task) => {
+    setTarefaDesempilhamento(task);
+    setDesempilhamentoModalVisible(true);
+  };
+
+  // Função para confirmar desempilhamento
+  const handleConfirmarDesempilhamento = async () => {
+    try {
+      setIsProcessing(true);
+
+      const response = await fetch(`https://backend.cultivesmart.com.br/api/tarefas/${tarefaDesempilhamento.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'completed',
+          fase: 'blackout'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar tarefa');
+      }
+
+      // Atualizar o estado local
+      setTarefasDoDia(prevTarefas =>
+        prevTarefas.map(tarefa =>
+          tarefa.id === tarefaDesempilhamento.id
+            ? { ...tarefa, status: 'completed' }
+            : tarefa
+        )
+      );
+
+      // Recarregar dados do calendário para atualizar os eventos
+      await recarregarDados();
+
+      setDesempilhamentoModalVisible(false);
+      alert('Desempilhamento realizado com sucesso! Fase atualizada.');
+
+    } catch (error) {
+      console.error('Erro ao confirmar desempilhamento:', error);
+      alert('Erro ao confirmar desempilhamento: ' + error.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Função para abrir modal de confirmação de colheita
+  const handleColheitaClick = (task) => {
+    // Se a tarefa não tem plantio completo, buscar pelos dados disponíveis
+    if (!task.plantio && task.plantio_id) {
+      const plantioCompleto = plantios.find(p => p.id === task.plantio_id);
+      const tarefaCompleta = {
+        ...task,
+        plantio: plantioCompleto,
+        description: task.description || `Colheita - Lote ${task.plantio_id}`,
+        plantio_id: task.plantio_id
+      };
+      setTarefaColheita(tarefaCompleta);
+    } else {
+      setTarefaColheita(task);
+    }
+    
+    setTotalColhido('');
+    setUnidadeColheita('kg');
+    setObservacoesColheita('');
+    setColheitaModalVisible(true);
+  };
+
+  // Função para confirmar colheita
+  const handleConfirmarColheita = async () => {
+    if (!totalColhido || parseFloat(totalColhido) <= 0) {
+      alert('Por favor, informe uma quantidade válida para o total colhido.');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+
+      const response = await fetch(`https://backend.cultivesmart.com.br/api/tarefas/${tarefaColheita.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'completed',
+          fase: 'concluido',
+          total_colhido: parseFloat(totalColhido),
+          unidade_colheita: unidadeColheita,
+          observacoes_colheita: observacoesColheita.trim() || 'Colheita realizada com sucesso'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar tarefa');
+      }
+
+      // Atualizar o estado local
+      setTarefasDoDia(prevTarefas =>
+        prevTarefas.map(tarefa =>
+          tarefa.id === tarefaColheita.id
+            ? { ...tarefa, status: 'completed' }
+            : tarefa
+        )
+      );
+
+      // Recarregar dados do calendário para atualizar os eventos
+      await recarregarDados();
+
+      setColheitaModalVisible(false);
+      alert(`Colheita registrada com sucesso! Total colhido: ${totalColhido}${unidadeColheita}`);
+
+    } catch (error) {
+      console.error('Erro ao confirmar colheita:', error);
+      alert('Erro ao confirmar colheita: ' + error.message);
     } finally {
       setIsProcessing(false);
     }
@@ -413,6 +715,9 @@ const CronogramaProducao = () => {
             : tarefa
         )
       );
+
+      // Recarregar dados do calendário para atualizar os eventos
+      await recarregarDados();
 
       setPlantioModalVisible(false);
       alert(`Plantio confirmado! Utilizadas ${bandejasUtilizadas} bandejas (${gramasParaEnviar}g)`);
@@ -474,6 +779,43 @@ const CronogramaProducao = () => {
                     height={600}
                     eventClick={handleEventClick}
                     dateClick={handleDateClick}
+                    eventContent={(eventInfo) => {
+                      const { extendedProps } = eventInfo.event;
+                      const isCompleted = extendedProps.tarefasConcluidas === extendedProps.totalTarefas;
+                      const isOverdue = extendedProps.isOverdue;
+                      
+                      return (
+                        <div 
+                          className={`fc-event-content ${isCompleted ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`}
+                          style={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            fontSize: '11px',
+                            fontWeight: 'bold',
+                            padding: '2px 4px',
+                            borderRadius: '3px',
+                            backgroundColor: isOverdue ? '#e74c3c' : 
+                                           isCompleted ? '#27ae60' : 
+                                           getEventColor(extendedProps.tipo),
+                          }}
+                        >
+                          <span style={{ marginRight: '4px', fontSize: '12px' }}>
+                            {extendedProps.tipo === 'plantio' ? '🌱' :
+                             extendedProps.tipo === 'Retirar blackout' ? '🌙' :
+                             extendedProps.tipo === 'colheita' ? '🧺' :
+                             extendedProps.tipo === 'desempilhamento' ? '📋' : '⏰'}
+                          </span>
+                          <span style={{ flexGrow: 1 }}>
+                            {extendedProps.tipo} ({extendedProps.lotes?.length || 0})
+                          </span>
+                          <span style={{ marginLeft: '4px', fontSize: '10px' }}>
+                            {isCompleted ? '✅' : 
+                             isOverdue ? '⚠️' : 
+                             extendedProps.tarefasPendentes > 0 ? '⏳' : '✅'}
+                          </span>
+                        </div>
+                      );
+                    }}
                   />
                 </CCol>
               </CRow>
@@ -503,7 +845,10 @@ const CronogramaProducao = () => {
                 <p style={{color: '#888'}}>Nenhuma tarefa agendada para hoje.</p>
               ) : (
                 <CListGroup>
-                  {tarefasDoDia.map((task) => (
+                  {tarefasDoDia.map((task) => {
+                    // Debug: verificar o tipo da tarefa
+                    console.log('Task type:', task.type, 'Status:', task.status, 'ID:', task.id);
+                    return (
                     <CListGroupItem
                       key={task.id}
                       className={`d-flex justify-content-between align-items-center ${
@@ -511,11 +856,29 @@ const CronogramaProducao = () => {
                       } ${task.status === 'active' ? 'list-group-item-info' : ''}`}
                       style={{fontSize: '1.05em'}}
                     >
-                      <div>
-                        {getStatusIcon(task.status)}{' '}
-                        <span style={{fontWeight: 'bold'}}>{task.description}</span>
-                        <br />
-                        <small className="text-muted">{task.details}</small>
+                      <div className="d-flex align-items-start">
+                        <div className="me-3">
+                          <CIcon 
+                            icon={getTarefaIcon(task.type)} 
+                            className={`text-${getTarefaCor(task.type)}`} 
+                            size="lg"
+                          />
+                        </div>
+                        <div>
+                          <div className="d-flex align-items-center mb-1">
+                            <span style={{fontWeight: 'bold', fontSize: '1.1em'}}>
+                              {task.type?.charAt(0).toUpperCase() + task.type?.slice(1)}
+                            </span>
+                            <span style={{ marginLeft: '8px', fontSize: '14px' }}>
+                              {task.status === 'completed' ? '✅' : 
+                               task.status === 'pending' ? '⏳' : '🔄'}
+                            </span>
+                          </div>
+                          <div style={{fontWeight: '500', color: '#495057'}}>
+                            {task.description}
+                          </div>
+                          <small className="text-muted">{task.details}</small>
+                        </div>
                       </div>
                       <div className="d-flex align-items-center">
                         {getStatusBadge(task.status)}
@@ -529,7 +892,7 @@ const CronogramaProducao = () => {
                             Executar Plantio
                           </CButton>
                         )}
-                        {task.type === 'Retirar blackout' && task.status === 'pending' && (
+                        {(task.type === 'Retirar blackout' || task.type === 'retirar blackout' || task.type?.toLowerCase().includes('blackout')) && task.status === 'pending' && (
                           <CButton 
                             color="dark" 
                             size="sm" 
@@ -539,6 +902,26 @@ const CronogramaProducao = () => {
                             Retirar Blackout
                           </CButton>
                         )}
+                        {task.type === 'desempilhamento' && task.status === 'pending' && (
+                          <CButton 
+                            color="info" 
+                            size="sm" 
+                            className="ms-2"
+                            onClick={() => handleDesempilhamentoClick(task)}
+                          >
+                            Desempilhar
+                          </CButton>
+                        )}
+                        {task.type === 'colheita' && task.status === 'pending' && (
+                          <CButton 
+                            color="warning" 
+                            size="sm" 
+                            className="ms-2"
+                            onClick={() => handleColheitaClick(task)}
+                          >
+                            Realizar Colheita
+                          </CButton>
+                        )}
                         {task.status === 'completed' && (
                           <span className="ms-3 text-success" style={{fontSize: '0.9em'}}>
                             ✓ Concluída
@@ -546,7 +929,8 @@ const CronogramaProducao = () => {
                         )}
                       </div>
                     </CListGroupItem>
-                  ))}
+                    );
+                  })}
                 </CListGroup>
               )}
             </CCardBody>
@@ -565,30 +949,330 @@ const CronogramaProducao = () => {
         </CModalHeader>
         <CModalBody style={{ maxHeight: '70vh', overflowY: 'auto' }}>
           {selectedEvent ? (
-            // Exibir informações do evento clicado
+            // Exibir cronograma de tarefas similar ao modal de simulação
             <div className="event-details">
-              <CRow>
-                <CCol md={6}>
-                  <div className="info-card p-3 bg-light rounded">
-                    <h6 className="text-primary mb-2">📅 Detalhes do Evento</h6>
-                    <p className="mb-1"><strong>Data:</strong> {createLocalDate(selectedEvent.data).toLocaleDateString('pt-BR')}</p>
-                    <p className="mb-1"><strong>Tipo:</strong> {selectedEvent.tipo}</p>
-                    <p className="mb-0"><strong>Quantidade:</strong> {selectedEvent.lotes.length} lotes</p>
-                  </div>
-                </CCol>
-                <CCol md={6}>
-                  <div className="info-card p-3 bg-light rounded">
-                    <h6 className="text-success mb-2">📦 Lotes Envolvidos</h6>
-                    <div className="lotes-summary">
-                      {selectedEvent.lotes.map((lote, index) => (
-                        <CBadge key={index} color="success" className="me-1 mb-1">
-                          Lote #{lote}
-                        </CBadge>
-                      ))}
+
+              {/* Cronograma de Tarefas */}
+              <div className="mb-4">
+                <CCard>
+                  <CCardHeader>
+                    <h6 className="mb-0 d-flex align-items-center">
+                      <CIcon icon={getTarefaIcon(selectedEvent.tipo)} className={`text-${getTarefaCor(selectedEvent.tipo)} me-2`} />
+                      Cronograma de Tarefas - {selectedEvent.tipo.charAt(0).toUpperCase() + selectedEvent.tipo.slice(1)}
+                    </h6>
+                  </CCardHeader>
+                  <CCardBody>
+                    <div className="mb-3">
+                      <small className="text-muted">
+                        Detalhes das tarefas agendadas para esta data ({selectedEvent.lotes?.length || 0} lotes)
+                      </small>
                     </div>
-                  </div>
-                </CCol>
-              </CRow>
+                    
+                    {/* Sistema de Abas por Lote */}
+                    {(() => {
+                      // Agrupar tarefas por lote
+                      const lotesTarefas = {};
+                      selectedEvent.lotes.forEach(loteId => {
+                        const tarefasDoLote = tarefas.filter(tarefa => 
+                          tarefa.plantio_id === loteId
+                        ).sort((a, b) => {
+                          const dataCompare = createLocalDate(a.data_agendada) - createLocalDate(b.data_agendada);
+                          if (dataCompare !== 0) return dataCompare;
+                          const tipoOrder = { 'plantio': 1, 'desempilhamento': 2, 'Retirar blackout': 3, 'colheita': 4 };
+                          return (tipoOrder[a.tipo] || 5) - (tipoOrder[b.tipo] || 5);
+                        });
+                        
+                        if (tarefasDoLote.length > 0) {
+                          const plantio = plantios.find(p => p.id === loteId);
+                          lotesTarefas[loteId] = {
+                            plantio,
+                            tarefas: tarefasDoLote
+                          };
+                        }
+                      });
+
+                      const lotesIds = Object.keys(lotesTarefas);
+                      
+                      if (lotesIds.length === 0) {
+                        return (
+                          <div className="text-center py-4">
+                            <p className="text-muted">Nenhuma tarefa encontrada para os lotes deste evento.</p>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <CTabs activeItemKey={activeTab} onActiveItemChange={setActiveTab}>
+                          <CTabList variant="tabs">
+                            {lotesIds.map((loteId, index) => {
+                              const { plantio, tarefas: tarefasLote } = lotesTarefas[loteId];
+                              const tarefasPendentes = tarefasLote.filter(t => t.status === 'pending').length;
+                              const tarefasConcluidas = tarefasLote.filter(t => t.status === 'completed').length;
+                              const tarefasAtrasadas = tarefasLote.filter(t => 
+                                t.status === 'pending' && createLocalDate(t.data_agendada) < new Date()
+                              ).length;
+                              
+                              return (
+                                <CTab key={index} itemKey={index}>
+                                  <div className="d-flex align-items-center">
+                                    <strong>Lote #{loteId}</strong>
+                                    {plantio?.variedade && (
+                                      <span className="ms-2 text-muted small">- {plantio.variedade}</span>
+                                    )}
+                                    <CBadge 
+                                      color={tarefasAtrasadas > 0 ? 'danger' : tarefasPendentes > 0 ? 'warning' : 'success'} 
+                                      className="ms-2"
+                                    >
+                                      {tarefasConcluidas}/{tarefasLote.length}
+                                    </CBadge>
+                                  </div>
+                                </CTab>
+                              );
+                            })}
+                          </CTabList>
+                          
+                          <CTabContent>
+                            {lotesIds.map((loteId, index) => {
+                              const { plantio, tarefas: tarefasLote } = lotesTarefas[loteId];
+                              
+                              return (
+                                <CTabPanel key={index} itemKey={index} className="py-3">
+                                  {/* Informações do Lote */}
+                                  <div className="mb-4 p-3 bg-light rounded">
+                                    <CRow>
+                                      <CCol md={6}>
+                                        <h6 className="text-primary mb-2">
+                                          <CIcon icon={getTarefaIcon('plantio')} className="me-2" />
+                                          Informações do Lote #{loteId}
+                                        </h6>
+                                        <div className="mb-2">
+                                          <strong className="text-muted small">VARIEDADE:</strong>
+                                          <div>{plantio?.variedade || 'Não especificado'}</div>
+                                        </div>
+                                        <div className="mb-2">
+                                          <strong className="text-muted small">DATA DO PLANTIO:</strong>
+                                          <div>{plantio?.data_plantio ? formatPlantioDate(plantio.data_plantio) : 'Não informado'}</div>
+                                        </div>
+                                      </CCol>
+                                      <CCol md={6}>
+                                        <div className="mb-2">
+                                          <strong className="text-muted small">BANDEJAS:</strong>
+                                          <div>{plantio?.bandejas_necessarias || 'N/A'} bandejas</div>
+                                        </div>
+                                        <div className="mb-2">
+                                          <strong className="text-muted small">STATUS:</strong>
+                                          <div>
+                                            <CBadge color={plantio?.status === 'ativo' ? 'success' : 'secondary'}>
+                                              {plantio?.status?.toUpperCase() || 'N/A'}
+                                            </CBadge>
+                                          </div>
+                                        </div>
+                                      </CCol>
+                                    </CRow>
+                                  </div>
+
+                                  {/* Tabela de Tarefas do Lote */}
+                                  <div className="table-responsive">
+                                    <table className="table table-striped table-hover">
+                                      <thead>
+                                        <tr>
+                                          <th>Tipo de Tarefa</th>
+                                          <th>Data Agendada</th>
+                                          <th>Status</th>
+                                          <th>Ações</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {tarefasLote.map((tarefa, tarefaIndex) => {
+                                          const isOverdue = createLocalDate(tarefa.data_agendada) < new Date() && tarefa.status === 'pending';
+                                          const isOriginalTask = tarefa.tipo === selectedEvent.tipo && tarefa.data_agendada === selectedEvent.data;
+                                          
+                                          return (
+                                            <tr key={tarefaIndex} className={`${tarefa.status === 'completed' ? 'table-success' : isOverdue ? 'table-warning' : ''} ${isOriginalTask ? 'table-info' : ''}`}>
+                                              <td>
+                                                <div className="d-flex align-items-center">
+                                                  <CIcon 
+                                                    icon={getTarefaIcon(tarefa.tipo)} 
+                                                    className={`text-${getTarefaCor(tarefa.tipo)} me-2`} 
+                                                  />
+                                                  <span className="fw-semibold">
+                                                    {tarefa.tipo.charAt(0).toUpperCase() + tarefa.tipo.slice(1)}
+                                                  </span>
+                                                  {isOriginalTask && (
+                                                    <span className="ms-2 badge bg-primary">Evento Original</span>
+                                                  )}
+                                                </div>
+                                              </td>
+                                              <td>
+                                                <div className={`fw-semibold ${isOverdue ? 'text-warning' : createLocalDate(tarefa.data_agendada).toDateString() === new Date().toDateString() ? 'text-primary' : 'text-muted'}`}>
+                                                  {formatPlantioDate(tarefa.data_agendada)}
+                                                  {createLocalDate(tarefa.data_agendada).toDateString() === new Date().toDateString() && (
+                                                    <small className="ms-2 badge bg-primary">Hoje</small>
+                                                  )}
+                                                  {isOverdue && (
+                                                    <small className="ms-2 badge bg-warning">Atrasada</small>
+                                                  )}
+                                                </div>
+                                              </td>
+                                              <td>
+                                                <div className="d-flex align-items-center">
+                                                  <span className="me-2">
+                                                    {tarefa.status === 'completed' ? '✅' : 
+                                                     isOverdue ? '⚠️' : 
+                                                     tarefa.status === 'pending' ? '⏳' : '🔄'}
+                                                  </span>
+                                                  {getStatusBadge(tarefa.status)}
+                                                </div>
+                                              </td>
+                                              <td>
+                                                {tarefa.status === 'pending' && (
+                                                  <>
+                                                    {tarefa.tipo === 'plantio' && (
+                                                      <CButton 
+                                                        color="success" 
+                                                        size="sm"
+                                                        onClick={() => {
+                                                          const tarefaCompleta = {
+                                                            ...tarefa,
+                                                            description: `Plantio do lote ${tarefa.plantio_id}`,
+                                                            details: `Lote ${tarefa.plantio_id} - ${plantio?.variedade || 'Variedade não especificada'}`,
+                                                            plantio: plantio
+                                                          };
+                                                          handlePlantioClick(tarefaCompleta);
+                                                        }}
+                                                      >
+                                                        <CIcon icon={getTarefaIcon('plantio')} className="me-1" size="sm" />
+                                                        Executar
+                                                      </CButton>
+                                                    )}
+                                                    {(tarefa.tipo === 'Retirar blackout' || tarefa.tipo === 'retirar blackout' || tarefa.tipo?.toLowerCase().includes('blackout')) && (
+                                                      <CButton 
+                                                        color="dark" 
+                                                        size="sm"
+                                                        onClick={() => {
+                                                          const tarefaCompleta = {
+                                                            ...tarefa,
+                                                            description: `Retirar blackout - Lote ${tarefa.plantio_id}`,
+                                                            plantio: plantio
+                                                          };
+                                                          handleBlackoutClick(tarefaCompleta);
+                                                        }}
+                                                      >
+                                                        <CIcon icon={getTarefaIcon('Retirar blackout')} className="me-1" size="sm" />
+                                                        Retirar
+                                                      </CButton>
+                                                    )}
+                                                    {tarefa.tipo === 'desempilhamento' && (
+                                                      <CButton 
+                                                        color="info" 
+                                                        size="sm"
+                                                        onClick={() => {
+                                                          const tarefaCompleta = {
+                                                            ...tarefa,
+                                                            description: `Desempilhamento - Lote ${tarefa.plantio_id}`,
+                                                            plantio: plantio
+                                                          };
+                                                          handleDesempilhamentoClick(tarefaCompleta);
+                                                        }}
+                                                      >
+                                                        <CIcon icon={getTarefaIcon('desempilhamento')} className="me-1" size="sm" />
+                                                        Desempilhar
+                                                      </CButton>
+                                                    )}
+                                                    {(tarefa.tipo === 'colheita') && (
+                                                      <CButton 
+                                                        color="warning" 
+                                                        size="sm"
+                                                        onClick={() => {
+                                                          const tarefaCompleta = {
+                                                            ...tarefa,
+                                                            description: `Colheita - Lote ${tarefa.plantio_id}`,
+                                                            plantio: plantio
+                                                          };
+                                                          handleColheitaClick(tarefaCompleta);
+                                                        }}
+                                                      >
+                                                        <CIcon icon={getTarefaIcon('colheita')} className="me-1" size="sm" />
+                                                        Colher
+                                                      </CButton>
+                                                    )}
+                                                  </>
+                                                )}
+                                                {tarefa.status === 'completed' && (
+                                                  <CBadge color="success" className="d-flex align-items-center">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="me-1">
+                                                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                                    </svg>
+                                                    Concluída
+                                                  </CBadge>
+                                                )}
+                                              </td>
+                                            </tr>
+                                          );
+                                        })}
+                                      </tbody>
+                                    </table>
+                                  </div>
+
+                                  {/* Resumo Estatístico do Lote */}
+                                  <div className="mt-3 p-3 bg-light rounded">
+                                    <h6 className="mb-2">Resumo do Lote #{loteId}:</h6>
+                                    {(() => {
+                                      const totalTarefas = tarefasLote.length;
+                                      const tarefasConcluidas = tarefasLote.filter(t => t.status === 'completed').length;
+                                      const tarefasPendentes = tarefasLote.filter(t => t.status === 'pending').length;
+                                      const tarefasAtrasadas = tarefasLote.filter(t => 
+                                        t.status === 'pending' && createLocalDate(t.data_agendada) < new Date()
+                                      ).length;
+
+                                      return (
+                                        <CRow>
+                                          <CCol md={3} className="text-center">
+                                            <div className="stat-item">
+                                              <div className="stat-number text-primary fw-bold fs-5">
+                                                {totalTarefas}
+                                              </div>
+                                              <div className="stat-label text-muted small">TOTAL</div>
+                                            </div>
+                                          </CCol>
+                                          <CCol md={3} className="text-center">
+                                            <div className="stat-item">
+                                              <div className="stat-number text-success fw-bold fs-5">
+                                                {tarefasConcluidas}
+                                              </div>
+                                              <div className="stat-label text-muted small">CONCLUÍDAS</div>
+                                            </div>
+                                          </CCol>
+                                          <CCol md={3} className="text-center">
+                                            <div className="stat-item">
+                                              <div className="stat-number text-warning fw-bold fs-5">
+                                                {tarefasPendentes}
+                                              </div>
+                                              <div className="stat-label text-muted small">PENDENTES</div>
+                                            </div>
+                                          </CCol>
+                                          <CCol md={3} className="text-center">
+                                            <div className="stat-item">
+                                              <div className="stat-number text-danger fw-bold fs-5">
+                                                {tarefasAtrasadas}
+                                              </div>
+                                              <div className="stat-label text-muted small">EM ATRASO</div>
+                                            </div>
+                                          </CCol>
+                                        </CRow>
+                                      );
+                                    })()}
+                                  </div>
+                                </CTabPanel>
+                              );
+                            })}
+                          </CTabContent>
+                        </CTabs>
+                      );
+                    })()}
+                  </CCardBody>
+                </CCard>
+              </div>
             </div>
           ) : (
             // Exibir plantios da data selecionada com detalhes completos
@@ -835,14 +1519,21 @@ const CronogramaProducao = () => {
                               {plantio.tarefasHoje.map((tarefa) => (
                                 <CBadge 
                                   key={tarefa.id} 
-                                  color={tarefa.tipo === 'plantio' ? 'success' : 
-                                         tarefa.tipo === 'colheita' ? 'danger' : 
-                                         tarefa.tipo === 'Retirar blackout' ? 'dark' :
-                                         tarefa.tipo === 'desempilhamento' ? 'warning' : 'info'}
-                                  className="px-3 py-2 fs-6"
+                                  color={getTarefaCor(tarefa.tipo)}
+                                  className="px-3 py-2 fs-6 d-flex align-items-center"
                                 >
+                                  <CIcon 
+                                    icon={getTarefaIcon(tarefa.tipo)} 
+                                    className="me-2" 
+                                    size="sm"
+                                  />
                                   {tarefa.tipo.toUpperCase()}
-                                  {tarefa.descricao && ` - ${tarefa.descricao}`}
+                                  {tarefa.status === 'completed' && (
+                                    <span className="ms-2">✅</span>
+                                  )}
+                                  {tarefa.status === 'pending' && (
+                                    <span className="ms-2">⏳</span>
+                                  )}
                                 </CBadge>
                               ))}
                             </div>
@@ -865,9 +1556,9 @@ const CronogramaProducao = () => {
                                   <div key={tarefa.id} className="timeline-item d-flex align-items-center py-2">
                                     <div className={`timeline-dot me-3 rounded-circle bg-${
                                       tarefa.tipo === 'plantio' ? 'success' : 
-                                      tarefa.tipo === 'colheita' ? 'danger' : 
+                                      tarefa.tipo === 'colheita' ? 'warning' : 
                                       tarefa.tipo === 'Retirar blackout' ? 'dark' :
-                                      tarefa.tipo === 'desempilhamento' ? 'warning' : 'info'
+                                      tarefa.tipo === 'desempilhamento' ? 'info' : 'secondary'
                                     }`} style={{ width: '8px', height: '8px' }}></div>
                                     <div className="flex-grow-1 d-flex justify-content-between align-items-center">
                                       <span className="fw-semibold text-capitalize">{tarefa.tipo}</span>
@@ -1064,7 +1755,7 @@ const CronogramaProducao = () => {
                 </div>
                 <h5 className="text-dark mb-2">Retirar Blackout</h5>
                 <p className="text-muted mb-3">
-                  Confirma que deseja retirar o blackout do plantio?
+                  Confirma que deseja retirar o blackout das bandejas do plantio?
                 </p>
               </div>
 
@@ -1087,10 +1778,20 @@ const CronogramaProducao = () => {
                     <div>{tarefaBlackout.plantio.variedade}</div>
                   </div>
                 )}
+                {tarefaBlackout.plantio?.bandejas_necessarias && (
+                  <div className="mt-2">
+                    <strong className="text-muted small">QUANTIDADE DE BANDEJAS:</strong>
+                    <div>{tarefaBlackout.plantio.bandejas_necessarias} bandejas</div>
+                  </div>
+                )}
               </div>
 
               <div className="alert alert-info mt-3">
-                <strong>Atenção:</strong> Esta ação marcará a tarefa como concluída e indicará que o blackout foi retirado do plantio.
+                <strong>Atenção:</strong> Esta ação marcará a tarefa como concluída e as bandejas passarão da fase de blackout para pronto para colheita.
+              </div>
+
+              <div className="alert alert-warning mt-2">
+                <strong>Importante:</strong> Certifique-se de que o tempo de blackout foi respeitado antes de confirmar esta ação.
               </div>
             </div>
           )}
@@ -1110,6 +1811,272 @@ const CronogramaProducao = () => {
           >
             {isProcessing && <CSpinner size="sm" className="me-2" />}
             {isProcessing ? 'Processando...' : 'Confirmar Retirada'}
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* Modal de Confirmação de Desempilhamento */}
+      <CModal visible={desempilhamentoModalVisible} onClose={() => setDesempilhamentoModalVisible(false)}>
+        <CModalHeader closeButton>
+          <h4 className="modal-title">Confirmar Desempilhamento</h4>
+        </CModalHeader>
+        <CModalBody>
+          {tarefaDesempilhamento && (
+            <div>
+              <div className="text-center mb-4">
+                <div className="mb-3">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" className="mx-auto text-info">
+                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                    <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                    <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                    <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                </div>
+                <h5 className="text-info mb-2">Desempilhar Bandejas</h5>
+                <p className="text-muted mb-3">
+                  Confirma que deseja desempilhar as bandejas do plantio?
+                </p>
+              </div>
+
+              <div className="info-card p-3 bg-light rounded">
+                <h6 className="text-primary mb-2">Detalhes da Tarefa:</h6>
+                <div className="row">
+                  <div className="col-md-6">
+                    <strong className="text-muted small">PLANTIO:</strong>
+                    <div>{tarefaDesempilhamento.description || `Lote #${tarefaDesempilhamento.plantio_id}`}</div>
+                  </div>
+                  <div className="col-md-6">
+                    <strong className="text-muted small">DATA AGENDADA:</strong>
+                    <div>{tarefaDesempilhamento.data_agendada ? 
+                      createLocalDate(tarefaDesempilhamento.data_agendada).toLocaleDateString('pt-BR') : 'Hoje'}</div>
+                  </div>
+                </div>
+                {tarefaDesempilhamento.plantio?.variedade && (
+                  <div className="mt-2">
+                    <strong className="text-muted small">VARIEDADE:</strong>
+                    <div>{tarefaDesempilhamento.plantio.variedade}</div>
+                  </div>
+                )}
+                {tarefaDesempilhamento.plantio?.bandejas_necessarias && (
+                  <div className="mt-2">
+                    <strong className="text-muted small">QUANTIDADE DE BANDEJAS:</strong>
+                    <div>{tarefaDesempilhamento.plantio.bandejas_necessarias} bandejas</div>
+                  </div>
+                )}
+              </div>
+
+              <div className="alert alert-info mt-3">
+                <strong>Atenção:</strong> Esta ação marcará a tarefa como concluída e as bandejas passarão da fase de desempilhamento para a fase de blackout.
+              </div>
+
+              <div className="alert alert-warning mt-2">
+                <strong>Importante:</strong> Certifique-se de que o tempo de empilhamento foi respeitado antes de confirmar esta ação.
+              </div>
+            </div>
+          )}
+        </CModalBody>
+        <CModalFooter>
+          <CButton 
+            color="secondary" 
+            onClick={() => setDesempilhamentoModalVisible(false)}
+            disabled={isProcessing}
+          >
+            Cancelar
+          </CButton>
+          <CButton 
+            color="info" 
+            onClick={handleConfirmarDesempilhamento}
+            disabled={isProcessing}
+          >
+            {isProcessing && <CSpinner size="sm" className="me-2" />}
+            {isProcessing ? 'Processando...' : 'Confirmar Desempilhamento'}
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* Modal de Confirmação de Colheita */}
+      <CModal visible={colheitaModalVisible} onClose={() => setColheitaModalVisible(false)} size="lg">
+        <CModalHeader closeButton>
+          <h4 className="modal-title">Registrar Colheita</h4>
+        </CModalHeader>
+        <CModalBody>
+          {tarefaColheita && (
+            <div>
+              <div className="text-center mb-4">
+                <div className="mb-3">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" className="mx-auto text-warning">
+                    <path d="M21 8l-3-3-6 6-6-6-3 3 6 6-6 6 3 3 6-6 6 6 3-3-6-6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                  </svg>
+                </div>
+                <h5 className="text-warning mb-2">Realizar Colheita</h5>
+                <p className="text-muted mb-3">
+                  Registre o total colhido deste plantio
+                </p>
+              </div>
+
+              <div className="info-card p-3 bg-light rounded mb-4">
+                <h6 className="text-primary mb-2">Detalhes da Colheita:</h6>
+                <div className="row">
+                  <div className="col-md-6">
+                    <strong className="text-muted small">LOTE:</strong>
+                    <div>
+                      Lote #{tarefaColheita.plantio_id || tarefaColheita.plantio_id || tarefaColheita.plantioId}
+                      {tarefaColheita.plantio?.nome && (
+                        <div className="small text-muted">{tarefaColheita.plantio.nome}</div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <strong className="text-muted small">DATA AGENDADA:</strong>
+                    <div>{tarefaColheita.data_agendada ? 
+                      createLocalDate(tarefaColheita.data_agendada).toLocaleDateString('pt-BR') : 'Hoje'}</div>
+                  </div>
+                </div>
+                
+                <div className="row mt-2">
+                  {tarefaColheita.plantio?.variedade && (
+                    <div className="col-md-4">
+                      <strong className="text-muted small">VARIEDADE:</strong>
+                      <div>{tarefaColheita.plantio.variedade}</div>
+                    </div>
+                  )}
+                  {(tarefaColheita.plantio?.bandejas_necessarias || tarefaColheita.plantio?.quantidade) && (
+                    <div className="col-md-4">
+                      <strong className="text-muted small">QUANTIDADE DE BANDEJAS:</strong>
+                      <div>{tarefaColheita.plantio?.bandejas_necessarias || tarefaColheita.plantio?.quantidade || 'N/A'} bandejas</div>
+                    </div>
+                  )}
+                  {tarefaColheita.plantio?.data_plantio && (
+                    <div className="col-md-4">
+                      <strong className="text-muted small">DATA DO PLANTIO:</strong>
+                      <div>{formatPlantioDate(tarefaColheita.plantio.data_plantio)}</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Informações adicionais do insumo, se disponível */}
+                {tarefaColheita.plantio?.insumo && (
+                  <div className="row mt-3 pt-3 border-top">
+                    <div className="col-md-12">
+                      <strong className="text-muted small">INSUMO:</strong>
+                      <div>
+                        {tarefaColheita.plantio.insumo.nome}
+                        {tarefaColheita.plantio.insumo.marca && (
+                          <span className="text-muted ms-2">({tarefaColheita.plantio.insumo.marca})</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Formulário de colheita */}
+              <div className="row">
+                <div className="col-md-8">
+                  <CFormLabel htmlFor="totalColhido">Total Colhido *</CFormLabel>
+                  <CFormInput
+                    type="number"
+                    id="totalColhido"
+                    value={totalColhido}
+                    onChange={(e) => setTotalColhido(e.target.value)}
+                    placeholder="Digite a quantidade total colhida"
+                    min="0"
+                    step="0.1"
+                  />
+                  <small className="text-muted">
+                    Informe a quantidade total colhida deste plantio
+                  </small>
+                </div>
+                <div className="col-md-4">
+                  <CFormLabel htmlFor="unidadeColheita">Unidade</CFormLabel>
+                  <select 
+                    className="form-select" 
+                    id="unidadeColheita"
+                    value={unidadeColheita} 
+                    onChange={(e) => setUnidadeColheita(e.target.value)}
+                  >
+                    <option value="kg">Kg (Quilogramas)</option>
+                    <option value="g">g (Gramas)</option>
+                    <option value="t">t (Toneladas)</option>
+                    <option value="un">un (Unidades)</option>
+                    <option value="cx">cx (Caixas)</option>
+                    <option value="sc">sc (Sacas)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="row mt-3">
+                <div className="col-md-12">
+                  <CFormLabel htmlFor="observacoesColheita">Observações</CFormLabel>
+                  <textarea 
+                    className="form-control" 
+                    id="observacoesColheita"
+                    value={observacoesColheita}
+                    onChange={(e) => setObservacoesColheita(e.target.value)}
+                    placeholder="Digite observações sobre a colheita (opcional)"
+                    rows="3"
+                  />
+                  <small className="text-muted">
+                    Informações adicionais sobre a qualidade, condições da colheita, etc.
+                  </small>
+                </div>
+              </div>
+
+              {/* Resumo dinâmico */}
+              {totalColhido && (
+                <div className="mt-4 p-3 bg-success bg-opacity-10 rounded">
+                  <h6 className="text-success mb-3">Resumo da Colheita:</h6>
+                  <div className="row">
+                    <div className="col-md-4">
+                      <strong>Total Colhido:</strong>
+                      <div className="text-success fs-5 fw-bold">
+                        {totalColhido} {unidadeColheita}
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <strong>Bandejas Utilizadas:</strong>
+                      <div className="text-primary">
+                        {tarefaColheita.plantio?.bandejas_necessarias || 'N/A'} bandejas
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <strong>Rendimento por Bandeja:</strong>
+                      <div className="text-info">
+                        {tarefaColheita.plantio?.bandejas_necessarias ? 
+                          (parseFloat(totalColhido) / tarefaColheita.plantio.bandejas_necessarias).toFixed(2) 
+                          : 'N/A'} {unidadeColheita}/bandeja
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="alert alert-info mt-3">
+                <strong>Atenção:</strong> Esta ação marcará a tarefa como concluída e finalizará o ciclo do plantio.
+              </div>
+
+              <div className="alert alert-success mt-2">
+                <strong>Importante:</strong> Após confirmar, o plantio será marcado como concluído e as informações de colheita serão registradas no sistema.
+              </div>
+            </div>
+          )}
+        </CModalBody>
+        <CModalFooter>
+          <CButton 
+            color="secondary" 
+            onClick={() => setColheitaModalVisible(false)}
+            disabled={isProcessing}
+          >
+            Cancelar
+          </CButton>
+          <CButton 
+            color="warning" 
+            onClick={handleConfirmarColheita}
+            disabled={isProcessing || !totalColhido}
+          >
+            {isProcessing && <CSpinner size="sm" className="me-2" />}
+            {isProcessing ? 'Processando...' : 'Confirmar Colheita'}
           </CButton>
         </CModalFooter>
       </CModal>

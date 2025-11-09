@@ -149,6 +149,83 @@
   opacity: 0.5;
 }
 
+/* Estilos para eventos do FullCalendar */
+.fc-event-content {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.fc-event-content:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Status específicos dos eventos */
+.fc-event-content.completed {
+  background-color: #27ae60 !important;
+  border-color: #229954 !important;
+}
+
+.fc-event-content.overdue {
+  background-color: #e74c3c !important;
+  border-color: #c0392b !important;
+  animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+  0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+}
+
+/* Ícones dos tipos de tarefa */
+.fc-event-content .task-icon {
+  font-size: 12px;
+  margin-right: 4px;
+  display: inline-block;
+}
+
+.fc-event-content .status-icon {
+  font-size: 10px;
+  margin-left: 4px;
+  display: inline-block;
+}
+
+/* Melhoria visual para eventos pequenos */
+.fc-daygrid-event {
+  margin: 1px 0 !important;
+  border-radius: 3px !important;
+}
+
+.fc-daygrid-event-harness {
+  margin: 1px 0 !important;
+}
+
+/* Cores específicas por tipo de tarefa */
+.fc-event.plantio {
+  background-color: #2ecc40 !important;
+  border-color: #27ae60 !important;
+}
+
+.fc-event.blackout {
+  background-color: #222f3e !important;
+  border-color: #1a252f !important;
+}
+
+.fc-event.colheita {
+  background-color: #f39c12 !important;
+  border-color: #e67e22 !important;
+}
+
+.fc-event.desempilhamento {
+  background-color: #3498db !important;
+  border-color: #2980b9 !important;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   .info-item {
@@ -162,5 +239,14 @@
   
   .timeline {
     padding-left: 0.75rem;
+  }
+  
+  .fc-event-content {
+    font-size: 10px !important;
+  }
+  
+  .fc-event-content .task-icon,
+  .fc-event-content .status-icon {
+    font-size: 9px;
   }
 }
