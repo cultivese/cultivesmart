@@ -629,7 +629,8 @@ const CronogramaProducao = () => {
     try {
       setIsProcessing(true);
 
-      const response = await fetch(`https://backend.cultivesmart.com.br/api/tarefas/${tarefaColheita.id}`, {
+      // 1. Atualizar a tarefa de colheita
+      const tarefaResponse = await fetch(`https://backend.cultivesmart.com.br/api/tarefas/${tarefaColheita.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -643,8 +644,32 @@ const CronogramaProducao = () => {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao atualizar tarefa');
+      if (!tarefaResponse.ok) {
+        throw new Error('Erro ao atualizar tarefa de colheita');
+      }
+
+      // 2. Atualizar o plantio com o total colhido
+      const plantioId = tarefaColheita.plantio_id || tarefaColheita.plantio?.id;
+      if (plantioId) {
+        const plantioResponse = await fetch(`https://backend.cultivesmart.com.br/api/plantios/${plantioId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            total_colhido: parseFloat(totalColhido),
+            unidade_colheita: unidadeColheita,
+            data_colheita: new Date().toISOString().split('T')[0], // Data atual no formato YYYY-MM-DD
+            observacoes_colheita: observacoesColheita.trim() || 'Colheita realizada com sucesso',
+            status: 'concluido' // Marcar plantio como concluído
+          }),
+        });
+
+        if (!plantioResponse.ok) {
+          console.warn('Erro ao atualizar plantio:', await plantioResponse.text());
+          // Não vamos interromper o processo se falhar a atualização do plantio
+          // pois a tarefa já foi atualizada com sucesso
+        }
       }
 
       // Atualizar o estado local
@@ -690,7 +715,7 @@ const CronogramaProducao = () => {
       // Usar o valor editável das gramas em vez do calculado
       const gramasParaEnviar = parseFloat(gramasUtilizadas) || 0;
       
-      // Atualizar o status da tarefa para concluída
+      // 1. Atualizar o status da tarefa para concluída
       const response = await fetch(`https://backend.cultivesmart.com.br/api/tarefas/${tarefaSelecionada.id}`, {
         method: 'PUT',
         headers: {
@@ -706,6 +731,38 @@ const CronogramaProducao = () => {
       if (!response.ok) {
         throw new Error('Erro ao atualizar tarefa');
       }
+
+      if (gramasParaEnviar > 0 && tarefaSelecionada.plantio?.insumo?.id) {
+      try {
+
+        const estoqueResponse = await fetch(`https://backend.cultivesmart.com.br/api/estoque/${tarefaSelecionada.plantio?.insumo?.id}/withdraw`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({
+            quantidade_retirada: gramasParaEnviar,
+            motivo: `Plantio executado - Lote #${tarefaSelecionada.plantio_id || tarefaSelecionada.plantioId}`,
+          }),
+        });
+
+        if (!estoqueResponse.ok) {
+          const errorData = await estoqueResponse.text();
+          console.warn('Erro ao fazer retirada do estoque:', errorData);
+          // Não vamos interromper o processo se falhar a retirada do estoque
+          // pois a tarefa já foi atualizada com sucesso
+          alert(`Plantio confirmado! Porém houve um problema na retirada do estoque: ${errorData}`);
+        } else {
+          console.log('Retirada do estoque realizada com sucesso');
+        }
+      } catch (estoqueError) {
+        console.warn('Erro ao fazer retirada do estoque:', estoqueError);
+        // Não interromper o processo principal
+      }
+    } else {
+      console.warn('Não foi possível fazer retirada do estoque: gramas utilizadas ou ID do insumo não disponível');
+    }
 
       // Atualizar o estado local
       setTarefasDoDia(prevTarefas =>

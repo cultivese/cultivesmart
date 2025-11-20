@@ -236,7 +236,7 @@ const handleOpenAdditionalFieldsModal = (insumo, mode) => {
 
 const handleRetiradaEstoqueModal = (insumo) =>
 {
-    setSelectedInsumoId(insumo.id);
+    setSelectedInsumoId(insumo.insumo_id);
     setShowRetiradaEstoqueModal(true);
 }
 

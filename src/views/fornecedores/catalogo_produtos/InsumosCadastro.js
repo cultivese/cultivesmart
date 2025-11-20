@@ -381,7 +381,7 @@ const handleBack = (e) => {
                               <CCard color={ selectedCategory === categoria.id ? 'success' : 'light'}
                                       textColor={ selectedCategory === categoria.id ? 'white' : ''}
                                       onClick={() => handleCategorySelect(categoria.id)}
-                                      style={{cursor: 'pointer', height: '400px'}}>
+                                      style={{cursor: 'pointer', height: '500px'}}>
                                 <CCardImage orientation="top" src={`data:image/png;base64,${categoria.logoPath}`} />
                                 <CCardBody>
                                   <CCardTitle>{categoria.descricao}</CCardTitle>
