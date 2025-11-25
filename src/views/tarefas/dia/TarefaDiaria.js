@@ -1,6 +1,56 @@
 import '@coreui/coreui-pro/dist/css/coreui.min.css';
 import '@coreui/coreui/dist/css/coreui.min.css';
 import React, { useState, useEffect } from 'react';
+
+// Estilos personalizados para mobile
+const mobileStyles = `
+  @media (max-width: 767.98px) {
+    .task-card-mobile {
+      border-radius: 12px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .task-card-mobile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
+    }
+    
+    .modal-fullscreen-sm-down .modal-dialog {
+      margin: 0;
+      height: 100vh;
+      max-height: none;
+    }
+    
+    .modal-fullscreen-sm-down .modal-content {
+      border: none;
+      border-radius: 0;
+      height: 100%;
+    }
+    
+    .btn-lg {
+      padding: 12px 24px;
+      font-size: 1.1rem;
+    }
+  }
+  
+  @media (max-width: 575.98px) {
+    .container {
+      padding: 0.75rem;
+    }
+    
+    .card {
+      margin-bottom: 1rem;
+    }
+  }
+`;
+
+// Injetar estilos no head
+if (typeof document !== 'undefined') {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = mobileStyles;
+  document.head.appendChild(styleElement);
+}
 import {
   CContainer,
   CRow,
@@ -237,136 +287,286 @@ const TarefaDiaria = () => {
         <CCol xs={12}>
           <CCard className="mb-4">
             <CCardHeader>
-              <span style={{fontWeight: 'bold', fontSize: '1.2em'}}>Tarefas do Dia - {new Date().toLocaleDateString('pt-BR', {weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'})}</span>
+              <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+                <div>
+                  <h5 className="mb-1 mb-md-0">Tarefas do Dia</h5>
+                  <small className="text-muted d-block d-md-none">
+                    {new Date().toLocaleDateString('pt-BR', {day: '2-digit', month: 'short'})}
+                  </small>
+                  <small className="text-muted d-none d-md-block">
+                    {new Date().toLocaleDateString('pt-BR', {weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'})}
+                  </small>
+                </div>
+                <CBadge color="primary" className="mt-2 mt-md-0">
+                  {tasks.length} {tasks.length === 1 ? 'tarefa' : 'tarefas'}
+                </CBadge>
+              </div>
             </CCardHeader>
             <CCardBody>
               {loading ? (
-                <p style={{color: '#888'}}>Carregando tarefas...</p>
+                <div className="text-center py-5">
+                  <CSpinner color="primary" className="mb-3" />
+                  <h6 className="text-muted">Carregando suas tarefas...</h6>
+                  <small className="text-muted">Buscando tarefas agendadas para hoje</small>
+                </div>
               ) : tasks.length === 0 ? (
-                <div>
-                  <p style={{color: '#888'}}>Nenhuma tarefa agendada para hoje.</p>
-                  <button 
-                    onClick={() => setDebug(!debug)}
-                    style={{fontSize: '12px', color: '#007bff', background: 'none', border: 'none', cursor: 'pointer'}}
-                  >
-                    {debug ? 'Ocultar debug' : 'Mostrar debug'}
-                  </button>
-                  {debug && (
-                    <div style={{marginTop: '10px', fontSize: '12px', color: '#666', backgroundColor: '#f8f9fa', padding: '10px', borderRadius: '4px'}}>
-                      <p><strong>Data atual:</strong> {new Date().toISOString().split('T')[0]}</p>
-                      <p><strong>APIs chamadas:</strong></p>
-                      <ul>
-                        <li>GET /api/tarefas</li>
-                        <li>GET /api/plantios</li>
-                      </ul>
-                      <p>Verifique o console (F12) para mais detalhes.</p>
-                    </div>
-                  )}
+                <div className="text-center py-5">
+                  {/* Ícone e mensagem para estado vazio */}
+                  <div className="mb-4">
+                    <div className="display-1 mb-3">📅</div>
+                    <h5 className="text-muted mb-2">Nenhuma tarefa para hoje</h5>
+                    <p className="text-muted mb-0">
+                      Que ótimo! Você não tem tarefas pendentes para hoje.
+                    </p>
+                  </div>
+                  
+                  {/* Debug toggle mais elegante */}
+                  <div className="mt-4">
+                    <CButton
+                      color="link"
+                      size="sm"
+                      onClick={() => setDebug(!debug)}
+                      className="text-decoration-none"
+                    >
+                      🔍 {debug ? 'Ocultar informações técnicas' : 'Mostrar informações técnicas'}
+                    </CButton>
+                    
+                    {debug && (
+                      <div className="mt-3 p-3 bg-light rounded text-start">
+                        <h6 className="mb-2">🛠️ Informações Técnicas</h6>
+                        <div className="small text-muted">
+                          <p className="mb-1"><strong>Data atual:</strong> {new Date().toISOString().split('T')[0]}</p>
+                          <p className="mb-2"><strong>APIs consultadas:</strong></p>
+                          <ul className="mb-2 ps-3">
+                            <li>GET /api/tarefas</li>
+                            <li>GET /api/plantios</li>
+                          </ul>
+                          <p className="mb-0">
+                            💡 <em>Abra o console do navegador (F12) para ver logs detalhados.</em>
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
-                <CListGroup>
-                  {tasks.map((task) => (
-                    <CListGroupItem
-                      key={task.id}
-                      className={`d-flex justify-content-between align-items-center ${
-                        task.status === 'completed' ? 'list-group-item-success' : ''
-                      } ${task.status === 'active' ? 'list-group-item-info' : ''}`}
-                      style={{fontSize: '1.05em'}}
-                    >
-                      <div>
-                        {getStatusIcon(task.status)}{' '}
-                        <span style={{fontWeight: 'bold'}}>{task.description}</span>
-                        <br />
-                        <small className="text-muted">{task.details}</small>
-                      </div>
-                      <div className="d-flex align-items-center">
-                        {getStatusBadge(task.status)}
-                        {task.status === 'pending' && (
-                          <CButton
-                            color="primary"
-                            size="sm"
-                            className="ms-3"
-                            onClick={() => handleIniciarTarefa(task)}
-                          >
-                            {task.type === 'plantio' ? 'Realizar Plantio' : 'Concluir'}
-                          </CButton>
-                        )}
-                        {task.status === 'completed' && (
-                          <span className="ms-3 text-success" style={{fontSize: '0.9em'}}>
-                            ✓ Concluída
-                          </span>
-                        )}
-                      </div>
-                    </CListGroupItem>
-                  ))}
-                </CListGroup>
+                <>
+                {/* Layout para Desktop */}
+                <div className="d-none d-lg-block">
+                  <CListGroup>
+                    {tasks.map((task) => (
+                      <CListGroupItem
+                        key={task.id}
+                        className={`d-flex justify-content-between align-items-center ${
+                          task.status === 'completed' ? 'list-group-item-success' : ''
+                        } ${task.status === 'active' ? 'list-group-item-info' : ''}`}
+                        style={{fontSize: '1.05em'}}
+                      >
+                        <div>
+                          {getStatusIcon(task.status)}{' '}
+                          <span style={{fontWeight: 'bold'}}>{task.description}</span>
+                          <br />
+                          <small className="text-muted">{task.details}</small>
+                        </div>
+                        <div className="d-flex align-items-center">
+                          {getStatusBadge(task.status)}
+                          {task.status === 'pending' && (
+                            <CButton
+                              color="primary"
+                              size="sm"
+                              className="ms-3"
+                              onClick={() => handleIniciarTarefa(task)}
+                            >
+                              {task.type === 'plantio' ? 'Realizar Plantio' : 'Concluir'}
+                            </CButton>
+                          )}
+                          {task.status === 'completed' && (
+                            <span className="ms-3 text-success" style={{fontSize: '0.9em'}}>
+                              ✓ Concluída
+                            </span>
+                          )}
+                        </div>
+                      </CListGroupItem>
+                    ))}
+                  </CListGroup>
+                </div>
+
+                {/* Layout para Mobile e Tablet */}
+                <div className="d-lg-none">
+                  <CRow className="g-3">
+                    {tasks.map((task) => (
+                      <CCol xs={12} key={task.id}>
+                        <CCard 
+                          className={`h-100 task-card-mobile ${
+                            task.status === 'completed' ? 'border-success' : 
+                            task.status === 'active' ? 'border-info' : 'border-secondary'
+                          }`}
+                          style={{ borderWidth: '2px' }}
+                        >
+                          <CCardBody className="p-3">
+                            {/* Header do Card Mobile */}
+                            <div className="d-flex justify-content-between align-items-start mb-2">
+                              <div className="d-flex align-items-center">
+                                {getStatusIcon(task.status)}
+                                <span className="ms-2 text-muted small">
+                                  {task.type.toUpperCase()}
+                                </span>
+                              </div>
+                              {getStatusBadge(task.status)}
+                            </div>
+                            
+                            {/* Título da Tarefa */}
+                            <h6 className="fw-bold mb-2 text-break">
+                              {task.description}
+                            </h6>
+                            
+                            {/* Detalhes em formato de chips/tags */}
+                            <div className="mb-3">
+                              {task.details.split(' | ').map((detail, index) => (
+                                <small key={index} className="d-block text-muted mb-1">
+                                  {detail}
+                                </small>
+                              ))}
+                            </div>
+                            
+                            {/* Ações */}
+                            <div className="d-grid gap-2">
+                              {task.status === 'pending' && (
+                                <CButton
+                                  color="primary"
+                                  size="sm"
+                                  onClick={() => handleIniciarTarefa(task)}
+                                  className="fw-semibold"
+                                >
+                                  <CIcon icon={cilCheckCircle} className="me-2" />
+                                  {task.type === 'plantio' ? 'Realizar Plantio' : 'Concluir Tarefa'}
+                                </CButton>
+                              )}
+                              {task.status === 'active' && (
+                                <CButton
+                                  color="info"
+                                  size="sm"
+                                  variant="outline"
+                                  disabled
+                                >
+                                  Em Andamento...
+                                </CButton>
+                              )}
+                              {task.status === 'completed' && (
+                                <div className="text-center py-2">
+                                  <CIcon icon={cilCheckCircle} className="text-success me-2" size="lg" />
+                                  <span className="text-success fw-semibold">Tarefa Concluída</span>
+                                </div>
+                              )}
+                            </div>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                    ))}
+                  </CRow>
+                </div>
+                </>
               )}
             </CCardBody>
           </CCard>
         </CCol>
       </CRow>
 
-      {/* Modal para plantio */}
-      <CModal visible={modalVisible} onClose={() => setModalVisible(false)} size="lg">
-        <CModalHeader>
-          <CModalTitle>Registrar Plantio</CModalTitle>
+      {/* Modal para plantio - Responsivo */}
+      <CModal 
+        visible={modalVisible} 
+        onClose={() => setModalVisible(false)} 
+        size="lg"
+        className="modal-fullscreen-sm-down"
+      >
+        <CModalHeader className="border-bottom">
+          <CModalTitle className="d-flex align-items-center">
+            <CIcon icon={cilCheckCircle} className="me-2 text-success" />
+            Registrar Plantio
+          </CModalTitle>
         </CModalHeader>
-        <CModalBody>
+        <CModalBody className="p-4">
           {tarefaSelecionada && (
             <div>
-              <h6 className="mb-3">{tarefaSelecionada.description}</h6>
+              {/* Informações da Tarefa */}
+              <div className="bg-light rounded p-3 mb-4">
+                <h6 className="text-primary mb-2">📋 Tarefa Selecionada</h6>
+                <p className="mb-0 fw-semibold">{tarefaSelecionada.description}</p>
+                <small className="text-muted">
+                  {tarefaSelecionada.details}
+                </small>
+              </div>
+              
               <CForm>
-                <CRow className="mb-3">
-                  <CCol md={6}>
-                    <CFormLabel htmlFor="gramasSementes">Gramas de sementes utilizadas *</CFormLabel>
-                    <CInputGroup>
-                      <CFormInput
-                        type="number"
-                        id="gramasSementes"
-                        value={gramasSementes}
-                        onChange={(e) => setGramasSementes(e.target.value)}
-                        placeholder="Ex: 250"
-                        min="0"
-                        step="0.01"
-                        required
-                      />
-                      <CInputGroupText>gramas</CInputGroupText>
-                    </CInputGroup>
-                  </CCol>
-                </CRow>
-                <CRow className="mb-3">
-                  <CCol md={12}>
-                    <CFormLabel htmlFor="observacoes">Observações (opcional)</CFormLabel>
+                {/* Campo de Gramas - Full width em mobile */}
+                <div className="mb-4">
+                  <CFormLabel htmlFor="gramasSementes" className="fw-semibold">
+                    🌱 Gramas de sementes utilizadas *
+                  </CFormLabel>
+                  <CInputGroup size="lg">
                     <CFormInput
-                      as="textarea"
-                      id="observacoes"
-                      value={observacoes}
-                      onChange={(e) => setObservacoes(e.target.value)}
-                      placeholder="Adicione observações sobre o plantio..."
-                      rows="3"
+                      type="number"
+                      id="gramasSementes"
+                      value={gramasSementes}
+                      onChange={(e) => setGramasSementes(e.target.value)}
+                      placeholder="Ex: 250"
+                      min="0"
+                      step="0.01"
+                      required
+                      className="text-center fw-bold"
+                      style={{ fontSize: '1.1em' }}
                     />
-                  </CCol>
-                </CRow>
+                    <CInputGroupText className="fw-semibold">gramas</CInputGroupText>
+                  </CInputGroup>
+                  <small className="text-muted mt-1 d-block">
+                    💡 Informe a quantidade exata utilizada no plantio
+                  </small>
+                </div>
+                
+                {/* Campo de Observações */}
+                <div className="mb-3">
+                  <CFormLabel htmlFor="observacoes" className="fw-semibold">
+                    📝 Observações (opcional)
+                  </CFormLabel>
+                  <CFormInput
+                    as="textarea"
+                    id="observacoes"
+                    value={observacoes}
+                    onChange={(e) => setObservacoes(e.target.value)}
+                    placeholder="Adicione observações sobre o plantio: condições climáticas, qualidade das sementes, etc..."
+                    rows="4"
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
               </CForm>
             </div>
           )}
         </CModalBody>
-        <CModalFooter>
-          <CButton 
-            color="secondary" 
-            onClick={() => setModalVisible(false)}
-            disabled={processando}
-          >
-            Cancelar
-          </CButton>
-          <CButton 
-            color="success" 
-            onClick={handleConcluirPlantio}
-            disabled={processando}
-          >
-            {processando && <CSpinner as="span" size="sm" className="me-2" />}
-            {processando ? 'Concluindo...' : 'Concluir Plantio'}
-          </CButton>
+        
+        {/* Footer com botões responsivos */}
+        <CModalFooter className="border-top p-3">
+          <div className="d-flex flex-column flex-md-row gap-2 w-100">
+            <CButton 
+              color="secondary" 
+              onClick={() => setModalVisible(false)}
+              disabled={processando}
+              className="flex-fill order-2 order-md-1"
+              variant="outline"
+            >
+              Cancelar
+            </CButton>
+            <CButton 
+              color="success" 
+              onClick={handleConcluirPlantio}
+              disabled={processando}
+              className="flex-fill order-1 order-md-2"
+              size="lg"
+            >
+              {processando && <CSpinner as="span" size="sm" className="me-2" />}
+              <CIcon icon={cilCheckCircle} className="me-2" />
+              {processando ? 'Concluindo Plantio...' : 'Concluir Plantio'}
+            </CButton>
+          </div>
         </CModalFooter>
       </CModal>
     </CContainer>

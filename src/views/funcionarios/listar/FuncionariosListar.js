@@ -46,6 +46,9 @@ import {
   cilOptions
 } from '@coreui/icons'
 import '../Funcionarios.css'
+import { auth, db } from '../../../../firebase'
+import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore'
+import { signInWithEmailAndPassword, deleteUser } from 'firebase/auth'
 
 const FuncionariosListar = () => {
   const [funcionarios, setFuncionarios] = useState([])
@@ -149,6 +152,14 @@ const FuncionariosListar = () => {
 
   const handleDelete = async (id) => {
     try {
+      // Primeiro, busca os dados do funcionário para obter o email
+      const funcionario = funcionarios.find(f => f.id === id)
+      if (!funcionario) {
+        addToast('Erro', 'Funcionário não encontrado', 'danger')
+        return
+      }
+
+      // 1. Deletar da API backend
       const response = await fetch(`https://backend.cultivesmart.com.br/api/funcionarios/${id}`, {
         method: 'DELETE',
         headers: {
@@ -157,15 +168,99 @@ const FuncionariosListar = () => {
         }
       })
 
-      if (response.ok) {
-        const responseData = await response.json()
-        // Remove da lista local
-        setFuncionarios(prev => prev.filter(func => func.id !== id))
-        addToast('Sucesso', responseData.message || 'Colaborador inativado com sucesso!', 'success')
-      } else {
+      if (!response.ok) {
         const errorData = await response.json()
-        addToast('Erro', errorData.message || 'Erro ao inativar colaborador', 'danger')
+        addToast('Erro', errorData.message || 'Erro ao deletar colaborador da API', 'danger')
+        return
       }
+
+      // 2. Primeiro buscar o usuário no Firebase Authentication pelo email
+      try {
+        // Buscar usuário no Firebase Authentication usando API REST
+        const getUserResponse = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDe9CPKih-TRNGkdgP5rhfQ56RsfSnswYc`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: [funcionario.email]
+          })
+        })
+        
+        if (getUserResponse.ok) {
+          const authData = await getUserResponse.json()
+          
+          if (authData.users && authData.users.length > 0) {
+            const userUID = authData.users[0].localId
+            console.log(`Usuário encontrado no Authentication. UID: ${userUID}, Email: ${funcionario.email}`)
+            
+            // 3. Buscar e deletar o documento do Firestore usando o UID
+            try {
+              const usuariosRef = collection(db, 'usuarios')
+              const q = query(usuariosRef, where('uid', '==', userUID))
+              const querySnapshot = await getDocs(q)
+              
+              if (!querySnapshot.empty) {
+                // Deletar documento do Firestore
+                const userDoc = querySnapshot.docs[0]
+                await deleteDoc(doc(db, 'usuarios', userDoc.id))
+                console.log(`Usuário removido do Firestore. UID: ${userUID}`)
+              } else {
+                // Tenta buscar por email se não encontrou por UID
+                const qEmail = query(usuariosRef, where('email', '==', funcionario.email))
+                const querySnapshotEmail = await getDocs(qEmail)
+                
+                if (!querySnapshotEmail.empty) {
+                  const userDocEmail = querySnapshotEmail.docs[0]
+                  await deleteDoc(doc(db, 'usuarios', userDocEmail.id))
+                  console.log(`Usuário removido do Firestore (busca por email). Email: ${funcionario.email}`)
+                } else {
+                  console.log('Usuário não encontrado no Firestore')
+                }
+              }
+            } catch (firestoreError) {
+              console.error('Erro ao remover do Firestore:', firestoreError)
+            }
+            
+            // 4. Por último, deletar do Firebase Authentication
+            try {
+              const deleteAuthResponse = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:delete?key=AIzaSyDe9CPKih-TRNGkdgP5rhfQ56RsfSnswYc`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  localId: userUID
+                })
+              })
+              
+              if (deleteAuthResponse.ok) {
+                console.log(`Usuário removido do Firebase Authentication. UID: ${userUID}`)
+              } else {
+                console.log('Erro ao remover do Authentication')
+              }
+            } catch (authError) {
+              console.error('Erro ao remover do Firebase Authentication:', authError)
+            }
+            
+            console.log(`Usuário completamente removido. UID: ${userUID}, Email: ${funcionario.email}`)
+            
+          } else {
+            console.log('Usuário não encontrado no Firebase Authentication')
+          }
+        } else {
+          console.log('Erro ao buscar usuário no Firebase Authentication')
+        }
+      } catch (firebaseError) {
+        console.error('Erro ao remover usuário do Firebase:', firebaseError)
+        addToast('Aviso', 'Colaborador removido da API, mas houve erro ao remover do Firebase', 'warning')
+      }
+
+      // Remove da lista local
+      setFuncionarios(prev => prev.filter(func => func.id !== id))
+      const responseData = await response.json()
+      addToast('Sucesso', 'Colaborador removido completamente da API, Firebase Authentication e Firestore!', 'success')
+      
     } catch (error) {
       console.error('Erro ao deletar colaborador:', error)
       addToast('Erro', 'Erro de conexão com o servidor', 'danger')
