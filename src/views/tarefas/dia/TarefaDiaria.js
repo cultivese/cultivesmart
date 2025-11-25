@@ -75,7 +75,15 @@ import {
   CSpinner,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCheckCircle, cilBan } from '@coreui/icons';
+import { 
+  cilCheckCircle, 
+  cilBan, 
+  cilLeaf, 
+  cilMoon, 
+  cilBasket, 
+  cilListNumbered, 
+  cilClock 
+} from '@coreui/icons';
 
 // Função para buscar tarefas reais da API
 const fetchTarefas = async () => {
@@ -98,6 +106,29 @@ const fetchPlantios = async () => {
   } catch (error) {
     console.error('Erro ao buscar plantios:', error);
     return [];
+  }
+};
+
+// Funções helper do cronograma
+const getTarefaIcon = (type) => {
+  switch (type?.toLowerCase()) {
+    case 'plantio': return cilLeaf;
+    case 'retirar blackout': 
+    case 'retirar do blackout': return cilMoon;
+    case 'colheita': return cilBasket;
+    case 'desempilhamento': return cilListNumbered;
+    default: return cilClock;
+  }
+};
+
+const getTarefaCor = (type) => {
+  switch (type?.toLowerCase()) {
+    case 'plantio': return 'success';
+    case 'retirar blackout': 
+    case 'retirar do blackout': return 'dark';
+    case 'colheita': return 'warning';
+    case 'desempilhamento': return 'info';
+    default: return 'secondary';
   }
 };
 
@@ -287,20 +318,9 @@ const TarefaDiaria = () => {
         <CCol xs={12}>
           <CCard className="mb-4">
             <CCardHeader>
-              <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
-                <div>
-                  <h5 className="mb-1 mb-md-0">Tarefas do Dia</h5>
-                  <small className="text-muted d-block d-md-none">
-                    {new Date().toLocaleDateString('pt-BR', {day: '2-digit', month: 'short'})}
-                  </small>
-                  <small className="text-muted d-none d-md-block">
-                    {new Date().toLocaleDateString('pt-BR', {weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'})}
-                  </small>
-                </div>
-                <CBadge color="primary" className="mt-2 mt-md-0">
-                  {tasks.length} {tasks.length === 1 ? 'tarefa' : 'tarefas'}
-                </CBadge>
-              </div>
+              <h5 style={{fontWeight: 'bold', fontSize: '1.2em'}}>
+                Tarefas do Dia - {new Date().toLocaleDateString('pt-BR', {weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'})}
+              </h5>
             </CCardHeader>
             <CCardBody>
               {loading ? (
@@ -351,7 +371,7 @@ const TarefaDiaria = () => {
                 </div>
               ) : (
                 <>
-                {/* Layout para Desktop */}
+                {/* Layout para Desktop - Igual ao cronograma */}
                 <div className="d-none d-lg-block">
                   <CListGroup>
                     {tasks.map((task) => (
@@ -362,22 +382,70 @@ const TarefaDiaria = () => {
                         } ${task.status === 'active' ? 'list-group-item-info' : ''}`}
                         style={{fontSize: '1.05em'}}
                       >
-                        <div>
-                          {getStatusIcon(task.status)}{' '}
-                          <span style={{fontWeight: 'bold'}}>{task.description}</span>
-                          <br />
-                          <small className="text-muted">{task.details}</small>
+                        <div className="d-flex align-items-start">
+                          <div className="me-3">
+                            <CIcon 
+                              icon={getTarefaIcon(task.type)} 
+                              className={`text-${getTarefaCor(task.type)}`} 
+                              size="lg"
+                            />
+                          </div>
+                          <div>
+                            <div className="d-flex align-items-center mb-1">
+                              <span style={{fontWeight: 'bold', fontSize: '1.1em'}}>
+                                {task.type?.charAt(0).toUpperCase() + task.type?.slice(1)}
+                              </span>
+                              <span style={{ marginLeft: '8px', fontSize: '14px' }}>
+                                {task.status === 'completed' ? '✅' : 
+                                 task.status === 'pending' ? '⏳' : '🔄'}
+                              </span>
+                            </div>
+                            <div style={{fontWeight: '500', color: '#495057'}}>
+                              {task.description}
+                            </div>
+                            <small className="text-muted">{task.details}</small>
+                          </div>
                         </div>
                         <div className="d-flex align-items-center">
                           {getStatusBadge(task.status)}
-                          {task.status === 'pending' && (
-                            <CButton
-                              color="primary"
-                              size="sm"
-                              className="ms-3"
+                          {task.type === 'plantio' && task.status === 'pending' && (
+                            <CButton 
+                              color="success" 
+                              size="sm" 
+                              className="ms-2"
                               onClick={() => handleIniciarTarefa(task)}
                             >
-                              {task.type === 'plantio' ? 'Realizar Plantio' : 'Concluir'}
+                              Executar Plantio
+                            </CButton>
+                          )}
+                          {(task.type === 'Retirar blackout' || task.type === 'retirar blackout' || task.type?.toLowerCase().includes('blackout')) && task.status === 'pending' && (
+                            <CButton 
+                              color="dark" 
+                              size="sm" 
+                              className="ms-2"
+                              onClick={() => handleIniciarTarefa(task)}
+                            >
+                              Retirar Blackout
+                            </CButton>
+                          )}
+                          {task.type === 'desempilhamento' && task.status === 'pending' && (
+                            <CButton 
+                              color="info" 
+                              size="sm" 
+                              className="ms-2"
+                              onClick={() => handleIniciarTarefa(task)}
+                            >
+                              Desempilhar
+                            </CButton>
+                          )}
+                          {task.type === 'colheita' && task.status === 'pending' && (
+                            <CButton 
+                              color="warning" 
+                              size="sm" 
+                              className="ms-2"
+                              onClick={() => handleIniciarTarefa(task)}
+                            >
+                              Realizar Colheita
                             </CButton>
                           )}
                           {task.status === 'completed' && (
@@ -407,9 +475,12 @@ const TarefaDiaria = () => {
                             {/* Header do Card Mobile */}
                             <div className="d-flex justify-content-between align-items-start mb-2">
                               <div className="d-flex align-items-center">
-                                {getStatusIcon(task.status)}
+                                <CIcon 
+                                  icon={getTarefaIcon(task.type)} 
+                                  className={`text-${getTarefaCor(task.type)}`} 
+                                />
                                 <span className="ms-2 text-muted small">
-                                  {task.type.toUpperCase()}
+                                  {task.type?.charAt(0).toUpperCase() + task.type?.slice(1)}
                                 </span>
                               </div>
                               {getStatusBadge(task.status)}
@@ -432,15 +503,63 @@ const TarefaDiaria = () => {
                             {/* Ações */}
                             <div className="d-grid gap-2">
                               {task.status === 'pending' && (
-                                <CButton
-                                  color="primary"
-                                  size="sm"
-                                  onClick={() => handleIniciarTarefa(task)}
-                                  className="fw-semibold"
-                                >
-                                  <CIcon icon={cilCheckCircle} className="me-2" />
-                                  {task.type === 'plantio' ? 'Realizar Plantio' : 'Concluir Tarefa'}
-                                </CButton>
+                                <>
+                                  {task.type === 'plantio' && (
+                                    <CButton
+                                      color="success"
+                                      size="sm"
+                                      onClick={() => handleIniciarTarefa(task)}
+                                      className="fw-semibold"
+                                    >
+                                      <CIcon icon={getTarefaIcon(task.type)} className="me-2" />
+                                      Executar Plantio
+                                    </CButton>
+                                  )}
+                                  {(task.type === 'Retirar blackout' || task.type === 'retirar blackout' || task.type?.toLowerCase().includes('blackout')) && (
+                                    <CButton
+                                      color="dark"
+                                      size="sm"
+                                      onClick={() => handleIniciarTarefa(task)}
+                                      className="fw-semibold"
+                                    >
+                                      <CIcon icon={getTarefaIcon(task.type)} className="me-2" />
+                                      Retirar Blackout
+                                    </CButton>
+                                  )}
+                                  {task.type === 'desempilhamento' && (
+                                    <CButton
+                                      color="info"
+                                      size="sm"
+                                      onClick={() => handleIniciarTarefa(task)}
+                                      className="fw-semibold"
+                                    >
+                                      <CIcon icon={getTarefaIcon(task.type)} className="me-2" />
+                                      Desempilhar
+                                    </CButton>
+                                  )}
+                                  {task.type === 'colheita' && (
+                                    <CButton
+                                      color="warning"
+                                      size="sm"
+                                      onClick={() => handleIniciarTarefa(task)}
+                                      className="fw-semibold"
+                                    >
+                                      <CIcon icon={getTarefaIcon(task.type)} className="me-2" />
+                                      Realizar Colheita
+                                    </CButton>
+                                  )}
+                                  {!['plantio', 'retirar blackout', 'desempilhamento', 'colheita'].includes(task.type?.toLowerCase()) && (
+                                    <CButton
+                                      color="primary"
+                                      size="sm"
+                                      onClick={() => handleIniciarTarefa(task)}
+                                      className="fw-semibold"
+                                    >
+                                      <CIcon icon={getTarefaIcon(task.type)} className="me-2" />
+                                      Concluir Tarefa
+                                    </CButton>
+                                  )}
+                                </>
                               )}
                               {task.status === 'active' && (
                                 <CButton
