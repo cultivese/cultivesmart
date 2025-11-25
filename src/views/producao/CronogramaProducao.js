@@ -1844,7 +1844,7 @@ const CronogramaProducao = () => {
               </div>
 
               <div className="alert alert-info mt-3">
-                <strong>Atenção:</strong> Esta ação marcará a tarefa como concluída e as bandejas passarão da fase de blackout para pronto para colheita.
+                <strong>Atenção:</strong> Esta ação marcará a tarefa como concluída e as bandejas passarão da fase de blackout para a fase de luz.
               </div>
 
               <div className="alert alert-warning mt-2">

@@ -845,21 +845,59 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                                 <h4 className="mt-4">Evolução de Uso dos Sacos</h4>
                                 {/* Verifica se o array existe e se tem elementos */}
                                 {insumoDetail.usoSacos && insumoDetail.usoSacos.length > 0 ? (
-                                    insumoDetail.usoSacos.map((uso, index) => (
-                                        <div key={index}> {/* Use uma div para encapsular o progresso e o texto */}
-                                            <small>Saco {index + 1}</small>
-                                            <CProgress
-                                                className="mb-2"
-                                                color={
-                                                    uso < 30 ? 'danger' : uso < 60 ? 'warning' : uso < 85 ? 'info' : 'success'
-                                                }
-                                                value={uso}
-                                            >
-                                                {/* A barra de progresso agora exibe a porcentagem do uso */}
-                                                <CProgressBar>{uso}%</CProgressBar>
-                                            </CProgress>
-                                        </div>
-                                    ))
+                                    (() => {
+                                        // Calcular informações necessárias para cada saco
+                                        const capacidadePorSaco = parseInt(insumoSelecionado.insumo.quantidade);
+                                        const quantidadeDisponivelAtual = insumoSelecionado.quantidade_total;
+                                        let quantidadeRestante = quantidadeDisponivelAtual;
+
+                                        return insumoDetail.usoSacos.map((uso, index) => {
+                                            // Calcular quantidade atual e restante para este saco específico
+                                            let quantidadeAtualSaco = 0;
+                                            let quantidadeRestanteSaco = 0;
+
+                                            if (quantidadeRestante >= capacidadePorSaco) {
+                                                // Saco completamente cheio
+                                                quantidadeAtualSaco = capacidadePorSaco;
+                                                quantidadeRestanteSaco = 0;
+                                                quantidadeRestante -= capacidadePorSaco;
+                                            } else if (quantidadeRestante > 0) {
+                                                // Saco parcialmente cheio
+                                                quantidadeAtualSaco = quantidadeRestante;
+                                                quantidadeRestanteSaco = capacidadePorSaco - quantidadeRestante;
+                                                quantidadeRestante = 0;
+                                            } else {
+                                                // Saco vazio
+                                                quantidadeAtualSaco = 0;
+                                                quantidadeRestanteSaco = capacidadePorSaco;
+                                            }
+
+                                            // Determinar cor baseada no percentual de uso
+                                            const corBarra = uso < 30 ? 'danger' : uso < 60 ? 'warning' : uso < 85 ? 'info' : 'success';
+
+                                            return (
+                                                <div key={index} className="mb-3">
+                                                    <div className="d-flex justify-content-between align-items-center mb-1">
+                                                        <small className="fw-semibold">Saco {index + 1}</small>
+                                                        <small className="text-muted">
+                                                            {quantidadeAtualSaco}g / {capacidadePorSaco}g
+                                                            {quantidadeRestanteSaco > 0 && (
+                                                                <span className="text-danger ms-2">(-{quantidadeRestanteSaco}g)</span>
+                                                            )}
+                                                        </small>
+                                                    </div>
+                                                    <CProgress value={uso}>
+                                                        <CProgressBar 
+                                                            className="overflow-visible text-dark px-2" 
+                                                            color={corBarra}
+                                                        >
+                                                            {quantidadeAtualSaco}g / {capacidadePorSaco}g
+                                                        </CProgressBar>
+                                                    </CProgress>
+                                                </div>
+                                            );
+                                        });
+                                    })()
                                 ) : (
                                     <p>Não há informações sobre o uso dos sacos.</p>
                                 )}

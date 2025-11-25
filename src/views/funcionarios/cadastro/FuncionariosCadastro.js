@@ -22,6 +22,9 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import CIcon from '@coreui/icons-react'
 import { cilPeople, cilSave, cilArrowLeft, cilUser } from '@coreui/icons'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { doc, setDoc } from 'firebase/firestore'
+import { auth, db } from '../../../../firebase'
 import '../Funcionarios.css'
 
 const FuncionariosCadastro = () => {
@@ -256,11 +259,44 @@ const FuncionariosCadastro = () => {
 
       if (response.ok) {
         const responseData = await response.json()
-        const message = isEditMode ? 'Colaborador atualizado com sucesso!' : 'Colaborador cadastrado com sucesso!'
-        addToast('Sucesso', message, 'success')
         
-        // Limpar formulário se for cadastro
+        // Se for cadastro, criar usuário no Firebase
         if (!isEditMode) {
+          addToast('Sucesso', 'Colaborador cadastrado no sistema! Criando usuário de acesso...', 'info')
+          
+          // Buscar o texto do role selecionado
+          const selectedRole = roles.find(role => (role.codigo || role.id) === formData.role)
+          const roleText = selectedRole ? (selectedRole.nome || selectedRole.descricao) : formData.role
+          
+          const firebaseResult = await createFirebaseUser(
+            formData.email, 
+            formData.senha, 
+            formData.nome, 
+            roleText
+          )
+          
+          if (firebaseResult.success) {
+            if (firebaseResult.warning) {
+              addToast('Aviso', 
+                `Colaborador cadastrado e usuário criado no Firebase! ${firebaseResult.warning}`, 
+                'warning'
+              )
+            } else {
+              addToast('Sucesso', 
+                'Colaborador cadastrado com sucesso! Usuário de acesso e documento criados no Firebase.', 
+                'success'
+              )
+            }
+          } else {
+            // Mesmo com erro no Firebase, o colaborador foi cadastrado no backend
+            addToast('Aviso', 
+              `Colaborador cadastrado no sistema, mas houve erro ao criar usuário de acesso: ${firebaseResult.error}. ` +
+              'O usuário pode ser criado manualmente no Firebase ou tentar fazer login com as credenciais cadastradas.', 
+              'warning'
+            )
+          }
+          
+          // Limpar formulário
           setFormData({
             nome: '',
             email: '',
@@ -274,11 +310,14 @@ const FuncionariosCadastro = () => {
             status: 'ativo',
           })
           setValidated(false)
+        } else {
+          // Modo edição
+          addToast('Sucesso', 'Colaborador atualizado com sucesso!', 'success')
         }
         
         setTimeout(() => {
           navigate('/funcionarios/listar')
-        }, 2000)
+        }, 3000)
       } else {
         const errorData = await response.json()
         const errorMessage = isEditMode ? 'Erro ao atualizar colaborador' : 'Erro ao cadastrar colaborador'
@@ -306,6 +345,75 @@ const FuncionariosCadastro = () => {
       }
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const createFirebaseUserDocument = async (uid, userData) => {
+    try {
+      const userDocRef = doc(db, 'usuarios', uid)
+      await setDoc(userDocRef, userData)
+      console.log('Documento do usuário criado no Firestore:', uid)
+      return { success: true }
+    } catch (error) {
+      console.error('Erro ao criar documento do usuário no Firestore:', error)
+      return { success: false, error: error.message || 'Erro ao criar documento do usuário' }
+    }
+  }
+
+  const createFirebaseUser = async (email, password, nome, role) => {
+    try {
+      // 1. Criar usuário no Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      const uid = userCredential.user.uid
+      console.log('Usuário criado no Firebase Auth:', uid)
+      
+      // 2. Criar documento do usuário no Firestore
+      const userData = {
+        admin: false, // Por padrão, novos usuários não são admin
+        apto: true,   // Por padrão, novos usuários estão aptos
+        email: email,
+        nome: nome,
+        role: role
+      }
+      
+      const docResult = await createFirebaseUserDocument(uid, userData)
+      
+      if (docResult.success) {
+        return { 
+          success: true, 
+          uid: uid,
+          message: 'Usuário e documento criados com sucesso'
+        }
+      } else {
+        // Se falhar ao criar documento, ainda retorna sucesso do Auth
+        // mas avisa sobre o problema do documento
+        return {
+          success: true,
+          uid: uid,
+          warning: `Usuário criado, mas erro no documento: ${docResult.error}`
+        }
+      }
+      
+    } catch (error) {
+      console.error('Erro ao criar usuário no Firebase:', error)
+      let errorMessage = 'Erro ao criar usuário no Firebase'
+      
+      // Tratar diferentes tipos de erro do Firebase
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = 'Este email já está sendo usado por outro usuário'
+          break
+        case 'auth/invalid-email':
+          errorMessage = 'Email inválido'
+          break
+        case 'auth/weak-password':
+          errorMessage = 'A senha deve ter pelo menos 6 caracteres'
+          break
+        default:
+          errorMessage = error.message || 'Erro desconhecido ao criar usuário'
+      }
+      
+      return { success: false, error: errorMessage }
     }
   }
 
