@@ -55,10 +55,6 @@ const EmpresasCadastro = React.lazy(() => import('./views/empresas/cadastro/Empr
 const EmpresasListar = React.lazy(() => import('./views/empresas/listar/EmpresasListar'))
 const EmpresasPlanos = React.lazy(() => import('./views/empresas/planos/EmpresasPlanos'))
 
-// Clientes
-// const ClientesListar = React.lazy(() => import('./views/clientes/listar/ClientesListar'))
-// const ClientesCadastro = React.lazy(() => import('./views/clients/cadastro/ClientesCadastro'))
-
 const ProducaoCadastro = React.lazy(() => import('./views/producao/cadastro/ProducaoCadastro'))
 
 import ConfigurarTarefas from './views/configuracao/ConfigurarTarefas';
@@ -69,18 +65,10 @@ const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   
-  // // Produção
-  // { path: '/producao', name: 'Produção', element: Cards, exact: true },
-  // { path: '/producao/visao_geral', name: 'VisaoGeral', element: VisaoGeral },
-  // { path: '/producao/novo_lote', name: 'NovoLote', element: NovoLote },
-  // { path: '/producao/encerrar_lote', name: 'EncerrarLote', element: EncerrarLote },
-  
-
   // TarefaDiaria
   { path: '/tarefas', name: 'Minhas Tarefas Diária', element: TarefaDiaria, exact: true },
   { path: '/tarefas/dia', name: 'Tarefas Diária', element: TarefaDiaria },
   { path: '/tarefas/historico', name: 'Histórico de Tarefas', element: HistoricoTarefa },
-
 
   // Produção
   { path: '/producao', name: 'Produção', element: VisaoGeralProducao, exact: true },
@@ -135,12 +123,6 @@ const routes = [
   { path: '/empresas/listar', name: 'Lista de Empresas', element: EmpresasListar },
   { path: '/empresas/planos', name: 'Gerenciar Planos', element: EmpresasPlanos },
   
-  // Clientes
-  // { path: '/clientes', name: 'Clientes', element: Cards, exact: true },
-  // { path: '/clientes/cadastro', name: 'Cadastro', element: ClientesCadastro },
-  // { path: '/clientes/listar', name: 'Listar', element: ClientesListar },
-  
-
   // Fornecedores
   { path: '/planejamento', name: 'Planejamento', element: ProducaoCadastro, exact: true },
   { path: '/planejamento/producao', name: 'Produção', element: ProducaoCadastro },
