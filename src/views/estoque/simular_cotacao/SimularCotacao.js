@@ -60,6 +60,12 @@ const SimularCotacao = () => {
   const [filtroNome, setFiltroNome] = useState('');
   const [filtroFornecedor, setFiltroFornecedor] = useState('');
   const [insumosSelecionadosModal, setInsumosSelecionadosModal] = useState([]);
+  const [modalFornecedor, setModalFornecedor] = useState({ 
+    visible: false, 
+    fornecedorAtual: '', 
+    fornecedorNovo: '', 
+    insumoTentativa: null 
+  });
 
 
   const [formData, setFormData] = useState({
@@ -68,6 +74,29 @@ const SimularCotacao = () => {
   });
 
   const adicionarInsumoCotacao = (insumo) => {
+    // Validar se o insumo é do mesmo fornecedor
+    if (insumosCotacao.length > 0) {
+      const fornecedorAtual = insumosCotacao[0].fornecedor_id;
+      if (insumo.fornecedor_id !== fornecedorAtual) {
+        // Buscar nome do fornecedor atual e do novo
+        const fornecedorAtualObj = fornecedores.records?.find(f => f.id === fornecedorAtual);
+        const novoFornecedorObj = fornecedores.records?.find(f => f.id === insumo.fornecedor_id);
+        
+        const nomeAtual = fornecedorAtualObj ? fornecedorAtualObj.nome : 'Fornecedor desconhecido';
+        const nomeNovo = novoFornecedorObj ? novoFornecedorObj.nome : 'Fornecedor desconhecido';
+        
+        setModalFornecedor({
+          visible: true,
+          fornecedorAtual: nomeAtual,
+          fornecedorNovo: nomeNovo,
+          insumoTentativa: insumo
+        });
+        
+        return; // Não adiciona o insumo
+      }
+    }
+
+    
     setInsumosCotacao((prevInsumosCotacao) => {
       const precoString = typeof insumo.preco === 'string' ? insumo.preco : '0';
       const precoNumerico = parseFloat(precoString.replace(/[^\d]/g, '') / 100) || 0;
@@ -641,6 +670,119 @@ const items = useMemo(() => {
             </CCard>
           </CCol>
 
+          {/* Modal de Alerta de Fornecedor Diferente */}
+          <CModal
+            alignment="center"
+            size="lg"
+            visible={modalFornecedor.visible}
+            onClose={() => setModalFornecedor({ ...modalFornecedor, visible: false })}
+            backdrop="static"
+            aria-labelledby="FornecedorDiferenteModal"
+          >
+            <CModalHeader>
+              <CModalTitle id="FornecedorDiferenteModal">
+                <CIcon icon={cilWarning} className="text-warning me-2" />
+                Fornecedor Diferente Detectado
+              </CModalTitle>
+            </CModalHeader>
+            <CModalBody>
+              <div className="text-center mb-4">
+                <CIcon icon={cilWarning} size="3xl" className="text-warning mb-3" />
+                <h5 className="text-dark mb-3">Não é possível misturar fornecedores</h5>
+              </div>
+              
+              <div className="alert alert-light border">
+                <h6 className="mb-3">Detalhes do conflito:</h6>
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="mb-3">
+                      <strong className="text-success">Orçamento Atual:</strong>
+                      <div className="mt-1">
+                        <CBadge color="success" className="px-3 py-2">
+                          {modalFornecedor.fornecedorAtual}
+                        </CBadge>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="mb-3">
+                      <strong className="text-warning">Insumo Selecionado:</strong>
+                      <div className="mt-1">
+                        <CBadge color="warning" className="px-3 py-2">
+                          {modalFornecedor.fornecedorNovo}
+                        </CBadge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="alert alert-info">
+                <h6 className="mb-2">
+                  <CIcon icon={cilWarning} className="me-2" />
+                  Por que isso acontece?
+                </h6>
+                <p className="mb-2">
+                  Cada orçamento deve conter apenas insumos do mesmo fornecedor, 
+                  pois a nota fiscal será emitida por um único fornecedor.
+                </p>
+              </div>
+
+              <div className="alert alert-light border">
+                <h6 className="mb-2">Opções disponíveis:</h6>
+                <ul className="mb-0">
+                  <li>Finalize o orçamento atual e crie um novo para este fornecedor</li>
+                  <li>Remova todos os itens atuais para começar com este fornecedor</li>
+                  <li>Continue adicionando apenas insumos do fornecedor atual</li>
+                </ul>
+              </div>
+            </CModalBody>
+            <CModalFooter>
+              <CButton 
+                color="secondary" 
+                onClick={() => setModalFornecedor({ ...modalFornecedor, visible: false })}
+              >
+                Entendi
+              </CButton>
+              <CButton 
+                color="danger" 
+                onClick={() => {
+                  const insumoParaAdicionar = modalFornecedor.insumoTentativa;
+                  
+                  // Limpar completamente o orçamento e fechar o modal
+                  setInsumosCotacao([]);
+                  setInsumosSelecionadosModal([]);
+                  setModalFornecedor({ visible: false, fornecedorAtual: '', fornecedorNovo: '', insumoTentativa: null });
+                  
+                  // Adicionar o insumo diretamente sem validação
+                  if (insumoParaAdicionar) {
+                    const precoString = typeof insumoParaAdicionar.preco === 'string' ? insumoParaAdicionar.preco : '0';
+                    const precoNumerico = parseFloat(precoString.replace(/[^\d]/g, '') / 100) || 0;
+
+                    const impostoString = typeof insumoParaAdicionar.imposto === 'string' ? insumoParaAdicionar.imposto : '0';
+                    const impostoNumerico = parseFloat(impostoString.replace(/[^\d]/g, '') / 100) || 0;
+
+                    const descontoString = typeof insumoParaAdicionar.desconto === 'string' ? insumoParaAdicionar.desconto : '0';
+                    const descontoNumerico = parseFloat(descontoString.replace(/[^\d]/g, '') / 100) || 0;
+
+                    const novoInsumo = {
+                      ...insumoParaAdicionar,
+                      preco: precoNumerico,
+                      quantidade_estoque: 1,
+                      imposto: impostoNumerico,
+                      desconto: descontoNumerico
+                    };
+                    
+                    setInsumosCotacao([novoInsumo]);
+                  }
+                }}
+              >
+                Limpar Orçamento e Adicionar
+              </CButton>
+            </CModalFooter>
+          </CModal>
+
+          {/* Modal de Cotação */}
           <CModal
             alignment="center"
             size="xl"
