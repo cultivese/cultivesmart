@@ -669,7 +669,7 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
             </CRow>
             <CRow className="mb-2" style={{ fontSize: 16, alignItems: 'center' }}>
               <CCol xs={8} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 22 }}>⏳</span> Dias até a colheita:
+                <span style={{ fontSize: 22 }}>⏳</span> Dias na luz até a colheita:
               </CCol>
               <CCol xs={4} style={{ textAlign: 'right', color: estoqueInsumo.insumo.especificacoes?.[0]?.dias_colheita ? 'inherit' : '#888' }}>
                 {estoqueInsumo.insumo.especificacoes?.[0]?.dias_colheita || 'sem espec.'}
@@ -744,7 +744,7 @@ const formatarCustoGrao = (totalLiquido, quantidade) => {
                     </CCol>
                 </CRow>
                 <CRow className="mb-3">
-                    <CFormLabel htmlFor="dias_colheita" className="col-sm-8 col-form-label">Dias até a colheita</CFormLabel>
+                    <CFormLabel htmlFor="dias_colheita" className="col-sm-8 col-form-label">Dias na luz até a colheita</CFormLabel>
                     <CCol xs={4}>
                         <CFormInput
                             id="dias_colheita"
