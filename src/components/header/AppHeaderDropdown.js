@@ -23,7 +23,7 @@ import {
 import CIcon from '@coreui/icons-react'
 import { auth } from './../../../firebase'; // Import do Firebase
 
-import avatar8 from './../../assets/images/avatars/herminio.jpg'
+import avatar8 from './../../assets/images/avatars/avatar.png'
 
 const handleLogout = async () => {
   try {
