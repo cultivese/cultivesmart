@@ -62,21 +62,24 @@ const _nav = (userRole) => {
       ],
     },
     {
-      component: CNavTitle,
-      name: 'Minhas Tarefas Diárias', // Título mais específico
+      component: CNavGroup,
+      name: 'Minhas Tarefas Diárias',
+      icon: <CIcon icon={cilClipboard} customClassName="nav-icon" />,
       roles: ['operador'],
-    },
-    {
-      component: CNavItem,
-      name: 'Tarefas do Dia',
-      to: '/tarefas/dia', // Nova rota sugerida para a página específica do operador
-      roles: ['operador'],
-    },
-    {
-      component: CNavItem,
-      name: 'Histórico de Execução', // Se houver necessidade de ver tarefas passadas
-      to: '/tarefas/historico',
-      roles: ['operador'],
+      items: [
+        {
+          component: CNavItem,
+          name: 'Tarefas do Dia',
+          to: '/tarefas/dia', // Nova rota sugerida para a página específica do operador
+          roles: ['operador'],
+        },
+        {
+          component: CNavItem,
+          name: 'Histórico de Execução', // Se houver necessidade de ver tarefas passadas
+          to: '/tarefas/historico',
+          roles: ['operador'],
+        },
+      ],
     },   
     {
       component: CNavGroup,
