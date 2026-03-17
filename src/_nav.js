@@ -195,15 +195,31 @@ const _nav = (userRole) => {
 
   // Filtra os itens de navegação com base no userRole
   const filteredNavigation = navigateItems.filter((item) => {
-    // Se o item for um CNavGroup, precisamos verificar seus filhos recursivamente
+    // Se o item for um CNavGroup, precisamos verificar tanto o grupo quanto seus filhos
     if (item.component === CNavGroup) {
+      // Primeiro verifica se o grupo pai tem permissão
+      if (!hasPermission(item)) {
+        return false
+      }
+      // Se o grupo tem permissão, verifica se há pelo menos um filho com permissão
       const filteredChildren = item.items.filter(hasPermission)
       return filteredChildren.length > 0
     }
     return hasPermission(item)
   })
 
-  return filteredNavigation
+  // Agora aplica o filtro nos filhos dos grupos que passaram no filtro anterior
+  const fullyFilteredNavigation = filteredNavigation.map((item) => {
+    if (item.component === CNavGroup && item.items) {
+      return {
+        ...item,
+        items: item.items.filter(hasPermission)
+      }
+    }
+    return item
+  })
+
+  return fullyFilteredNavigation
 }
 
 export default _nav
